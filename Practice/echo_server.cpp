@@ -45,7 +45,7 @@ int main()
     }
 
     // 연결 대기
-    if (listen(serverSocket, 5) == -1)
+    if (listen(serverSocket, 5) == -1) // 연결 대기용 queue size = 5를 사용하여 해당 소켓에서 클라이언트 연결 대기.
 	{
         std::cerr << "Error listening on socket." << std::endl;
         close(serverSocket);
@@ -58,6 +58,9 @@ int main()
     sockaddr_in clientAddr;
     socklen_t clientAddrLen = sizeof(clientAddr);
     int clientSocket = accept(serverSocket, reinterpret_cast<struct sockaddr*>(&clientAddr), &clientAddrLen);
+        // 클라이언트의 정보를 clientAddr에 담고, 해당 서버 소켓에서 연결을 수락한다.
+        // 클라이언트와 연결된 소켓을 새로 하나 만들고, 해당 소켓의 파일 디스크립터를 반환한다.
+        // 반환된 독립적인 새로운 소켓을 통해 클라이언트와 통신이 가능하다.
     if (clientSocket == -1)
 	{
         std::cerr << "Error accepting client connection." << std::endl;
@@ -72,6 +75,10 @@ int main()
     while (true)
 	{
         int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+            // recv() 호출시 입력을 기다린다(block).
+            // client와 연결된 소켓에 데이터가 들어오면, buffer에 buffer 크기 만큼 저장한다.
+            // 읽은 데이터의 크기를 반환한다.
+            // 들어온 데이터가 버퍼 크기보다 큰 경우 생각해줘야 할듯.
         if (bytesRead <= 0)
 		{
             std::cerr << "Error receiving data from client." << std::endl;
@@ -83,6 +90,9 @@ int main()
 
         // 에코 메시지 전송
         send(clientSocket, buffer, bytesRead, 0);
+        // 해당 소켓으로 데이터를 전송할 때까지 기다린다(block).
+        // buffer에 있는 데이터 중 bytesRead 만큼의 크기를 전송한다.
+        // 전송이 완료되면, 전송한 크기를 반환한다.
     }
 
     // 소켓 닫기
