@@ -92,10 +92,12 @@ int main(int argc, char** argv)
 				std::cerr << "error connecting server." << std::endl;
 				perror("connect()");
 				std::cerr << "errno: " << errno << std::endl;
+				return EXIT_FAILURE;
 			}
 		}
 	}
 	std::cout << "Connected server : " << serverIP << std::endl;
+	std::cout << std::endl;
 
 	// 4. 데이터 전송
 	char sendBuffer[1000];
@@ -104,65 +106,74 @@ int main(int argc, char** argv)
 	ssize_t recvLength = 0;
 	while (true)
 	{
-		std::cout << "Enter the message(\"exit\" to quit): " << std::endl;
+		std::cout << "Enter the message(\"exit\" to quit): ";
 		std::cin.getline(sendBuffer, sizeof(sendBuffer));
-		//ios::good	Check whether state of stream is good (public member function)
-		//ios::bad	Check whether badbit is set (public member function)
-		//ios::fail	Check whether either failbit or badbit is set (public member function)
-		//ios::eof
-		//std::cout << std::cin.good() << std::endl;
-		//std::cout << std::cin.bad() << std::endl;
-		//std::cout << std::cin.fail() << std::endl;
-		//std::cout << std::cin.eof() << std::endl;
-		if (std::cin.fail() == true) // buffer 크기보다 더 많은 문자열이 들어온 경우 cin(istream)의 failbit가 설정된다.
+		if (std::cin.eof())  // ctrl+d(EOF) 입력시.
 		{
-			std::memset(sendBuffer, 0, sizeof(sendBuffer));
-			std::fflush(stdin);
+			std::clearerr(stdin);
 			std::cin.clear();
+			std::cout << std::endl;
 			continue;
 		}
-		if (std::strcmp(sendBuffer, "exit") == 0)
+		else if (std::cin.fail()) // buffer 크기보다 더 많은 문자열이 들어온 경우 cin(istream)의 failbit가 설정된다.
 		{
+			std::fflush(stdin);	// cin 버퍼 비우기 (안비우면 버퍼에 남아있는게 전송되어버림)
+			std::cin.clear();	// cin의 failbit 재설정
+			continue;
+		}
+		else if (std::strcmp(sendBuffer, "exit") == 0)
+		{
+			close(clientSocket);
 			break;
 		}
 
 		// Todo: 데이터 전송
-		sendLength = send(clientSocket, sendBuffer, sizeof(sendBuffer), 0);
-		if (sendLength <= 0)
+		while (true)
 		{
-			if (errno == EAGAIN) // non-blocking으로 인한 return인 경우
+			sendLength = send(clientSocket, sendBuffer, sizeof(sendBuffer), 0);
+			if (sendLength <= 0)
 			{
-				continue;
+				if (errno == EAGAIN) // non-blocking으로 인한 return인 경우
+				{
+					continue;
+				}
+				else
+				{
+					std::cerr << "error sending data." << std::endl;
+					perror("send()");
+					std::cerr << "errno: " << errno << std::endl;
+					close(clientSocket);
+					return EXIT_FAILURE;
+				}
 			}
-			else
-			{
-				std::cerr << "error sending data." << std::endl;
-				perror("send()");
-				std::cerr << "errno: " << errno << std::endl;
-				close(clientSocket);
-				return EXIT_FAILURE;
-			}
+			std::cout << "send data " << sendLength << " bytes to " << inet_ntoa(server.sin_addr)
+			<< ": " << sendBuffer << std::endl;
+			break;
 		}
-		std::cout << "send data " << sendLength << " bytes." << std::endl;
 
 		// Todo: 데이터 수신
-		recvLength = recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
-		if (recvLength <= 0)
+		while (true)
 		{
-			if (errno == EAGAIN) // non-blocking으로 인한 return인 경우
+			recvLength = recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
+			if (recvLength <= 0)
 			{
-				continue;
+				if (errno == EAGAIN) // non-blocking으로 인한 return인 경우
+				{
+					continue;
+				}
+				else
+				{
+					std::cerr << "error receiving data." << std::endl;
+					perror("recv()");
+					std::cerr << "errno: " << errno << std::endl;
+					close(clientSocket);
+					return EXIT_FAILURE;
+				}
 			}
-			else
-			{
-				std::cerr << "error receiving data." << std::endl;
-				perror("recv()");
-				std::cerr << "errno: " << errno << std::endl;
-				close(clientSocket);
-				return EXIT_FAILURE;
-			}
+			std::cout << "receive data " << recvLength << " bytes. : " << recvBuffer << std::endl;
+			break;
 		}
-		std::cout << "receive data " << recvLength << " bytes. : " << recvBuffer << std::endl;
+		std::cout << std::endl;
 	}
 	
 	close(clientSocket);

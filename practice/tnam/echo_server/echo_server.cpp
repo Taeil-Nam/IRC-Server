@@ -109,6 +109,7 @@ int main()
 			}
 		}
 		std::cout << "Client(" << inet_ntoa(clientAddr.sin_addr) << ") connected." << std::endl;
+		std::cout << std::endl;
 		
 		ssize_t sendLength = 0;
 		char recvBuffer[1000];
@@ -154,7 +155,8 @@ int main()
 					break;
 				}
 			}
-			std::cout << "send data " << sendLength << " bytes." << std::endl;
+			std::cout << "send data " << sendLength << " bytes. : " << recvBuffer << std::endl;
+			std::cout << std::endl;
 		}
 		close(clientSocket);
 	}
