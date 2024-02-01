@@ -108,22 +108,22 @@ int main(int argc, char** argv)
 	{
 		std::cout << "Enter the message(\"exit\" to quit): ";
 		std::cin.getline(sendBuffer, sizeof(sendBuffer));
-		//ios::good	Check whether state of stream is good (public member function)
-		//ios::bad	Check whether badbit is set (public member function)
-		//ios::fail	Check whether either failbit or badbit is set (public member function)
-		//ios::eof
-		//std::cout << std::cin.good() << std::endl;
-		//std::cout << std::cin.bad() << std::endl;
-		//std::cout << std::cin.fail() << std::endl;
-		//std::cout << std::cin.eof() << std::endl;
-		if (std::cin.fail() == true) // buffer 크기보다 더 많은 문자열이 들어온 경우 cin(istream)의 failbit가 설정된다.
+		if (std::cin.eof())  // ctrl+d(EOF) 입력시.
+		{
+			std::clearerr(stdin);
+			std::cin.clear();
+			std::cout << std::endl;
+			continue;
+		}
+		else if (std::cin.fail()) // buffer 크기보다 더 많은 문자열이 들어온 경우 cin(istream)의 failbit가 설정된다.
 		{
 			std::fflush(stdin);	// cin 버퍼 비우기 (안비우면 버퍼에 남아있는게 전송되어버림)
 			std::cin.clear();	// cin의 failbit 재설정
 			continue;
 		}
-		if (std::strcmp(sendBuffer, "exit") == 0)
+		else if (std::strcmp(sendBuffer, "exit") == 0)
 		{
+			close(clientSocket);
 			break;
 		}
 
