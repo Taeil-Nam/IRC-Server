@@ -25,14 +25,16 @@ static bool checkArgs(const int argc, const char **argv)
     return true;
 }
 
+#include "core/ErrorLogger.hpp"
+
 int main(const int argc, const char **argv)
 {
     if (checkArgs(argc, argv) == false)
     {
         std::cout << "Usage: ./ircserv <port> <password>" << std::endl;
+        ErrorLogger::getInstance().log("Invalid command line Arguments.");
         return EXIT_FAILURE;
     }
-
     // run
     const int port = std::atoi(argv[1]);
     const std::string password(argv[2]);
