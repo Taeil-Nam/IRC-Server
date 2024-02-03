@@ -1,4 +1,6 @@
 *.o
 ircserv
 .clangd
-*.log
+*.txt
+log
+*.d
