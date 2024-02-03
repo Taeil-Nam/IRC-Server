@@ -4,7 +4,7 @@ ErrorLogger::ErrorLogger()
 {
     createLogFolder();
     std::ostringstream fileName;
-    fileName << "log/log_" << nowTimeStr() << ".txt";
+    fileName << "log/log_" << currentTimeStr() << ".txt";
     mLogFile.open(fileName.str().c_str(), std::ios::app);
 }
 
@@ -23,14 +23,14 @@ ErrorLogger& ErrorLogger::getInstance()
 void ErrorLogger::log(const std::string& errorMessage)
 {    
     if (mLogFile.is_open())
-        mLogFile << nowTimeStr() << ": " << errorMessage << std::endl;
+        mLogFile << currentTimeStr() << ": " << errorMessage << std::endl;
 }
 
 void ErrorLogger::fatalLog(const std::string& errorMessage, const char* functionName)
 {    
     if (mLogFile.is_open())
     {
-        mLogFile << nowTimeStr() << ": "
+        mLogFile << currentTimeStr() << ": "
             << "<FATAL> "
             << errorMessage
             << " -> "
@@ -39,7 +39,7 @@ void ErrorLogger::fatalLog(const std::string& errorMessage, const char* function
     }
 }
 
-std::string ErrorLogger::nowTimeStr()
+std::string ErrorLogger::currentTimeStr()
 {
     std::time_t now = std::time(0);
     std::tm* localTime = std::localtime(&now);
