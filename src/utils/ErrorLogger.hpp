@@ -48,5 +48,5 @@ private:
     ~ErrorLogger(); 
 
     void createLogFolder();
-    std::string nowTimeStr();
+    std::string currentTimeStr();
 };
