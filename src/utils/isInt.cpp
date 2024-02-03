@@ -1,4 +1,4 @@
-#include "utils/isInt.hpp"
+#include "isInt.hpp"
 
 bool isInt(const std::string& literal)
 {

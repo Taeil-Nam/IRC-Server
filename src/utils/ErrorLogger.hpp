@@ -16,8 +16,6 @@
 #include <sstream>
 #include <sys/stat.h>
 
-#include "common.hpp"
-
 #if !defined(__clang__) && !defined(__GNUC__)
     #define __PRETTY_FUNCTION__ ("not supported")
 #endif
