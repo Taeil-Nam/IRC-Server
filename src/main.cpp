@@ -12,36 +12,24 @@
 #include "common.hpp"
 #include "core/Core.hpp"
 
-static bool checkArgs(const int argc, const char **argv)
-{
-    // 인자 개수 확인
-    if (argc != 3) return false;
-    // 포트 유효성 검사
-    if (isInt(argv[1]) == false) return false;
-    if (std::atoi(argv[1]) >> 16 != 0) return false; // port 범위: 16비트
-    // 비밀번호 유효성 검사
-    if (std::string(argv[2]).empty()) return false;
-
-    return true;
-}
-
-#include "core/ErrorLogger.hpp"
-
 int main(const int argc, const char **argv)
 {
-    if (checkArgs(argc, argv) == false)
+    if (argc != 3
+        || isInt(argv[1]) == false
+        || std::atoi(argv[1]) >> 16 != 0
+        || std::string(argv[2]).empty())
     {
-        std::cout << "Usage: ./ircserv <port> <password>" << std::endl;
-        ErrorLogger::getInstance().log("Invalid command line Arguments.");
+        FATAL_PRINT("Usage: ./ircserv <port> <password>");
+        FATAL_LOG("커맨드라인 인자 오류");
         return EXIT_FAILURE;
     }
-    // run
-    const int port = std::atoi(argv[1]);
-    const std::string password(argv[2]);
-
-    Core server(port, password);
-
-    server.run();
-    
-    return EXIT_SUCCESS;
+    else
+    {
+        LOG("커맨드라인 인자 정상");
+        const int port = std::atoi(argv[1]);
+        const std::string password(argv[2]);
+        Core server(port, password);
+        server.run();
+        return EXIT_SUCCESS;
+    }
 }

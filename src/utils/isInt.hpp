@@ -1,5 +1,5 @@
 #pragma once
 
-#include "common.hpp"
+#include <string>
 
 bool isInt(const std::string& literal);
