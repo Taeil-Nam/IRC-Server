@@ -2,13 +2,14 @@ NAME		=	ircserv
 
 
 CXX			=	c++
-CXXFLAGS	=	-I./src #-Wall -Wextra -Werror -std=c++98
+CXXFLAGS	=	-I./src -MMD #-Wall -Wextra -Werror -std=c++98
 
 SRCS		=	src/main.cpp						\
 				$(wildcard src/core/*.cpp)			\
 				$(wildcard src/utils/*.cpp)
 				
 OBJS		=	$(SRCS:.cpp=.o)
+DEPS		=	$(SRCS:.cpp=.d)
 
 
 %.o : %.cpp
@@ -20,15 +21,16 @@ $(NAME) : $(OBJS)
 	$(CXX) $(LDFLAGS) $^ -o $@
 
 fclean :
-	$(RM) -rf $(OBJS) $(NAME)
+	$(RM) -rf $(OBJS) $(DEPS) $(NAME)
 clean :
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) $(DEPS)
 re :
 	$(MAKE) fclean
 	$(MAKE) all
 	
 bonus :
 
+-include $(DEPS)
 
 .PHONY: all clean fclean re
 
