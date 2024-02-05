@@ -1,0 +1,6 @@
+*.o
+ircserv
+.clangd
+*.txt
+log
+*.d
