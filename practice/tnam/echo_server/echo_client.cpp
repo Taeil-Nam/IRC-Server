@@ -100,9 +100,9 @@ int main(int argc, char** argv)
 	std::cout << std::endl;
 
 	// 4. 데이터 전송
-	char sendBuffer[1000];
+	char sendBuffer[3000];
 	ssize_t sendLength = 0;
-	char recvBuffer[1000];
+	char recvBuffer[3000];
 	ssize_t recvLength = 0;
 	while (true)
 	{
@@ -117,6 +117,7 @@ int main(int argc, char** argv)
 		}
 		else if (std::cin.fail()) // buffer 크기보다 더 많은 문자열이 들어온 경우 cin(istream)의 failbit가 설정된다.
 		{
+			std::cout << "Max input length = 3000!! can't send" << std::endl;
 			std::fflush(stdin);	// cin 버퍼 비우기 (안비우면 버퍼에 남아있는게 전송되어버림)
 			std::cin.clear();	// cin의 failbit 재설정
 			continue;

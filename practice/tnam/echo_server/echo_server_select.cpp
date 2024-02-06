@@ -95,12 +95,14 @@ int main()
 	std::cout << "Server is listening on port " << serverPort << std::endl;
 
 	// 4. select를 이용한 IO multiplexing
+	// multiplexing을 이용하면 아래와 같은 문제를 해결할 수 있다.
+	// - blocking socket : block이 되는 상황을 방지할 수 있음.
+	// - non-blocking socket : 무한 루프를 돌면서 계속 반복적으로 확인하는 상황을 방지할 수 있음.
+	// 즉, multiplexing은 blocking, non-blocking 어느 곳에든 사용 가능하다.
+
 	//	void
 	//  FD_CLR(fd, fd_set *fdset);
 	//	fd를 fdset에서 제거한다.
-	//
-	//  void
-	//  FD_COPY(fd_set *fdset_orig, fd_set *fdset_copy);
 	//
 	//  int
 	//  FD_ISSET(fd, fd_set *fdset);
@@ -218,6 +220,8 @@ int main()
 			{
 				int sendLen = send(sessions[i].socket,
 					&sessions[i].recvBuffer[sessions[i].sendBytes], sessions[i].recvBytes - sessions[i].sendBytes, 0);
+					// send() 호출시, 100 bytes 크기를 보낸다고 호출해도, 커널 sendBuffer가 모자랄 경우 실제로 100 bytes보다 작은 크기(50 bytes)만 보내게 될 수도 있음.
+					// 그럴 경우, 다음 send() 호출시 이전에 보냈던 buffer의 왼쪽 부분은 제외하고, 보내지 못했던 부분부터 보내도록 이와 같은 코드를 사용한다.
 				if (sendLen == -1) // send 실패시.
 				{
 					perror("send()");
