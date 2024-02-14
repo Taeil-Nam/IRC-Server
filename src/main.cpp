@@ -11,6 +11,7 @@
 
 #include "common.hpp"
 #include "core/Core.hpp"
+#include "utils/LogManager.hpp"
 
 int main(const int argc, const char **argv)
 {
@@ -19,17 +20,16 @@ int main(const int argc, const char **argv)
         || std::atoi(argv[1]) >> 16 != 0
         || std::string(argv[2]).empty())
     {
-        FATAL_PRINT("Usage: ./ircserv <port> <password>");
-        FATAL_LOG("커맨드라인 인자 오류");
+        LOG(Error, "커맨드라인 인자 오류 (Usage: ./ircserv <port> <password>)");
         return EXIT_FAILURE;
     }
-    else
-    {
-        LOG("커맨드라인 인자 정상");
-        const int port = std::atoi(argv[1]);
-        const std::string password(argv[2]);
-        Core server(port, password);
-        server.run();
-        return EXIT_SUCCESS;
-    }
+
+    LOG(Informational, "커맨드라인 인자 정상");
+    const int port = std::atoi(argv[1]);
+    const std::string password(argv[2]);
+    Core server(port, password);
+
+    server.Run();
+
+    return EXIT_SUCCESS;
 }

@@ -6,4 +6,4 @@
 
 // custom
 #include "utils/isInt.hpp"
-#include "utils/ErrorLogger.hpp"
+#include "utils/LogManager.hpp"
