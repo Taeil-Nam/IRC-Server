@@ -15,8 +15,16 @@
 class Core
 {
 public:
-    Core(const int port, const std::string& password) {}
-    bool run(){return true;}
-private:
+    Core(const int port, const std::string& password);
+    ~Core();
 
+    void Run();
+private:
+    Core();
+    Core(const Core& core);
+    const Core& operator=(const Core& core);
+
+private:
+    const int mPort;
+    const std::string mPassword;
 };
