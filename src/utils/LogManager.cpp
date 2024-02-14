@@ -25,6 +25,7 @@ void LogManager::Log(eSeverityLevel level, const std::string& errorMessage, cons
 {
     std::string levelStr;
     std::string currentTime = getCurrentTime();
+    char hostname[30];
 
     switch (level)
     {
@@ -54,11 +55,14 @@ void LogManager::Log(eSeverityLevel level, const std::string& errorMessage, cons
             break;
     }
 
+    gethostname(hostname, sizeof(hostname));
+
     // 파일에 로그 출력
     if (mLogFile.is_open())
     {
         mLogFile << "[" << levelStr << "] "
-                << currentTime << " : "
+                << currentTime << " "
+                << hostname << " : "
                 << errorMessage 
                 << " -> "
                 << functionName
@@ -69,7 +73,8 @@ void LogManager::Log(eSeverityLevel level, const std::string& errorMessage, cons
     if (level <= Error) // 심각한 로그일 경우 cerr에 로그 출력
     {
         std::cerr << "[" << levelStr << "] "
-                << currentTime << " : "
+                << currentTime << " "
+                << hostname << " : "
                 << errorMessage 
                 << " -> "
                 << functionName
@@ -78,7 +83,8 @@ void LogManager::Log(eSeverityLevel level, const std::string& errorMessage, cons
     else // 일반적인 로그일 경우 cout에 로그 출력
     {
         std::cout << "[" << levelStr << "] "
-                << currentTime << " : "
+                << currentTime << " "
+                << hostname << " : "
                 << errorMessage 
                 << " -> "
                 << functionName
