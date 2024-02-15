@@ -6,6 +6,7 @@
 
 LogManager::LogManager()
 {
+    gethostname(mHostname, sizeof(mHostname));
     createLogFile();
 }
 
@@ -21,11 +22,10 @@ LogManager& LogManager::GetInstance()
     return instance;
 }
 
-void LogManager::Log(eSeverityLevel level, const std::string& errorMessage, const char* functionName)
+void LogManager::Log(eSeverityLevel level, const std::string& message, const char* functionName)
 {
     std::string levelStr;
     std::string currentTime = getCurrentTime();
-    char hostname[30];
 
     switch (level)
     {
@@ -55,15 +55,13 @@ void LogManager::Log(eSeverityLevel level, const std::string& errorMessage, cons
             break;
     }
 
-    gethostname(hostname, sizeof(hostname));
-
     // 파일에 로그 출력
     if (mLogFile.is_open())
     {
         mLogFile << "[" << levelStr << "] "
                 << currentTime << " "
-                << hostname << " : "
-                << errorMessage 
+                << mHostname << " : "
+                << message 
                 << " -> "
                 << functionName
                 << std::endl;
@@ -74,8 +72,8 @@ void LogManager::Log(eSeverityLevel level, const std::string& errorMessage, cons
     {
         std::cerr << "[" << levelStr << "] "
                 << currentTime << " "
-                << hostname << " : "
-                << errorMessage 
+                << mHostname << " : "
+                << message 
                 << " -> "
                 << functionName
                 << std::endl;
@@ -84,8 +82,8 @@ void LogManager::Log(eSeverityLevel level, const std::string& errorMessage, cons
     {
         std::cout << "[" << levelStr << "] "
                 << currentTime << " "
-                << hostname << " : "
-                << errorMessage 
+                << mHostname << " : "
+                << message 
                 << " -> "
                 << functionName
                 << std::endl;

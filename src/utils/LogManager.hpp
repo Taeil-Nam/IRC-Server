@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <vector>
 #include <fstream>
 #include <sys/_types/_u_int32_t.h>
 #include <sys/stat.h>
@@ -37,8 +36,8 @@ enum eSeverityLevel // 로그의 심각도 수준
 /**
  * @brief 싱글톤 패턴. 구현된 매크로 함수(LOG) 사용 추천.
  * 따로 delete 필요 없음.
- *
- * @note 파일/폴더 생성 예외처리 안됨. 권한 없을 시, 문제 발생 가능.
+ * 
+ * @note
  */
 class LogManager
 {
@@ -59,4 +58,5 @@ private:
 
 private:
     std::ofstream mLogFile;
+    char mHostname[256];
 };
