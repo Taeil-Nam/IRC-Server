@@ -12,7 +12,9 @@
 #pragma once
 
 #include "common.hpp"
+#include "NetworkManager.hpp"
 
+class NetworkManager;
 class Core
 {
 public:
@@ -28,4 +30,5 @@ private:
 private:
     const int mPort;
     const std::string mPassword;
+    NetworkManager mNetworkManager;
 };
