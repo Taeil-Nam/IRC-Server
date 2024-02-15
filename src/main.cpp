@@ -23,8 +23,6 @@ int main(const int argc, const char **argv)
         LOG(Error, "커맨드라인 인자 오류 (Usage: ./ircserv <port> <password>)");
         return EXIT_FAILURE;
     }
-
-    LOG(Informational, "커맨드라인 인자 정상");
     const int port = std::atoi(argv[1]);
     const std::string password(argv[2]);
     Core server(port, password);
