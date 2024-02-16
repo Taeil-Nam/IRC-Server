@@ -1,8 +1,9 @@
 #include "NetworkManager.hpp"
 #include "utils/LogManager.hpp"
 
-NetworkManager::NetworkManager(const int& port)
+NetworkManager::NetworkManager(const int port, const std::string& password)
 : mPort(port)
+, mPassword(password)
 , mMaxEventCount(MAX_KEVENT_SIZE)
 {
 

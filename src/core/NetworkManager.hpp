@@ -36,7 +36,7 @@ struct session	// 연결된 client의 정보를 저장하는 구조체
 class NetworkManager
 {
 public:
-	NetworkManager(const int& port);
+	NetworkManager(const int port, const std::string& password);
 	~NetworkManager();
 
 	void Run();
@@ -52,6 +52,7 @@ private:
 
 private:
 	const int mPort;
+	const std::string& mPassword;
 	const int mMaxEventCount; // event 발생시, 발생한 event들을 저장할 수 있는 최대 크기
 	int mServerSocket;
 	int mKqueue;
