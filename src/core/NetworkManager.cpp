@@ -3,7 +3,6 @@
 
 NetworkManager::NetworkManager(const int& port)
 : mPort(port)
-, mBufferSize(IRC_MESSAGE_SIZE)
 , mMaxEventCount(MAX_KEVENT_SIZE)
 {
 

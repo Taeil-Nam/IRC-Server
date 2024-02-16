@@ -52,7 +52,6 @@ private:
 
 private:
 	const int mPort;
-	const int mBufferSize; // recv, send에 사용할 버퍼사이즈 (IRC 메세지 최대 크기 = 512)
 	const int mMaxEventCount; // event 발생시, 발생한 event들을 저장할 수 있는 최대 크기
 	int mServerSocket;
 	int mKqueue;
