@@ -4,7 +4,6 @@
 NetworkManager::NetworkManager(const int port, const std::string& password)
 : mPort(port)
 , mPassword(password)
-, mMaxEventCount(MAX_KEVENT_SIZE)
 {
 
 }
@@ -148,16 +147,7 @@ int NetworkManager::monitorSocketEvent()
                 if (currentSocket == mServerSocket)
                 {
                     // client 연결
-                    sockaddr_in clientAddr;
-                    std::memset(&clientAddr, 0, sizeof(clientAddr));
-                    socklen_t clientAddrLength = sizeof(clientAddr);
-                    int clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
-                    if (clientSocket == ERROR)
-                    {
-                        LOG(Error, "client 연결 실패 - " + std::string(strerror(errno)) + "(accept())");
-                        continue;
-                    }
-                    if (addClient(clientAddr, clientSocket) == FAILURE)
+                    if (addClient() == FAILURE)
                     {
                         continue;
                     }
@@ -165,29 +155,10 @@ int NetworkManager::monitorSocketEvent()
                 // client socket인 경우
                 else
                 {
-                    struct session& currentSession = mSessions[currentSocket];
-                    int recvLen = recv(currentSocket, currentSession.recvBuffer, sizeof(currentSession.recvBuffer), 0);
-                    if (recvLen == ERROR)
+                    // client로부터 메세지 수신
+                    if (recvFromClient(currentSocket) == FAILURE)
                     {
-                        LOG(Error, "Client(" + std::string(inet_ntoa(currentSession.addr.sin_addr)) + ")로 부터 메세지를 전달받지 못함 - "
-                            + std::string(strerror(errno)) + "(recv())");
-                        close(currentSocket);
-                        mSessions.erase(currentSocket);
                         continue;
-                    }
-                    else if (recvLen == 0) // 상대방과 연결이 끊긴 경우
-                    {
-                        LOG(Error, "Client(" + std::string(inet_ntoa(currentSession.addr.sin_addr)) + ")와 연결이 끊어짐");
-                        close(currentSocket);
-                        mSessions.erase(currentSocket); // 해당 client 세션 삭제
-                        continue;
-                    }
-                    else
-                    {
-                        LOG(Informational, "Client(" + std::string(inet_ntoa(currentSession.addr.sin_addr)) + ")로부터 "
-                            + toString(std::strlen(currentSession.recvBuffer) + 1) + "bytes 만큼의 메세지 수신\n"
-                            + currentSession.recvBuffer + "\n");
-                        // Todo: 전달 받은 메세지를 IRCManager에게 전송
                     }
                 }
             }
@@ -205,8 +176,20 @@ int NetworkManager::monitorSocketEvent()
     return SUCCESS;
 }
 
-int NetworkManager::addClient(sockaddr_in& clientAddr, int clientSocket)
+int NetworkManager::addClient()
 {
+    // client 연결
+    sockaddr_in clientAddr;
+    std::memset(&clientAddr, 0, sizeof(clientAddr));
+    socklen_t clientAddrLength = sizeof(clientAddr);
+    int clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
+    if (clientSocket == ERROR)
+    {
+        LOG(Error, "client 연결 실패 - " + std::string(strerror(errno)) + "(accept())");
+        return FAILURE;
+    }
+
+    // client socket non-blocking 설정
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) == ERROR)
     {
         LOG(Error, "client socket 설정 오류 - " + std::string(strerror(errno)) + "(fcntl())");
@@ -228,9 +211,39 @@ int NetworkManager::addClient(sockaddr_in& clientAddr, int clientSocket)
     {
         LOG(Error, "client event 추가 오류 - " + std::string(strerror(errno)) + "(kevent())");
         close(clientSocket);
+        mSessions.erase(clientSocket);
         return FAILURE;
     }
     LOG(Informational, "Client(" + std::string(inet_ntoa(clientAddr.sin_addr)) + ") 연결됨");
+
+    return SUCCESS;
+}
+
+int NetworkManager::recvFromClient(int clientSocket)
+{
+    // client로부터 메세지 수신
+    struct session& currentSession = mSessions[clientSocket];
+    int recvLen = recv(clientSocket, currentSession.recvBuffer, sizeof(currentSession.recvBuffer), 0);
+    if (recvLen == ERROR)
+    {
+        LOG(Error, "Client(" + std::string(inet_ntoa(currentSession.addr.sin_addr)) + ")로 부터 메세지를 전달받지 못함 - "
+            + std::string(strerror(errno)) + "(recv())");
+        close(clientSocket);
+        mSessions.erase(clientSocket);
+        return FAILURE;
+    }
+    else if (recvLen == 0) // 상대방과 연결이 끊긴 경우
+    {
+        LOG(Error, "Client(" + std::string(inet_ntoa(currentSession.addr.sin_addr)) + ")와 연결이 끊어짐");
+        close(clientSocket);
+        mSessions.erase(clientSocket);
+        return FAILURE;
+    }
+
+    LOG(Informational, "Client(" + std::string(inet_ntoa(currentSession.addr.sin_addr)) + ")로부터 "
+        + toString(std::strlen(currentSession.recvBuffer) + 1) + "bytes 만큼의 메세지 수신\n"
+        + currentSession.recvBuffer + "\n");
+    // Todo: 전달 받은 메세지를 IRCManager에게 전송
 
     return SUCCESS;
 }
