@@ -48,12 +48,13 @@ private:
     int setServerSocket();
     int monitorSocketEvent();
 
-    int addClient(sockaddr_in& clientAddr, int clientSocket);
+    int addClient();
+    int recvFromClient(int clientSocket);
+    //int writeToClient(int clientSocket);
 
 private:
     const int mPort;
     const std::string& mPassword;
-    const int mMaxEventCount; // event 발생시, 발생한 event들을 저장할 수 있는 최대 크기
     int mServerSocket;
     int mKqueue;
     std::map<int, struct session> mSessions;
