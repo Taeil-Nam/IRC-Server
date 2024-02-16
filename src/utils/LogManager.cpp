@@ -58,6 +58,8 @@ void LogManager::Log(eSeverityLevel level, const std::string& message, const cha
     // 파일에 로그 출력
     if (mLogFile.is_open())
     {
+        if (level <= Error) // 심각한 로그일 경우
+        {
         mLogFile << "[" << levelStr << "] "
                 << currentTime << " "
                 << mHostname << " : "
@@ -65,6 +67,15 @@ void LogManager::Log(eSeverityLevel level, const std::string& message, const cha
                 << " -> "
                 << functionName
                 << std::endl;
+        }
+        else // 일반적인 로그일 경우
+        {
+        mLogFile << "[" << levelStr << "] "
+                << currentTime << " "
+                << mHostname << " : "
+                << message
+                << std::endl;
+        }
     }
 
     // 스트림에 로그 출력
@@ -83,9 +94,7 @@ void LogManager::Log(eSeverityLevel level, const std::string& message, const cha
         std::cout << "[" << levelStr << "] "
                 << currentTime << " "
                 << mHostname << " : "
-                << message 
-                << " -> "
-                << functionName
+                << message
                 << std::endl;
     }
 }

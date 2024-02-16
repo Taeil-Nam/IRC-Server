@@ -25,36 +25,36 @@
 
 struct session	// 연결된 client의 정보를 저장하는 구조체
 {
-	sockaddr_in addr;
-	int socket;
-	char recvBuffer[IRC_MESSAGE_SIZE];
-	char sendBuffer[IRC_MESSAGE_SIZE];
-	int recvBytes;
-	int sendBytes;
+    sockaddr_in addr;
+    int socket;
+    char recvBuffer[IRC_MESSAGE_SIZE];
+    char sendBuffer[IRC_MESSAGE_SIZE];
 };
 
 class NetworkManager
 {
 public:
-	NetworkManager(const int& port);
-	~NetworkManager();
+    NetworkManager(const int port, const std::string& password);
+    ~NetworkManager();
 
-	void Run();
+    void Run();
 private:
-	NetworkManager();
-	NetworkManager(const NetworkManager& networkManager);
-	const NetworkManager& operator=(const NetworkManager& networkManager);
+    NetworkManager();
+    NetworkManager(const NetworkManager& networkManager);
+    const NetworkManager& operator=(const NetworkManager& networkManager);
 
-	int createServerSocket();
-	int createKqueue();
-	int setServerSocket();
-	int monitorSocketEvent();
+    int createServerSocket();
+    int createKqueue();
+    int setServerSocket();
+    int monitorSocketEvent();
+
+    int addClient(sockaddr_in& clientAddr, int clientSocket);
 
 private:
-	const int mPort;
-	const int mBufferSize; // recv, send에 사용할 버퍼사이즈 (IRC 메세지 최대 크기 = 512)
-	const int mMaxEventCount; // event 발생시, 발생한 event들을 저장할 수 있는 최대 크기
-	int mServerSocket;
-	int mKqueue;
-	std::map<int, struct session> mSessions;
+    const int mPort;
+    const std::string& mPassword;
+    const int mMaxEventCount; // event 발생시, 발생한 event들을 저장할 수 있는 최대 크기
+    int mServerSocket;
+    int mKqueue;
+    std::map<int, struct session> mSessions;
 };
