@@ -12,51 +12,85 @@
 #pragma once
 
 #include <fstream>
-#include <sys/_types/_u_int32_t.h>
+#include <sstream>
+#include <ctime>
+#include <iostream>
+#include <unistd.h>
+#include <vector>
 #include <sys/stat.h>
 
 #if !defined(__clang__) && !defined(__GNUC__)
-    #define __PRETTY_FUNCTION__ ("not supported")
+    #define __PRETTY_FUNCTION__ __FUNCTION__
 #endif
 
-#define LOG(level, msg) LogManager::GetInstance().Log(level, msg, __PRETTY_FUNCTION__)
+#define LOG(level) LogManager::LogStream(level, __PRETTY_FUNCTION__, __FILE__, __LINE__)
 
-enum eSeverityLevel // 로그의 심각도 수준
-{
-    Emergency = 0,  // system is unusable
-    Alert,          // action must be taken immediately
-    Critical,       // critical conditions
-    Error,          // error conditions
-    Warning,        // warning conditions
-    Notice,         // normal but significant condition
-    Informational,  // informational messages
-    Debug,          // debug-level messages
-};
+#define SET_CONSOLE_LEVEL(level) LogManager::mConsoleLevel = level
+#define SET_FILE_LEVEL(level) LogManager::mFileLevel = level
 
-/**
- * @brief 싱글톤 패턴. 구현된 매크로 함수(LOG) 사용 추천.
- * 따로 delete 필요 없음.
- * 
- * @note
- */
 class LogManager
 {
 public:
     LogManager();
     ~LogManager();
-
+    enum eSeverityLevel // 로그의 심각도 수준
+    {
+        Emergency = 0,  // system is unusable
+        Alert,          // action must be taken immediately
+        Critical,       // critical conditions
+        Error,          // error conditions
+        Warning,        // warning conditions
+        Notice,         // normal but significant condition
+        Informational,  // informational messages
+        Debug,          // debug-level messages
+    };
+    
     static LogManager& GetInstance();
+    void ConsoleLog(eSeverityLevel level, const std::string& message,
+                    const char* functionName, const char* fileName,
+                    const int lineNumber);
+    void FileLog(eSeverityLevel level, const std::string& message,
+                 const char* functionName, const char* fileName,
+                 const int lineNumber);
+    
+    class LogStream
+    {
+    public:
+        LogStream(eSeverityLevel level, const char* functionName,
+                  const char* fileName, const int lineNumber);
+        ~LogStream();
 
-    void Log(eSeverityLevel, const std::string& message, const char* functionName);
+        template <typename T>
+        LogStream& operator<<(const T& message)
+        {
+            mStream << message;
+            return *this;
+        }
+
+    private:
+        eSeverityLevel mLevel;
+        const char* mFunctionName;
+        const char* mFileName;
+        const int mLineNumber;
+        std::ostringstream mStream;
+    };
+
 private:
-    LogManager(const LogManager&);
-    LogManager& operator=(const LogManager&);
-
+    LogManager(const LogManager&); // = delete
+    LogManager& operator=(const LogManager&); // = delete
     void createLogFile();
-
     std::string getCurrentTime();
 
+public:
+    static eSeverityLevel mConsoleLevel;
+    static eSeverityLevel mFileLevel;
+    
 private:
     std::ofstream mLogFile;
+    std::vector<std::string> mLevelStr;
     char mHostname[256];
 };
+
+// for alias
+class LogLevel : public LogManager
+{};
