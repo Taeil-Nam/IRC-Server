@@ -15,9 +15,10 @@
 #include <sstream>
 #include <ctime>
 #include <iostream>
-#include <unistd.h>
 #include <vector>
+#include <unistd.h>
 #include <sys/stat.h>
+#include <pthread.h>
 
 #if !defined(__clang__) && !defined(__GNUC__)
     #define __PRETTY_FUNCTION__ __FUNCTION__
@@ -88,6 +89,8 @@ public:
 private:
     std::ofstream mLogFile;
     std::vector<std::string> mLevelStr;
+    pthread_mutex_t mConsoleMutex;
+    pthread_mutex_t mFileMutex;
     char mHostname[256];
 };
 

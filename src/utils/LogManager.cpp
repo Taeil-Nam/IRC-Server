@@ -1,5 +1,6 @@
 
 #include "LogManager.hpp"
+#include <pthread.h>
 
 LogManager::eSeverityLevel LogManager::mConsoleLevel = LogManager::Notice;
 LogManager::eSeverityLevel LogManager::mFileLevel = LogManager::Informational;
@@ -17,12 +18,16 @@ LogManager::LogManager()
     mLevelStr[Notice] = "Notice";
     mLevelStr[Informational] = "Informational";
     mLevelStr[Debug] = "Debug";
+    pthread_mutex_init(&mConsoleMutex, NULL);
+    pthread_mutex_init(&mFileMutex, NULL);
 }
 
 LogManager::~LogManager()
 {
     if (mLogFile.is_open())
         mLogFile.close();
+    pthread_mutex_destroy(&mConsoleMutex);
+    pthread_mutex_destroy(&mFileMutex);
 }
 
 LogManager& LogManager::GetInstance()
@@ -35,6 +40,7 @@ void LogManager::ConsoleLog(eSeverityLevel level, const std::string& message,
                             const char* functionName, const char* fileName,
                             const int lineNumber)
 {
+    pthread_mutex_lock(&mConsoleMutex);
     std::string currentTime = getCurrentTime();
 
     if (level <= Error)
@@ -62,12 +68,14 @@ void LogManager::ConsoleLog(eSeverityLevel level, const std::string& message,
         }
         std::cout << std::endl;
     }
+    pthread_mutex_unlock(&mConsoleMutex);
 }
 
 void LogManager::FileLog(eSeverityLevel level, const std::string& message,
                          const char* functionName, const char* fileName,
                          const int lineNumber)
 {
+    pthread_mutex_lock(&mFileMutex);
     std::string currentTime = getCurrentTime();
 
     if (mLogFile.is_open())
@@ -87,6 +95,7 @@ void LogManager::FileLog(eSeverityLevel level, const std::string& message,
         }
         mLogFile << std::endl;
     }
+    pthread_mutex_unlock(&mFileMutex);
 }
 
 LogManager::LogStream::LogStream(eSeverityLevel level, const char* functionName,
