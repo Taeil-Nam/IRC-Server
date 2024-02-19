@@ -19,6 +19,7 @@
 #include "utils/isInt.hpp"
 #include "utils/LogManager.hpp"
 #include "utils/toString.hpp"
+#include "utils/AssertManager.hpp"
 
 // 공용 매크로
 #define SUCCESS 0
