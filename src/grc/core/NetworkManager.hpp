@@ -37,31 +37,29 @@ struct session	// 연결된 client의 정보를 저장하는 구조체
 class NetworkManager
 {
 public:
-    NetworkManager(const int port, const std::string& password);
+    NetworkManager();
     ~NetworkManager();
 
     static NetworkManager& GetInstance();
-    int InitNetwork();
+    int InitNetwork(const int port);
+    int ProcessNetworkEvent();
 private:
-    NetworkManager();
     NetworkManager(const NetworkManager& networkManager);
     const NetworkManager& operator=(const NetworkManager& networkManager);
 
     int createServerSocket();
     int createKqueue();
-    int setServerSocket();
-    int monitorSocketEvent();
+    int setServerSocket(const int port);
 
-    int addClient();
-    int recvFromClient(int clientSocket);
-    //int writeToClient(int clientSocket);
+    void addClient();
+    void recvFromClient(int clientSocket);
+    //int writeToClient();
 
 private:
-    const int mPort;
-    const std::string mPassword;
     int mServerSocket;
     int mKqueue;
     std::map<int, struct session> mSessions;
+    struct kevent mEventList[MAX_KEVENT_SIZE];
 };
 
 }
