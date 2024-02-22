@@ -42,6 +42,51 @@ int NetworkManager::InitNetwork(const int port)
     return SUCCESS;
 }
 
+int NetworkManager::ProcessNetworkEvent()
+{
+    // event 확인(모니터링)
+    std::memset(mEventList, 0, sizeof(struct kevent) * MAX_KEVENT_SIZE);
+    int eventCount = kevent(mKqueue, NULL, 0, mEventList, MAX_KEVENT_SIZE, NULL);
+    if (eventCount == ERROR)
+    {
+        LOG(LogLevel::Error) << "Server socket event 처리 오류(errno:" << errno << " - "
+            << strerror(errno) << ") on kevent()";
+        close(mServerSocket);
+        close(mKqueue);
+        mSessions.clear();
+        return FAILURE;
+    }
+
+    // 발생한 event 처리
+    for (int i = 0; i < eventCount; i++)
+    {
+        struct kevent& currentEvent = mEventList[i];
+        int currentSocket = currentEvent.ident;
+
+        // READ 이벤트 처리
+        if (currentEvent.filter == EVFILT_READ)
+        {
+            // server socket인 경우
+            if (currentSocket == mServerSocket)
+            {
+                addClient();
+            }
+            // client socket인 경우
+            else
+            {
+                recvFromClient(currentSocket);
+            }
+        }
+
+        // WRITE 이벤트 처리
+        else if (currentEvent.filter == EVFILT_WRITE)
+        {
+            // writeToClient(int clientSocket);
+        }
+    }
+    return SUCCESS;
+}
+
 int NetworkManager::createServerSocket()
 {
     mServerSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -122,51 +167,6 @@ int NetworkManager::setServerSocket(const int port)
         return FAILURE;
     }
 
-    return SUCCESS;
-}
-
-int NetworkManager::ProcessNetworkEvent()
-{
-    // event 확인(모니터링)
-    std::memset(mEventList, 0, sizeof(struct kevent) * MAX_KEVENT_SIZE);
-    int eventCount = kevent(mKqueue, NULL, 0, mEventList, MAX_KEVENT_SIZE, NULL);
-    if (eventCount == ERROR)
-    {
-        LOG(LogLevel::Error) << "Server socket event 처리 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on kevent()";
-        close(mServerSocket);
-        close(mKqueue);
-        mSessions.clear();
-        return FAILURE;
-    }
-
-    // 발생한 event 처리
-    for (int i = 0; i < eventCount; i++)
-    {
-        struct kevent& currentEvent = mEventList[i];
-        int currentSocket = currentEvent.ident;
-
-        // READ 이벤트 처리
-        if (currentEvent.filter == EVFILT_READ)
-        {
-            // server socket인 경우
-            if (currentSocket == mServerSocket)
-            {
-                addClient();
-            }
-            // client socket인 경우
-            else
-            {
-                recvFromClient(currentSocket);
-            }
-        }
-
-        // WRITE 이벤트 처리
-        else if (currentEvent.filter == EVFILT_WRITE)
-        {
-            // writeToClient(int clientSocket);
-        }
-    }
     return SUCCESS;
 }
 
