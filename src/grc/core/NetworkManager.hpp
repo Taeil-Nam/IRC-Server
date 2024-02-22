@@ -23,6 +23,9 @@
 #include <map>
 #include "common.hpp"
 
+namespace grc
+{
+
 struct session	// 연결된 client의 정보를 저장하는 구조체
 {
     sockaddr_in addr;
@@ -37,7 +40,8 @@ public:
     NetworkManager(const int port, const std::string& password);
     ~NetworkManager();
 
-    void Run();
+    static NetworkManager& GetInstance();
+    int InitNetwork();
 private:
     NetworkManager();
     NetworkManager(const NetworkManager& networkManager);
@@ -54,8 +58,10 @@ private:
 
 private:
     const int mPort;
-    const std::string& mPassword;
+    const std::string mPassword;
     int mServerSocket;
     int mKqueue;
     std::map<int, struct session> mSessions;
 };
+
+}
