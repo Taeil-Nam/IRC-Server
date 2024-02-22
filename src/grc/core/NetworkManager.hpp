@@ -1,7 +1,7 @@
 /**
  * @file NetworkManager.hpp
  * @author tnam (tnam@student.42seoul.kr)
- * @brief 네트워크와 관련된 역할을 수행하는 클래스
+ * @brief 네트워크와 관련된 역할을 수행하는 싱글톤 클래스
  * @version 0.1
  * @date 2024-02-15
  * 
