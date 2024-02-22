@@ -13,6 +13,9 @@
 
 #include "common.hpp"
 
+namespace grc
+{
+
 class Core
 {
 public:
@@ -29,3 +32,5 @@ private:
     const int mPort;
     const std::string mPassword;
 };
+
+}

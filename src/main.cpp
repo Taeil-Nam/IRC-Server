@@ -10,7 +10,7 @@
  */
 
 #include "common.hpp"
-#include "core/Core.hpp"
+#include "grc/core/Core.hpp"
 #include "utils/LogManager.hpp"
 
 int main(const int argc, const char **argv)
@@ -20,12 +20,12 @@ int main(const int argc, const char **argv)
         || std::atoi(argv[1]) >> 16 != 0
         || std::string(argv[2]).empty())
     {
-        LOG(Error, "커맨드라인 인자 오류 (Usage: ./ircserv <port> <password>)");
+        LOG(LogLevel::Error) << "커맨드라인 인자 오류 (Usage: ./ircserv <port> <password>)";
         return EXIT_FAILURE;
     }
     const int port = std::atoi(argv[1]);
     const std::string password(argv[2]);
-    Core server(port, password);
+    grc::Core server(port, password);
 
     server.Run();
 
