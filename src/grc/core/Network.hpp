@@ -22,6 +22,7 @@
 #include <sys/event.h>
 #include <map>
 #include "common.hpp"
+#include "Event.hpp"
 
 namespace grc
 {
@@ -37,12 +38,13 @@ struct session	// 연결된 client의 정보를 저장하는 구조체
 class Network
 {
 public:
-    Network();
+    Network(Event& event);
     ~Network();
 
     int InitNetwork(const int port);
     int ProcessNetworkEvent();
 private:
+    Network(); // = delete
     Network(const Network& Network); // = delete
     const Network& operator=(const Network& Network); // = delete
 
@@ -56,6 +58,7 @@ private:
 private:
     int mServerSocket;
     std::map<int, struct session> mSessions;
+    Event& mEvent;
 };
 
 }

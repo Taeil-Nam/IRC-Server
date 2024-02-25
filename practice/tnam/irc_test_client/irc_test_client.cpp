@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 	// 2. 서버 주소 설정
 	sockaddr_in server;
 	char* serverIP = argv[1];
-	const int serverPort = 194;
+	const int serverPort = 6667;
 	std::memset(&server, 0, sizeof(server));
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = inet_addr(argv[1]);

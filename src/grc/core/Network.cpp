@@ -7,7 +7,8 @@
 namespace grc
 {
 
-Network::Network()
+Network::Network(Event& event)
+: mEvent(event)
 {
 
 }
@@ -35,8 +36,8 @@ int Network::InitNetwork(const int port)
 int Network::ProcessNetworkEvent()
 {
     // event 확인(모니터링)
-    struct kevent* eventList = Event.GetEventList();
-    int eventCount = Event.getEventCount();
+    struct kevent* eventList = mEvent.GetEventList();
+    int eventCount = mEvent.GetEventCount();
     if (eventCount == ERROR)
     {
         LOG(LogLevel::Error) << "Network event list 생성 오류";
@@ -145,7 +146,7 @@ int Network::setServerSocket(const int port)
     }
 
     // server socket의 READ event를 kqueue에 등록
-    if (Event.AddReadEvent(mServerSocket) == FAILURE)
+    if (mEvent.AddReadEvent(mServerSocket) == FAILURE)
     {
         LOG(LogLevel::Error) << "Server socket READ event 등록 오류 on Event::AddReadEvent()";
         return FAILURE;
@@ -184,12 +185,12 @@ void Network::addClient()
     mSessions[clientSocket] = client;
 
     // client socket에 대한 READ, WRITE event 추가
-    if (Event.AddReadEvent(clientSocket) == FAILURE)
+    if (mEvent.AddReadEvent(clientSocket) == FAILURE)
     {
         LOG(LogLevel::Error) << "Client socket READ event 등록 오류 on Event::AddReadEvent()";
         return;
     }
-    if (Event.AddWriteEvent(clientSocket) == FAILURE)
+    if (mEvent.AddWriteEvent(clientSocket) == FAILURE)
     {
         LOG(LogLevel::Error) << "Client socket WRITE event 등록 오류 on Event::AddWriteEvent()";
         return;
