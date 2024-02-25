@@ -172,12 +172,12 @@ void Network::addClient()
     // client socket에 대한 READ, WRITE event 추가
     if (Event.AddReadEvent(clientSocket) == FAILURE)
     {
-        LOG(LogLevel::Error) << "Server socket READ event 등록 오류 on Event::AddReadEvent()";
+        LOG(LogLevel::Error) << "Client socket READ event 등록 오류 on Event::AddReadEvent()";
         return;
     }
     if (Event.AddWriteEvent(clientSocket) == FAILURE)
     {
-        LOG(LogLevel::Error) << "Server socket WRITE event 등록 오류 on Event::AddWriteEvent()";
+        LOG(LogLevel::Error) << "Client socket WRITE event 등록 오류 on Event::AddWriteEvent()";
         return;
     }
     LOG(LogLevel::Notice) << "Client(" << inet_ntoa(clientAddr.sin_addr) << ") 연결됨";
