@@ -1,6 +1,8 @@
 #include "Network.hpp"
 #include "Event.hpp"
 #include "utils/LogManager.hpp"
+#include <cstdio>
+#include <unistd.h>
 
 namespace grc
 {
@@ -52,8 +54,13 @@ int Network::ProcessNetworkEvent()
         // READ 이벤트 처리
         if (currentEvent.filter == EVFILT_READ)
         {
+            // stdin인 경우
+            if (currentSocket == STDIN_FILENO)
+            {
+                continue;
+            }
             // server socket인 경우
-            if (currentSocket == mServerSocket)
+            else if (currentSocket == mServerSocket)
             {
                 addClient();
             }
@@ -67,7 +74,14 @@ int Network::ProcessNetworkEvent()
         // WRITE 이벤트 처리
         else if (currentEvent.filter == EVFILT_WRITE)
         {
-            // writeToClient(int clientSocket);
+            if (currentSocket == STDOUT_FILENO)
+            {
+                continue;
+            }
+            else
+            {
+                // writeToClient(int clientSocket);
+            }
         }
     }
     return SUCCESS;
