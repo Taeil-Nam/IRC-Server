@@ -1,7 +1,7 @@
 /**
- * @file NetworkManager.hpp
- * @author tnam (tnam@student.42seoul.kr)
- * @brief 네트워크와 관련된 역할을 수행하는 싱글톤 클래스
+ * @file Network.hpp
+ * @author Taeil-Nam (nam0314@gmail.com)
+ * @brief 네트워크와 관련된 역할을 수행하는 클래스
  * @version 0.1
  * @date 2024-02-15
  * 
@@ -34,21 +34,19 @@ struct session	// 연결된 client의 정보를 저장하는 구조체
     char sendBuffer[IRC_MESSAGE_SIZE];
 };
 
-class NetworkManager
+class Network
 {
 public:
-    NetworkManager();
-    ~NetworkManager();
+    Network();
+    ~Network();
 
-    static NetworkManager& GetInstance();
     int InitNetwork(const int port);
     int ProcessNetworkEvent();
 private:
-    NetworkManager(const NetworkManager& networkManager);
-    const NetworkManager& operator=(const NetworkManager& networkManager);
+    Network(const Network& Network); // = delete
+    const Network& operator=(const Network& Network); // = delete
 
     int createServerSocket();
-    int createKqueue();
     int setServerSocket(const int port);
 
     void addClient();
@@ -57,9 +55,7 @@ private:
 
 private:
     int mServerSocket;
-    int mKqueue;
     std::map<int, struct session> mSessions;
-    struct kevent mEventList[MAX_KEVENT_SIZE];
 };
 
 }

@@ -1,5 +1,5 @@
 #include "Core.hpp"
-#include "NetworkManager.hpp"
+#include "Network.hpp"
 #include "utils/LogManager.hpp"
 
 namespace grc
@@ -19,7 +19,11 @@ Core::~Core()
 
 void Core::Run()
 {
-    if (NetworkManager::GetInstance().InitNetwork(mPort) == FAILURE)
+    if (mEvent.InitEvent() == FAILURE)
+    {
+        return;
+    }
+    if (mNetwork.InitNetwork(mPort) == FAILURE)
     {
         return;
     }
@@ -27,7 +31,7 @@ void Core::Run()
     LOG(LogLevel::Notice) << "IRC Server 시작 (Port = " << mPort << ")";
     while (true)
     {
-        if (NetworkManager::GetInstance().ProcessNetworkEvent() == FAILURE)
+        if (mNetwork.ProcessNetworkEvent() == FAILURE)
         {
             break;
         }
