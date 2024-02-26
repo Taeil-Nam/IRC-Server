@@ -38,27 +38,25 @@ struct session	// 연결된 client의 정보를 저장하는 구조체
 class Network
 {
 public:
-    Network(Event& event);
+    Network();
     ~Network();
 
-    int InitNetwork(const int port);
-    int ProcessNetworkEvent();
+    int InitNetwork(const int port, Event& event);
+    int ProcessNetworkEvent(Event& event);
 private:
-    Network(); // = delete
     Network(const Network& Network); // = delete
     const Network& operator=(const Network& Network); // = delete
 
     int createServerSocket();
-    int setServerSocket(const int port);
+    int setServerSocket(const int port, Event& event);
 
-    void addClient();
+    void addClient(Event& event);
     void recvFromClient(int clientSocket);
     //int writeToClient();
 
 private:
     int mServerSocket;
     std::map<int, struct session> mSessions;
-    Event& mEvent;
 };
 
 }

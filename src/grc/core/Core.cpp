@@ -8,7 +8,6 @@ namespace grc
 Core::Core(const int port, const std::string& password)
 : mPort(port)
 , mPassword(password)
-, mNetwork(mEvent)
 {
 
 }
@@ -20,19 +19,21 @@ Core::~Core()
 
 void Core::Run()
 {
+    /* init */
     if (mEvent.InitEvent() == FAILURE)
     {
         return;
     }
-    if (mNetwork.InitNetwork(mPort) == FAILURE)
+    if (mNetwork.InitNetwork(mPort, mEvent) == FAILURE)
     {
         return;
     }
 
+    /* main logic */
     LOG(LogLevel::Notice) << "IRC Server 시작 (Port = " << mPort << ")";
     while (true)
     {
-        if (mNetwork.ProcessNetworkEvent() == FAILURE)
+        if (mNetwork.ProcessNetworkEvent(mEvent) == FAILURE)
         {
             break;
         }

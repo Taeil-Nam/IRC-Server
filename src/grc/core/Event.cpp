@@ -6,7 +6,9 @@ namespace grc
 
 Event::Event()
 {
-
+    mKqueue = ERROR;
+    mEventCount = 0;
+    std::memset(mEventList, 0, sizeof(mEventList));
 }
 
 Event::~Event()
@@ -51,7 +53,6 @@ int Event::AddWriteEvent(const int fd)
 
 struct kevent* Event::GetEventList()
 {
-    std::memset(mEventList, 0, sizeof(mEventList));
     mEventCount = kevent(mKqueue, NULL, 0, mEventList, MAX_KEVENT_SIZE, NULL);
     if (mEventCount == ERROR)
     {

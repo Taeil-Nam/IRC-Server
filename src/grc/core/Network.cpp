@@ -7,10 +7,9 @@
 namespace grc
 {
 
-Network::Network(Event& event)
-: mEvent(event)
+Network::Network()
 {
-
+    mServerSocket = ERROR;
 }
 
 Network::~Network()
@@ -19,13 +18,13 @@ Network::~Network()
     mSessions.clear();
 }
 
-int Network::InitNetwork(const int port)
+int Network::InitNetwork(const int port, Event& event)
 {
     if (createServerSocket() == FAILURE)
     {
         return FAILURE;
     }
-    if (setServerSocket(port) == FAILURE)
+    if (setServerSocket(port, event) == FAILURE)
     {
         close(mServerSocket);
         return FAILURE;
@@ -33,11 +32,11 @@ int Network::InitNetwork(const int port)
     return SUCCESS;
 }
 
-int Network::ProcessNetworkEvent()
+int Network::ProcessNetworkEvent(Event& event)
 {
     // event 확인(모니터링)
-    struct kevent* eventList = mEvent.GetEventList();
-    int eventCount = mEvent.GetEventCount();
+    struct kevent* eventList = event.GetEventList();
+    int eventCount = event.GetEventCount();
     if (eventCount == ERROR)
     {
         LOG(LogLevel::Error) << "Network event list 생성 오류";
@@ -63,7 +62,7 @@ int Network::ProcessNetworkEvent()
             // server socket인 경우
             else if (currentSocket == mServerSocket)
             {
-                addClient();
+                addClient(event);
             }
             // client socket인 경우
             else
@@ -100,7 +99,7 @@ int Network::createServerSocket()
     return SUCCESS;
 }
 
-int Network::setServerSocket(const int port)
+int Network::setServerSocket(const int port, Event& event)
 {
     int reuseOption = 1;
     int keepaliveOption = 1;
@@ -146,7 +145,7 @@ int Network::setServerSocket(const int port)
     }
 
     // server socket의 READ event를 kqueue에 등록
-    if (mEvent.AddReadEvent(mServerSocket) == FAILURE)
+    if (event.AddReadEvent(mServerSocket) == FAILURE)
     {
         LOG(LogLevel::Error) << "Server socket READ event 등록 오류 on Event::AddReadEvent()";
         return FAILURE;
@@ -155,7 +154,7 @@ int Network::setServerSocket(const int port)
     return SUCCESS;
 }
 
-void Network::addClient()
+void Network::addClient(Event& event)
 {
     // client 연결
     sockaddr_in clientAddr;
@@ -185,12 +184,12 @@ void Network::addClient()
     mSessions[clientSocket] = client;
 
     // client socket에 대한 READ, WRITE event 추가
-    if (mEvent.AddReadEvent(clientSocket) == FAILURE)
+    if (event.AddReadEvent(clientSocket) == FAILURE)
     {
         LOG(LogLevel::Error) << "Client socket READ event 등록 오류 on Event::AddReadEvent()";
         return;
     }
-    if (mEvent.AddWriteEvent(clientSocket) == FAILURE)
+    if (event.AddWriteEvent(clientSocket) == FAILURE)
     {
         LOG(LogLevel::Error) << "Client socket WRITE event 등록 오류 on Event::AddWriteEvent()";
         return;
