@@ -1,7 +1,5 @@
 #include "Network.hpp"
-#include "Event.hpp"
 #include "utils/LogManager.hpp"
-#include <cstdio>
 #include <unistd.h>
 
 namespace grc
@@ -10,6 +8,7 @@ namespace grc
 Network::Network()
 {
     mServerSocket = ERROR;
+    mNewClients.reserve(128);
 }
 
 Network::~Network()
@@ -18,13 +17,13 @@ Network::~Network()
     mSessions.clear();
 }
 
-int Network::InitNetwork(const int port, Event& event)
+int32 Network::Init(const int32 port)
 {
     if (createServerSocket() == FAILURE)
     {
         return FAILURE;
     }
-    if (setServerSocket(port, event) == FAILURE)
+    if (setServerSocket(port) == FAILURE)
     {
         close(mServerSocket);
         return FAILURE;
@@ -32,62 +31,44 @@ int Network::InitNetwork(const int port, Event& event)
     return SUCCESS;
 }
 
-int Network::ProcessNetworkEvent(Event& event)
+int32 Network::Read(const int32 socket)
 {
-    // event 확인(모니터링)
-    struct kevent* eventList = event.GetEventList();
-    int eventCount = event.GetEventCount();
-    if (eventCount == ERROR)
+    if (socket == mServerSocket)
     {
-        LOG(LogLevel::Error) << "Network event list 생성 오류";
-        close(mServerSocket);
-        mSessions.clear();
-        return FAILURE;
+        addClient();
     }
-
-    // 발생한 event 처리
-    for (int i = 0; i < eventCount; i++)
+    else
     {
-        struct kevent& currentEvent = eventList[i];
-        int currentSocket = currentEvent.ident;
-
-        // READ 이벤트 처리
-        if (currentEvent.filter == EVFILT_READ)
-        {
-            // stdin인 경우
-            if (currentSocket == STDIN_FILENO)
-            {
-                continue;
-            }
-            // server socket인 경우
-            else if (currentSocket == mServerSocket)
-            {
-                addClient(event);
-            }
-            // client socket인 경우
-            else
-            {
-                recvFromClient(currentSocket);
-            }
-        }
-
-        // WRITE 이벤트 처리
-        else if (currentEvent.filter == EVFILT_WRITE)
-        {
-            if (currentSocket == STDOUT_FILENO)
-            {
-                continue;
-            }
-            else
-            {
-                // writeToClient(int clientSocket);
-            }
-        }
+        recvFromClient(socket);
     }
     return SUCCESS;
 }
 
-int Network::createServerSocket()
+const int32 Network::GetServerSocket() const
+{
+    return mServerSocket;
+}
+
+const char* Network::GetIP(const int fd) const
+{
+    if (mSessions.find(fd) != mSessions.end())
+    {
+        return inet_ntoa(mSessions.at(fd).addr.sin_addr);
+    }
+    return "Unkown client";
+}
+
+const std::vector<int>& Network::FetchNewClients() const
+{
+    return mNewClients;
+}
+
+void Network::ClearNewClients()
+{
+    mNewClients.clear();
+}
+
+int32 Network::createServerSocket()
 {
     mServerSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mServerSocket == ERROR)
@@ -99,11 +80,11 @@ int Network::createServerSocket()
     return SUCCESS;
 }
 
-int Network::setServerSocket(const int port, Event& event)
+int32 Network::setServerSocket(const int32 port)
 {
-    int reuseOption = 1;
-    int keepaliveOption = 1;
-    int nodelayOption = 1;
+    int32 reuseOption = 1;
+    int32 keepaliveOption = 1;
+    int32 nodelayOption = 1;
 
     // server socket option 설정
     if (setsockopt(mServerSocket, SOL_SOCKET, SO_REUSEADDR, &reuseOption, sizeof(reuseOption)) == ERROR
@@ -144,23 +125,16 @@ int Network::setServerSocket(const int port, Event& event)
         return FAILURE;
     }
 
-    // server socket의 READ event를 kqueue에 등록
-    if (event.AddReadEvent(mServerSocket) == FAILURE)
-    {
-        LOG(LogLevel::Error) << "Server socket READ event 등록 오류 on Event::AddReadEvent()";
-        return FAILURE;
-    }
-
     return SUCCESS;
 }
 
-void Network::addClient(Event& event)
+void Network::addClient()
 {
     // client 연결
     sockaddr_in clientAddr;
     std::memset(&clientAddr, 0, sizeof(clientAddr));
     socklen_t clientAddrLength = sizeof(clientAddr);
-    int clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
+    int32 clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
     if (clientSocket == ERROR)
     {
         LOG(LogLevel::Error) << "client 연결 실패(errno: " << errno << " - "
@@ -183,25 +157,15 @@ void Network::addClient(Event& event)
     client.socket = clientSocket;
     mSessions[clientSocket] = client;
 
-    // client socket에 대한 READ, WRITE event 추가
-    if (event.AddReadEvent(clientSocket) == FAILURE)
-    {
-        LOG(LogLevel::Error) << "Client socket READ event 등록 오류 on Event::AddReadEvent()";
-        return;
-    }
-    if (event.AddWriteEvent(clientSocket) == FAILURE)
-    {
-        LOG(LogLevel::Error) << "Client socket WRITE event 등록 오류 on Event::AddWriteEvent()";
-        return;
-    }
-    LOG(LogLevel::Notice) << "Client(" << inet_ntoa(clientAddr.sin_addr) << ") 연결됨";
+    // 새로운 클라이언트 목록에 추가
+    mNewClients.push_back(clientSocket);
 }
 
-void Network::recvFromClient(int clientSocket)
+void Network::recvFromClient(int32 clientSocket)
 {
     // client로부터 메세지 수신
     struct session& currentSession = mSessions[clientSocket];
-    int recvLen = recv(clientSocket, currentSession.recvBuffer, sizeof(currentSession.recvBuffer), 0);
+    int32 recvLen = recv(clientSocket, currentSession.recvBuffer, sizeof(currentSession.recvBuffer), 0);
     if (recvLen == ERROR)
     {
         LOG(LogLevel::Error) << "Client(" << inet_ntoa(currentSession.addr.sin_addr) << ")로 부터 메세지를 전달받지 못함(errno:"

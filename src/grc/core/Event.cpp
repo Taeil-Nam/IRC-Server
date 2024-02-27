@@ -16,7 +16,7 @@ Event::~Event()
     close(mKqueue);
 }
 
-int Event::InitEvent()
+int32 Event::Init()
 {
     if (createKqueue() == FAILURE)
     {
@@ -25,7 +25,7 @@ int Event::InitEvent()
     return SUCCESS;
 }
 
-int Event::AddReadEvent(const int fd)
+int32 Event::AddReadEvent(const int32 fd)
 {
     struct kevent newEvent;
     EV_SET(&newEvent, fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
@@ -38,20 +38,7 @@ int Event::AddReadEvent(const int fd)
     return SUCCESS;
 }
 
-int Event::AddWriteEvent(const int fd)
-{
-    struct kevent newEvent;
-    EV_SET(&newEvent, fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
-    if (kevent(mKqueue, &newEvent, 1, NULL, 0, NULL) == ERROR)
-    {
-        LOG(LogLevel::Error) << "WRITE event 등록 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on kevent()";
-        return FAILURE;
-    }
-    return SUCCESS;
-}
-
-struct kevent* Event::GetEventList()
+const struct kevent* Event::GetEventList()
 {
     mEventCount = kevent(mKqueue, NULL, 0, mEventList, MAX_KEVENT_SIZE, NULL);
     if (mEventCount == ERROR)
@@ -63,12 +50,12 @@ struct kevent* Event::GetEventList()
     return mEventList;
 }
 
-int Event::GetEventCount() const
+const int32 Event::GetEventCount() const
 {
     return mEventCount;
 }
 
-int Event::createKqueue()
+int32 Event::createKqueue()
 {
     mKqueue = kqueue();
     if (mKqueue == ERROR)

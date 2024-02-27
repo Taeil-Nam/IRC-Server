@@ -22,7 +22,6 @@
 #include <sys/event.h>
 #include <map>
 #include "common.hpp"
-#include "Event.hpp"
 
 namespace grc
 {
@@ -30,7 +29,7 @@ namespace grc
 struct session	// 연결된 client의 정보를 저장하는 구조체
 {
     sockaddr_in addr;
-    int socket;
+    int32 socket;
     char recvBuffer[IRC_MESSAGE_SIZE];
     char sendBuffer[IRC_MESSAGE_SIZE];
 };
@@ -41,22 +40,29 @@ public:
     Network();
     ~Network();
 
-    int InitNetwork(const int port, Event& event);
-    int ProcessNetworkEvent(Event& event);
+    int32 Init(const int32 port);
+    int32 Read(const int32 socket);
+    // int32 Write(const int32 socket);
+
+    const int32 GetServerSocket() const;
+    const char* GetIP(const int fd) const;
+    const std::vector<int>& FetchNewClients() const;
+    void ClearNewClients();
 private:
     Network(const Network& Network); // = delete
     const Network& operator=(const Network& Network); // = delete
 
-    int createServerSocket();
-    int setServerSocket(const int port, Event& event);
+    int32 createServerSocket();
+    int32 setServerSocket(const int32 port);
 
-    void addClient(Event& event);
-    void recvFromClient(int clientSocket);
-    //int writeToClient();
+    void addClient();
+    void recvFromClient(int32 clientSocket);
+    //int32 writeToClient();
 
 private:
-    int mServerSocket;
-    std::map<int, struct session> mSessions;
+    int32 mServerSocket;
+    std::map<int32, struct session> mSessions;
+    std::vector<int> mNewClients;
 };
 
 }

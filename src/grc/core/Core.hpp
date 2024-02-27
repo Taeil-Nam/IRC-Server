@@ -30,6 +30,7 @@ private:
     Core(const Core& core); // = delete
     const Core& operator=(const Core& core); // = delete
 
+    int32 Init();
 private:
     const int mPort;
     const std::string mPassword;
