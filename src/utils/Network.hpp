@@ -18,9 +18,7 @@
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <fcntl.h>
-#include <sys/types.h>
-#include <sys/event.h>
-#include <map>
+
 #include "common.hpp"
 
 namespace grc

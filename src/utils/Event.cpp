@@ -1,5 +1,4 @@
 #include "Event.hpp"
-#include "common.hpp"
 
 namespace grc
 {

@@ -1,8 +1,4 @@
 #include "Core.hpp"
-#include "Network.hpp"
-#include "utils/LogManager.hpp"
-#include <cstdio>
-#include <unistd.h>
 
 namespace grc
 {

@@ -1,6 +1,4 @@
 #include "ConsoleWindow.hpp"
-#include <iostream>
-#include <ostream>
 
 namespace grc
 {

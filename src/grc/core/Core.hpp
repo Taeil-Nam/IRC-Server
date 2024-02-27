@@ -12,8 +12,8 @@
 #pragma once
 
 #include "common.hpp"
-#include "Event.hpp"
-#include "Network.hpp"
+#include "utils/Event.hpp"
+#include "utils/Network.hpp"
 
 namespace grc
 {
