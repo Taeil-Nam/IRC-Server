@@ -21,6 +21,7 @@
 
 
 // custom (사용자 정의 헤더)
+#include "types.hpp"
 #include "utils/isInt.hpp"
 #include "utils/LogManager.hpp"
 #include "utils/AssertManager.hpp"
@@ -31,4 +32,3 @@
 #define ERROR -1
 
 #define IRC_MESSAGE_SIZE 512
-#define MAX_KEVENT_SIZE 100

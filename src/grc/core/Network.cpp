@@ -1,93 +1,74 @@
-#include "NetworkManager.hpp"
+#include "Network.hpp"
 #include "utils/LogManager.hpp"
+#include <unistd.h>
 
 namespace grc
 {
 
-NetworkManager::NetworkManager()
+Network::Network()
 {
-
+    mServerSocket = ERROR;
+    mNewClients.reserve(128);
 }
 
-NetworkManager::~NetworkManager()
+Network::~Network()
 {
     close(mServerSocket);
-    close(mKqueue);
     mSessions.clear();
 }
 
-NetworkManager& NetworkManager::GetInstance()
-{
-    static NetworkManager instance;
-    return instance;
-}
-
-int NetworkManager::InitNetwork(const int port)
+int32 Network::Init(const int32 port)
 {
     if (createServerSocket() == FAILURE)
     {
         return FAILURE;
     }
-    if (createKqueue() == FAILURE)
-    {
-        close(mServerSocket);
-        return FAILURE;
-    }
     if (setServerSocket(port) == FAILURE)
     {
         close(mServerSocket);
-        close(mKqueue);
         return FAILURE;
     }
     return SUCCESS;
 }
 
-int NetworkManager::ProcessNetworkEvent()
+int32 Network::Read(const int32 socket)
 {
-    // event 확인(모니터링)
-    std::memset(mEventList, 0, sizeof(struct kevent) * MAX_KEVENT_SIZE);
-    int eventCount = kevent(mKqueue, NULL, 0, mEventList, MAX_KEVENT_SIZE, NULL);
-    if (eventCount == ERROR)
+    if (socket == mServerSocket)
     {
-        LOG(LogLevel::Error) << "Server socket event 처리 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on kevent()";
-        close(mServerSocket);
-        close(mKqueue);
-        mSessions.clear();
-        return FAILURE;
+        addClient();
     }
-
-    // 발생한 event 처리
-    for (int i = 0; i < eventCount; i++)
+    else
     {
-        struct kevent& currentEvent = mEventList[i];
-        int currentSocket = currentEvent.ident;
-
-        // READ 이벤트 처리
-        if (currentEvent.filter == EVFILT_READ)
-        {
-            // server socket인 경우
-            if (currentSocket == mServerSocket)
-            {
-                addClient();
-            }
-            // client socket인 경우
-            else
-            {
-                recvFromClient(currentSocket);
-            }
-        }
-
-        // WRITE 이벤트 처리
-        else if (currentEvent.filter == EVFILT_WRITE)
-        {
-            // writeToClient(int clientSocket);
-        }
+        recvFromClient(socket);
     }
     return SUCCESS;
 }
 
-int NetworkManager::createServerSocket()
+const int32 Network::GetServerSocket() const
+{
+    return mServerSocket;
+}
+
+const char* Network::GetIP(const int fd) const
+{
+    if (mSessions.find(fd) != mSessions.end())
+    {
+        return inet_ntoa(mSessions.at(fd).addr.sin_addr);
+    }
+    return "Unkown client";
+}
+
+const std::vector<int>& Network::FetchNewClients() const
+{
+    return mNewClients;
+}
+
+void Network::ClearNewClients()
+{
+    mNewClients.clear();
+}
+
+int32 Network::createServerSocket()
 {
     mServerSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mServerSocket == ERROR)
@@ -99,24 +80,11 @@ int NetworkManager::createServerSocket()
     return SUCCESS;
 }
 
-int NetworkManager::createKqueue()
+int32 Network::setServerSocket(const int32 port)
 {
-    mKqueue = kqueue();
-    if (mKqueue == ERROR)
-    {
-        LOG(LogLevel::Error) << "Kqueue 생성 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on kqueue()";
-        close(mServerSocket);
-        return FAILURE;
-    }
-    return SUCCESS;
-}
-
-int NetworkManager::setServerSocket(const int port)
-{
-    int reuseOption = 1;
-    int keepaliveOption = 1;
-    int nodelayOption = 1;
+    int32 reuseOption = 1;
+    int32 keepaliveOption = 1;
+    int32 nodelayOption = 1;
 
     // server socket option 설정
     if (setsockopt(mServerSocket, SOL_SOCKET, SO_REUSEADDR, &reuseOption, sizeof(reuseOption)) == ERROR
@@ -157,26 +125,16 @@ int NetworkManager::setServerSocket(const int port)
         return FAILURE;
     }
 
-    // server socket의 READ event를 kqueue에 등록
-    struct kevent serverEvent;
-    EV_SET(&serverEvent, mServerSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-    if (kevent(mKqueue, &serverEvent, 1, NULL, 0, NULL) == ERROR)
-    {
-        LOG(LogLevel::Error) << "Server socket event 등록 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on kevent()";
-        return FAILURE;
-    }
-
     return SUCCESS;
 }
 
-void NetworkManager::addClient()
+void Network::addClient()
 {
     // client 연결
     sockaddr_in clientAddr;
     std::memset(&clientAddr, 0, sizeof(clientAddr));
     socklen_t clientAddrLength = sizeof(clientAddr);
-    int clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
+    int32 clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
     if (clientSocket == ERROR)
     {
         LOG(LogLevel::Error) << "client 연결 실패(errno: " << errno << " - "
@@ -199,26 +157,15 @@ void NetworkManager::addClient()
     client.socket = clientSocket;
     mSessions[clientSocket] = client;
 
-    // client socket에 대한 READ, WRITE event 추가
-    struct kevent clientEvent[2];
-    EV_SET(&clientEvent[0], clientSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-    EV_SET(&clientEvent[1], clientSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
-    if (kevent(mKqueue, &clientEvent[0], 2, NULL, 0, NULL) == ERROR)
-    {
-        LOG(LogLevel::Error) << "client socket event 등록 오류(errno: " << errno << " - "
-            << strerror(errno) << ") on kevent()";
-        close(clientSocket);
-        mSessions.erase(clientSocket);
-        return;
-    }
-    LOG(LogLevel::Notice) << "Client(" << inet_ntoa(clientAddr.sin_addr) << ") 연결됨";
+    // 새로운 클라이언트 목록에 추가
+    mNewClients.push_back(clientSocket);
 }
 
-void NetworkManager::recvFromClient(int clientSocket)
+void Network::recvFromClient(int32 clientSocket)
 {
     // client로부터 메세지 수신
     struct session& currentSession = mSessions[clientSocket];
-    int recvLen = recv(clientSocket, currentSession.recvBuffer, sizeof(currentSession.recvBuffer), 0);
+    int32 recvLen = recv(clientSocket, currentSession.recvBuffer, sizeof(currentSession.recvBuffer), 0);
     if (recvLen == ERROR)
     {
         LOG(LogLevel::Error) << "Client(" << inet_ntoa(currentSession.addr.sin_addr) << ")로 부터 메세지를 전달받지 못함(errno:"

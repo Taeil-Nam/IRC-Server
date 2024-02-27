@@ -12,6 +12,8 @@
 #pragma once
 
 #include "common.hpp"
+#include "Event.hpp"
+#include "Network.hpp"
 
 namespace grc
 {
@@ -25,12 +27,15 @@ public:
     void Run();
 private:
     Core();
-    Core(const Core& core);
-    const Core& operator=(const Core& core);
+    Core(const Core& core); // = delete
+    const Core& operator=(const Core& core); // = delete
 
+    int32 Init();
 private:
     const int mPort;
     const std::string mPassword;
+    Event mEvent;
+    Network mNetwork;
 };
 
 }
