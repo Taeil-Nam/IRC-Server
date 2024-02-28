@@ -1,4 +1,5 @@
 #include "Core.hpp"
+#include "common.hpp"
 
 namespace grc
 {
@@ -175,7 +176,13 @@ bool Core::initLog()
         close(mLogFileFDWrite);
         return FAILURE;
     }
-    mLogFileStreamRead = std::ifstream(mLogFileName);
+    mLogFileStreamRead.open(mLogFileName);
+    if (mLogFileStreamRead.is_open() == false)
+    {
+        close(mLogFileFDWrite);
+        close(mLogFileFDRead);
+        return FAILURE;
+    }
     LOG_SET_FD(mLogFileFDWrite);
     LOG_SET_LEVEL(LogLevel::Informational);
     return SUCCESS;

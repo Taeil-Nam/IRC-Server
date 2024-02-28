@@ -57,7 +57,7 @@ void Network::Write(const int32 socket)
     // 메세지 전송 완료
     session.sendSize = sendLen;
     LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ")에게 "<< sendLen
-        << " bytes 만큼의 메세지 전송\n" << session.sendBuffer << "\n";
+        << "bytes 만큼의 메세지 전송\n" << session.sendBuffer << "\n";
     ClearSendBuffer(socket);
 }
 
