@@ -125,7 +125,7 @@ void Core::Run()
                                  / 1000L;
         if (elapsedTime >= 40)
         {
-            mActivatedWindow->RefreshScreen();//임시: fps설정없이 그냥 while 한번 돌때마다 출력하도록 함.
+            mActivatedWindow->RefreshScreen();
             consoleFrameStrat = consoleFrameEnd;
         }
     }
