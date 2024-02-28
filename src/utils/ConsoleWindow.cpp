@@ -133,12 +133,12 @@ void ConsoleWindow::RefreshScreen()
 
 void ConsoleWindow::SetHeaderColor(const eANSIColor color)
 {
-    mHeaderColor = color;
+    mHeaderColor = mANSIColors[color];
 }
 
 void ConsoleWindow::SetFooterColor(const eANSIColor color)
 {
-    mFooterColor = color;
+    mFooterColor = mANSIColors[color];
 }
 
 void ConsoleWindow::SetHeader(const std::string& str)

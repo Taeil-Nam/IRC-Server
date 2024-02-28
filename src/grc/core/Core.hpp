@@ -14,6 +14,8 @@
 #include "common.hpp"
 #include "utils/Event.hpp"
 #include "utils/Network.hpp"
+#include "utils/ConsoleWindow.hpp"
+#include <fstream>
 
 namespace grc
 {
@@ -30,12 +32,21 @@ private:
     Core(const Core& core); // = delete
     const Core& operator=(const Core& core); // = delete
 
-    int32 Init();
+    bool init();
+    bool initLog();
+    void initConsoleWindow();
 private:
     const int mPort;
     const std::string mPassword;
     Event mEvent;
     Network mNetwork;
+    int32 mLogFileFDRead;
+    int32 mLogFileFDWrite;
+    std::ifstream mLogFileStreamRead;
+    std::string mLogFileName;
+    ConsoleWindow mLogMonitor;
+    ConsoleWindow mServerMonitor;
+    ConsoleWindow* mActivatedWindow;
 };
 
 }

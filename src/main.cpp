@@ -11,7 +11,6 @@
 
 #include "common.hpp"
 #include "grc/core/Core.hpp"
-#include "utils/LogManager.hpp"
 
 int main(const int argc, const char **argv)
 {
