@@ -21,6 +21,8 @@
 
 #include "common.hpp"
 
+#define BUFFER_SIZE 1024
+
 namespace grc
 {
 
@@ -28,8 +30,8 @@ struct session	// 연결된 client의 정보를 저장하는 구조체
 {
     sockaddr_in addr;
     int32 socket;
-    char recvBuffer[BufferSize];
-    char sendBuffer[BufferSize];
+    char recvBuffer[BUFFER_SIZE];
+    char sendBuffer[BUFFER_SIZE];
     int64 recvSize;
     int64 sendSize;
 };
