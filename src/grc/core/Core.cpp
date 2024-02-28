@@ -62,7 +62,11 @@ void Core::Run()
                     }
                     else if (input == "/exit" || input == "/quit")
                     {
-                        return ; // Core::run() 함수 종료
+                        return ;
+                    }
+                    else if (input == "/test")
+                    {
+                        LOG(LogLevel::Informational) << "Test";
                     }
                     else
                     {
@@ -72,15 +76,19 @@ void Core::Run()
             }
             else if (event.ident == mLogFileFDRead && event.filter == EVFILT_READ)
             {
+                char readBuffer;
                 std::string line;
-                while (std::getline(mLogFileStreamRead, line))
+                while (read(mLogFileFDRead, &readBuffer, 1))
                 {
-                    const uint64 firstSpace = line.find(' ');
-                    const uint64 secondSpace = line.find(' ', firstSpace + 1);
-                    const uint64 thirdSpace = line.find(' ', secondSpace + 1);
-                    line.erase(firstSpace, thirdSpace - firstSpace);
-                    mActivatedWindow->Out(line);
+                    if (readBuffer == '\n')
+                        break;
+                    line.push_back(readBuffer);
                 }
+                const uint64 firstSpace = line.find(' ');
+                const uint64 secondSpace = line.find(' ', firstSpace + 1);
+                const uint64 thirdSpace = line.find(' ', secondSpace + 1);
+                line.erase(firstSpace, thirdSpace - firstSpace);
+                mActivatedWindow->Out(line);
             }
             else if ((event.ident != STDIN_FILENO && event.ident != mLogFileFDRead) && event.filter == EVFILT_READ)
             {
@@ -103,13 +111,9 @@ void Core::Run()
         /* IRC 로직 수행 */
         // Todo: IRC 로직 추가
 
-
+        
         /* ConsoleWindow 출력 처리 */
-        if (clock() - consoleRefreshTime > 40 * CLOCKS_PER_SEC / 1000) // 40ms마다 출력
-        {
-            mActivatedWindow->RefreshScreen();
-            consoleRefreshTime = clock();
-        }
+        mActivatedWindow->RefreshScreen();//임시: fps설정없이 그냥 while 한번 돌때마다 출력하도록 함.
     }
 }
 
