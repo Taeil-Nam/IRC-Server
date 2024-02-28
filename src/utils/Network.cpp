@@ -15,7 +15,6 @@ Network::~Network()
     mSessions.clear();
 }
 
-// 네트워크 통신을 위해 필요한 소켓을 만들고 설정합니다.
 bool Network::Init(const int32 port)
 {
     if (createServerSocket() == FAILURE)
@@ -30,9 +29,6 @@ bool Network::Init(const int32 port)
     return SUCCESS;
 }
 
-// 소켓에 발생한 READ 이벤트를 처리합니다.
-// 서버 소켓의 경우, client 연결 요청을 허가합니다.
-// 클라이언트 소켓의 경우, 해당 소켓으로부터 메세지를 읽어옵니다.
 void Network::Read(const int32 socket)
 {
     if (socket == mServerSocket)
@@ -43,6 +39,26 @@ void Network::Read(const int32 socket)
     {
         recvFromClient(socket);
     }
+}
+
+void Network::Write(const int32 socket)
+{
+    struct session& session = mSessions[socket];
+    int sendLen = send(socket, session.sendBuffer, std::strlen(session.sendBuffer), 0);
+    // 오류 발생시
+    if (sendLen == -1)
+    {
+        LOG(LogLevel::Error) << "Client(" << GetIP(socket) << ")로 메세지를 전달하지 못함(errno:"
+            << errno << " - " << strerror(errno) << ") on send()";
+        close(socket);
+        mSessions.erase(socket);
+        return;
+    }
+    // 메세지 전송 완료
+    session.sendSize = sendLen;
+    LOG(LogLevel::Error) << "Client(" << GetIP(socket) << ")에게 "<< sendLen
+        << " bytes 만큼의 메세지 전송\n" << session.sendBuffer << "\n";
+    ClearSendBuffer(socket);
 }
 
 const int32 Network::GetServerSocket() const
@@ -176,32 +192,37 @@ void Network::addClient()
     mNewClients.push_back(clientSocket);
 }
 
-void Network::recvFromClient(int32 clientSocket)
+void Network::recvFromClient(int32 socket)
 {
     // client로부터 메세지 수신 시도
-    struct session& currentSession = mSessions[clientSocket];
-    int32 recvLen = recv(clientSocket, currentSession.recvBuffer, sizeof(currentSession.recvBuffer), 0);
+    struct session& session = mSessions[socket];
+    int32 recvLen = recv(socket, session.recvBuffer, sizeof(session.recvBuffer), 0);
     // 오류 발생시
     if (recvLen == ERROR)
     {
-        LOG(LogLevel::Error) << "Client(" << inet_ntoa(currentSession.addr.sin_addr) << ")로 부터 메세지를 전달받지 못함(errno:"
+        LOG(LogLevel::Error) << "Client(" << GetIP(socket) << ")로 부터 메세지를 전달받지 못함(errno:"
             << errno << " - " << strerror(errno) << ") on recv()";
-        close(clientSocket);
-        mSessions.erase(clientSocket);
+        close(socket);
+        mSessions.erase(socket);
         return;
     }
     // 상대방과 연결이 끊긴 경우
     else if (recvLen == 0)
     {
-        LOG(LogLevel::Notice) << "Client(" << inet_ntoa(currentSession.addr.sin_addr) << ")와 연결이 끊어짐";
-        close(clientSocket);
-        mSessions.erase(clientSocket);
+        LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ")와 연결이 끊어짐";
+        close(socket);
+        mSessions.erase(socket);
         return;
     }
     // 메시지 수신 완료
-    currentSession.recvSize += recvLen;
-    LOG(LogLevel::Notice) << "Client(" << inet_ntoa(currentSession.addr.sin_addr) << ")로 부터 "
-        << std::strlen(currentSession.recvBuffer) + 1 << "bytes 만큼의 메세지 수신\n" << currentSession.recvBuffer << "\n";
+    session.recvSize = recvLen;
+    LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ")로 부터 "
+        << std::strlen(session.recvBuffer) << "bytes 만큼의 메세지 수신\n" << session.recvBuffer << "\n";
+
+    // WRITE Test code
+    // std::memcpy(session.sendBuffer, session.recvBuffer, sizeof(session.recvBuffer));
+    // ClearReceiveBuffer(socket);
+    // Write(socket);
 }
 
 }

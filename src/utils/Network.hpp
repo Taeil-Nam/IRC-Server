@@ -44,7 +44,7 @@ public:
 
     bool Init(const int32 port);
     void Read(const int32 socket);
-    // int32 Write(const int32 socket);
+    void Write(const int32 socket);
 
     const int32 GetServerSocket() const;
     const char* GetIP(const int32 socket) const;
@@ -60,8 +60,8 @@ private:
     bool setServerSocket(const int32 port);
 
     void addClient();
-    void recvFromClient(int32 clientSocket);
-    //int32 writeToClient();
+    void recvFromClient(int32 Socket);
+    void sendToClient();
 
 private:
     int32 mServerSocket;
