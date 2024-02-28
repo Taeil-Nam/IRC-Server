@@ -56,7 +56,7 @@ void Network::Write(const int32 socket)
     }
     // 메세지 전송 완료
     session.sendSize = sendLen;
-    LOG(LogLevel::Error) << "Client(" << GetIP(socket) << ")에게 "<< sendLen
+    LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ")에게 "<< sendLen
         << " bytes 만큼의 메세지 전송\n" << session.sendBuffer << "\n";
     ClearSendBuffer(socket);
 }
@@ -220,9 +220,9 @@ void Network::recvFromClient(int32 socket)
         << std::strlen(session.recvBuffer) << "bytes 만큼의 메세지 수신\n" << session.recvBuffer << "\n";
 
     // WRITE Test code
-    // std::memcpy(session.sendBuffer, session.recvBuffer, sizeof(session.recvBuffer));
-    // ClearReceiveBuffer(socket);
-    // Write(socket);
+    std::memcpy(session.sendBuffer, session.recvBuffer, sizeof(session.recvBuffer));
+    ClearReceiveBuffer(socket);
+    Write(socket);
 }
 
 }

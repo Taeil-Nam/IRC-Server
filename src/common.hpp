@@ -11,6 +11,8 @@
 
 #pragma once
 
+#define GAMERC_VERSION ("GameRC v1.0.0")
+
 // standard (표준 헤더)
 #include <iostream>
 #include <string>
@@ -19,11 +21,10 @@
 #include <map>
 #include <deque>
 
-
 // custom (사용자 정의 헤더)
 #include "types.hpp"
 #include "utils/isInt.hpp"
-#include "utils/LogManager.hpp"
+#include "utils/GlobalLogger.hpp"
 #include "utils/AssertManager.hpp"
 
 // 공용 매크로
