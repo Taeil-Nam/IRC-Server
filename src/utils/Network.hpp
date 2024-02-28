@@ -28,8 +28,10 @@ struct session	// 연결된 client의 정보를 저장하는 구조체
 {
     sockaddr_in addr;
     int32 socket;
-    char recvBuffer[IRC_MESSAGE_SIZE];
-    char sendBuffer[IRC_MESSAGE_SIZE];
+    char recvBuffer[BufferSize];
+    char sendBuffer[BufferSize];
+    int64 recvSize;
+    int64 sendSize;
 };
 
 class Network

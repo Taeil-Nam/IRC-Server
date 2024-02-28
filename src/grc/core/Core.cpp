@@ -49,7 +49,6 @@ void Core::Run()
         {
             if (mEvent.AddReadEvent(newClients[i]) == FAILURE)
             {
-                LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIP(newClients[i]) << ") READ event 등록 실패";
                 continue;
             }
             LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIP(newClients[i]) << ") 연결됨";
@@ -60,7 +59,7 @@ void Core::Run()
     }
 }
 
-int32 Core::Init()
+bool Core::Init()
 {
     if (mEvent.Init() == FAILURE)
     {

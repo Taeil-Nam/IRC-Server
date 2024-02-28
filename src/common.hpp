@@ -32,3 +32,4 @@
 #define ERROR -1
 
 #define IRC_MESSAGE_SIZE 512
+#define BufferSize 1024
