@@ -38,20 +38,22 @@ public:
     Network();
     ~Network();
 
-    int32 Init(const int32 port);
-    int32 Read(const int32 socket);
+    bool Init(const int32 port);
+    void Read(const int32 socket);
     // int32 Write(const int32 socket);
 
     const int32 GetServerSocket() const;
-    const char* GetIP(const int fd) const;
+    const char* GetIP(const int32 socket) const;
     const std::vector<int>& FetchNewClients() const;
     void ClearNewClients();
+    void ClearReceiveBuffer(const int32 socket);
+    void ClearSendBuffer(const int32 socket);
 private:
     Network(const Network& Network); // = delete
     const Network& operator=(const Network& Network); // = delete
 
-    int32 createServerSocket();
-    int32 setServerSocket(const int32 port);
+    bool createServerSocket();
+    bool setServerSocket(const int32 port);
 
     void addClient();
     void recvFromClient(int32 clientSocket);

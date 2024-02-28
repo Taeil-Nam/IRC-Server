@@ -27,8 +27,8 @@
 #include "utils/AssertManager.hpp"
 
 // 공용 매크로
-#define SUCCESS 0
-#define FAILURE 1
+#define SUCCESS true
+#define FAILURE false
 #define ERROR -1
 
 #define IRC_MESSAGE_SIZE 512

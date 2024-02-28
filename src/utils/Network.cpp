@@ -15,7 +15,7 @@ Network::~Network()
     mSessions.clear();
 }
 
-int32 Network::Init(const int32 port)
+bool Network::Init(const int32 port)
 {
     if (createServerSocket() == FAILURE)
     {
@@ -29,7 +29,7 @@ int32 Network::Init(const int32 port)
     return SUCCESS;
 }
 
-int32 Network::Read(const int32 socket)
+void Network::Read(const int32 socket)
 {
     if (socket == mServerSocket)
     {
@@ -39,7 +39,6 @@ int32 Network::Read(const int32 socket)
     {
         recvFromClient(socket);
     }
-    return SUCCESS;
 }
 
 const int32 Network::GetServerSocket() const
@@ -47,13 +46,13 @@ const int32 Network::GetServerSocket() const
     return mServerSocket;
 }
 
-const char* Network::GetIP(const int fd) const
+const char* Network::GetIP(const int32 socket) const
 {
-    if (mSessions.find(fd) != mSessions.end())
+    if (mSessions.find(socket) != mSessions.end())
     {
-        return inet_ntoa(mSessions.at(fd).addr.sin_addr);
+        return inet_ntoa(mSessions.at(socket).addr.sin_addr);
     }
-    return "Unkown client";
+    return "Unknown client";
 }
 
 const std::vector<int>& Network::FetchNewClients() const
@@ -66,7 +65,25 @@ void Network::ClearNewClients()
     mNewClients.clear();
 }
 
-int32 Network::createServerSocket()
+void Network::ClearReceiveBuffer(const int32 socket)
+{
+    std::map<int, struct session>::iterator pair = mSessions.find(socket);
+    if (pair != mSessions.end())
+    {
+        std::memset(pair->second.recvBuffer, 0, sizeof(pair->second.recvBuffer));
+    }
+}
+
+void Network::ClearSendBuffer(const int32 socket)
+{
+    std::map<int, struct session>::iterator pair = mSessions.find(socket);
+    if (pair != mSessions.end())
+    {
+        std::memset(pair->second.sendBuffer, 0, sizeof(pair->second.sendBuffer));
+    }
+}
+
+bool Network::createServerSocket()
 {
     mServerSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mServerSocket == ERROR)
@@ -78,7 +95,7 @@ int32 Network::createServerSocket()
     return SUCCESS;
 }
 
-int32 Network::setServerSocket(const int32 port)
+bool Network::setServerSocket(const int32 port)
 {
     int32 reuseOption = 1;
     int32 keepaliveOption = 1;
