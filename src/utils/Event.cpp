@@ -8,6 +8,8 @@ Event::Event()
     mKqueue = ERROR;
     mEventCount = 0;
     std::memset(mEventList, 0, sizeof(mEventList));
+    mTimeout.tv_sec = 0;
+    mTimeout.tv_nsec = 5 * 1000* 1000;
 }
 
 Event::~Event()
@@ -39,7 +41,7 @@ int32 Event::AddReadEvent(const int32 fd)
 
 const struct kevent* Event::GetEventList()
 {
-    mEventCount = kevent(mKqueue, NULL, 0, mEventList, MAX_KEVENT_SIZE, NULL);
+    mEventCount = kevent(mKqueue, NULL, 0, mEventList, MAX_KEVENT_SIZE, &mTimeout);
     if (mEventCount == ERROR)
     {
         LOG(LogLevel::Error) << "Event list 생성 오류(errno:" << errno << " - "
@@ -64,6 +66,12 @@ int32 Event::createKqueue()
         return FAILURE;
     }
     return SUCCESS;
+}
+
+void Event::SetTimeout(int64 ms)
+{
+    mTimeout.tv_sec = ms / 1000;
+    mTimeout.tv_nsec = (ms % 1000) * 1000 * 1000;
 }
 
 }

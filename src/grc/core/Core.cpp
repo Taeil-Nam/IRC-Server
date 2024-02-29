@@ -29,15 +29,15 @@ void Core::Run()
     }
 
     /* 메인 로직 */
-    LOG(LogLevel::Notice) << "IRC Server 시작 (Port = " << mPort << ")";
-    LOG(LogLevel::Informational) << "Test";
-    clock_t consoleRefreshTime = clock();
+    LOG(LogLevel::Notice) << "IRC Server start (Port = " << mPort << ")";
+    struct timeval consoleFrameStrat, consoleFrameEnd;
+    gettimeofday(&consoleFrameStrat, NULL);
     while (true)
     {
         /* 이벤트 처리 */
         const struct kevent* eventList = mEvent.GetEventList();
         const int eventCount = mEvent.GetEventCount();
-        for (int i = 0; i < eventCount; i++)
+        for (uint64 i = 0; i < eventCount; ++i)
         {
             const struct kevent& event = eventList[i];
             if (event.ident == STDIN_FILENO && event.filter == EVFILT_READ)
@@ -61,9 +61,19 @@ void Core::Run()
                     {
                         mActivatedWindow->Out("Server is running", ConsoleWindow::Green);
                     }
+                    else if (mActivatedWindow == &mLogMonitor && input == "/test")
+                    {
+                        LOG(LogLevel::Informational) << "Test";
+                        LOG(LogLevel::Notice) << "Test";
+                        LOG(LogLevel::Warning) << "Test";
+                        LOG(LogLevel::Error) << "Test";
+                        LOG(LogLevel::Critical) << "Test";
+                        LOG(LogLevel::Alert) << "Test";
+                        LOG(LogLevel::Emergency) << "Test";
+                    }
                     else if (input == "/exit" || input == "/quit")
                     {
-                        return ; // Core::run() 함수 종료
+                        return ;
                     }
                     else
                     {
@@ -73,15 +83,19 @@ void Core::Run()
             }
             else if (event.ident == mLogFileFDRead && event.filter == EVFILT_READ)
             {
+                char readBuffer;
                 std::string line;
-                while (std::getline(mLogFileStreamRead, line))
+                while (read(mLogFileFDRead, &readBuffer, 1))
                 {
-                    const uint64 firstSpace = line.find(' ');
-                    const uint64 secondSpace = line.find(' ', firstSpace + 1);
-                    const uint64 thirdSpace = line.find(' ', secondSpace + 1);
-                    line.erase(firstSpace, thirdSpace - firstSpace);
-                    mActivatedWindow->Out(line);
+                    if (readBuffer == '\n')
+                        break;
+                    line.push_back(readBuffer);
                 }
+                const uint64 firstSpace = line.find(' ');
+                const uint64 secondSpace = line.find(' ', firstSpace + 1);
+                const uint64 thirdSpace = line.find(' ', secondSpace + 1);
+                line.erase(firstSpace, thirdSpace - firstSpace);
+                mActivatedWindow->Out(line);
             }
             else if ((event.ident != STDIN_FILENO && event.ident != mLogFileFDRead) && event.filter == EVFILT_READ)
             {
@@ -91,7 +105,7 @@ void Core::Run()
         }
         /* 새로운 클라이언트 연결 */
         const std::vector<int32>& newClients = mNetwork.FetchNewClients();
-        for (size_t i = 0; i < newClients.size(); i++)
+        for (uint64 i = 0; i < newClients.size(); ++i)
         {
             if (mEvent.AddReadEvent(newClients[i]) == FAILURE)
             {
@@ -103,12 +117,16 @@ void Core::Run()
         /* IRC 로직 수행 */
         // Todo: IRC 로직 추가
 
-
         /* ConsoleWindow 출력 처리 */
-        if (clock() - consoleRefreshTime > 40 * CLOCKS_PER_SEC / 1000) // 40ms마다 출력
+        gettimeofday(&consoleFrameEnd, NULL);
+        const long elapsedTime = (consoleFrameEnd.tv_sec - consoleFrameStrat.tv_sec)
+                                 * 1000L
+                                 + (consoleFrameEnd.tv_usec - consoleFrameStrat.tv_usec)
+                                 / 1000L;
+        if (elapsedTime >= 40)
         {
             mActivatedWindow->RefreshScreen();
-            consoleRefreshTime = clock();
+            consoleFrameStrat = consoleFrameEnd;
         }
     }
 }

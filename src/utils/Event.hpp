@@ -30,6 +30,7 @@ public:
     int32 AddReadEvent(const int32 fd);
     const struct kevent* GetEventList();
     const int32 GetEventCount() const;
+    void SetTimeout(int64 ms);
 private:
     Event(const Event& event); // = delete
     const Event& operator=(const Event& event); // = delete
@@ -39,6 +40,7 @@ private:
     int32 mKqueue;
     struct kevent mEventList[MAX_KEVENT_SIZE];
     int32 mEventCount;
+    struct timespec mTimeout;
 };
  
 }
