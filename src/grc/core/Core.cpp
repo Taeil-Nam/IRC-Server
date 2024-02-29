@@ -24,12 +24,12 @@ void Core::Run()
     /* 초기화 */
     if (init() == FAILURE)
     {
-        LOG(LogLevel::Error) << "Core 초기화 오류";
+        LOG(LogLevel::Error) << "Core init error";
         return;
     }
 
     /* 메인 로직 */
-    LOG(LogLevel::Notice) << "IRC Server start (Port = " << mPort << ")";
+    LOG(LogLevel::Notice) << "IRC Server started (Port = " << mPort << ")";
     struct timeval consoleFrameStrat, consoleFrameEnd;
     gettimeofday(&consoleFrameStrat, NULL);
     while (true)
@@ -111,7 +111,7 @@ void Core::Run()
             {
                 continue;
             }
-            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIP(newClients[i]) << ") 연결됨";
+            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIP(newClients[i]) << ") connected";
             mNetwork.ClearNewClients();
         }
         /* IRC 로직 수행 */
@@ -141,30 +141,30 @@ bool Core::init()
     initConsoleWindow();
     if (mEvent.Init() == FAILURE)
     {
-        LOG(LogLevel::Error) << "Event 객체 초기화 오류";
+        LOG(LogLevel::Error) << "Event init error";
         return FAILURE;
     }
 
     if (mNetwork.Init(mPort) == FAILURE)
     {
-        LOG(LogLevel::Error) << "Network 객체 초기화 오류";
+        LOG(LogLevel::Error) << "Network init error";
         return FAILURE;
     }
 
     /* Add basic events */
     if (mEvent.AddReadEvent(STDIN_FILENO) == FAILURE)
     {
-        LOG(LogLevel::Error) << "STDIN event 등록 오류";
+        LOG(LogLevel::Error) << "STDIN event add error";
         return FAILURE;
     }
     if (mEvent.AddReadEvent(mLogFileFDRead) == FAILURE)
     {
-        LOG(LogLevel::Error) << "Log file 등록 오류";
+        LOG(LogLevel::Error) << "Log file event add error";
         return FAILURE;
     }
     if (mEvent.AddReadEvent(mNetwork.GetServerSocket()) == FAILURE)
     {
-        LOG(LogLevel::Error) << "server socket event 등록 오류";
+        LOG(LogLevel::Error) << "server socket event add error";
         return FAILURE;
     }
 
