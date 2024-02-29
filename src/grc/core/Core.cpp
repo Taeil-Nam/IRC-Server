@@ -24,7 +24,7 @@ void Core::Run()
     /* 초기화 */
     if (init() == FAILURE)
     {
-        LOG(LogLevel::Error) << "Core init error";
+        LOG(LogLevel::Error) << "Failed to init Core";
         return;
     }
 
@@ -141,30 +141,30 @@ bool Core::init()
     initConsoleWindow();
     if (mEvent.Init() == FAILURE)
     {
-        LOG(LogLevel::Error) << "Event init error";
+        LOG(LogLevel::Error) << "Failed to init Event";
         return FAILURE;
     }
 
     if (mNetwork.Init(mPort) == FAILURE)
     {
-        LOG(LogLevel::Error) << "Network init error";
+        LOG(LogLevel::Error) << "Failed to init Network";
         return FAILURE;
     }
 
     /* Add basic events */
     if (mEvent.AddReadEvent(STDIN_FILENO) == FAILURE)
     {
-        LOG(LogLevel::Error) << "STDIN event add error";
+        LOG(LogLevel::Error) << "Failed to add STDIN READ event";
         return FAILURE;
     }
     if (mEvent.AddReadEvent(mLogFileFDRead) == FAILURE)
     {
-        LOG(LogLevel::Error) << "Log file event add error";
+        LOG(LogLevel::Error) << "Failed to add Log file READ event";
         return FAILURE;
     }
     if (mEvent.AddReadEvent(mNetwork.GetServerSocket()) == FAILURE)
     {
-        LOG(LogLevel::Error) << "server socket event add error";
+        LOG(LogLevel::Error) << "Failed to add server socket READ event";
         return FAILURE;
     }
 

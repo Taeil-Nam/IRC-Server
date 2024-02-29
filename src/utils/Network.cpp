@@ -48,16 +48,16 @@ void Network::Write(const int32 socket)
     // 오류 발생시
     if (sendLen == -1)
     {
-        LOG(LogLevel::Error) << "Client(" << GetIP(socket) << ")로 메세지를 전달하지 못함(errno:"
-            << errno << " - " << strerror(errno) << ") on send()";
+        LOG(LogLevel::Error) << "Failed to send message to client(" << GetIP(socket) << ")"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on send()";
         close(socket);
         mSessions.erase(socket);
         return;
     }
     // 메세지 전송 완료
     session.sendSize = sendLen;
-    LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ")에게 "<< sendLen
-        << "bytes 만큼의 메세지 전송\n" << session.sendBuffer << "\n";
+    LOG(LogLevel::Notice) << "Sent to message to client(" << GetIP(socket) << ") "
+        << sendLen << "bytes : " << session.sendBuffer;
     ClearSendBuffer(socket);
 }
 
@@ -110,8 +110,8 @@ bool Network::createServerSocket()
     mServerSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mServerSocket == ERROR)
     {
-        LOG(LogLevel::Error) << "Server socket 생성 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on socket()";
+        LOG(LogLevel::Error) << "Failed to create server socket"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on socket()";
         return FAILURE;
     }
     return SUCCESS;
@@ -128,15 +128,15 @@ bool Network::setServerSocket(const int32 port)
         || setsockopt(mServerSocket, SOL_SOCKET, SO_KEEPALIVE, &keepaliveOption, sizeof(keepaliveOption)) == ERROR
         || setsockopt(mServerSocket, IPPROTO_TCP, TCP_NODELAY, &nodelayOption, sizeof(nodelayOption)) == ERROR)
     {
-        LOG(LogLevel::Error) << "Server socket 옵션 설정 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on setsockopt()";
+        LOG(LogLevel::Error) << "Failed to set socket option on server socket"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on setsockopt()";
         return FAILURE;
     }
     // server socket non-blocking 설정
     if (fcntl(mServerSocket, F_SETFL, O_NONBLOCK) == ERROR)
     {
-        LOG(LogLevel::Error) << "Server socket non-blocking 설정 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on fcntl()";
+        LOG(LogLevel::Error) << "Failed to set non-blocking fd on server socket"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on fcntl()";
         return FAILURE;
     }
     // server socket address 설정 (IP address, port 바인딩)
@@ -147,15 +147,15 @@ bool Network::setServerSocket(const int32 port)
     serverAddress.sin_port = htons(port);
     if (bind(mServerSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) == ERROR)
     {
-        LOG(LogLevel::Error) << "Server socket bind 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on bind()";
+        LOG(LogLevel::Error) << "Failed to bind server socket "
+            << "(errno:" << errno << " - " << strerror(errno) << ") on bind()";
         return FAILURE;
     }
     // server socket listen (TCP 연결 준비)
     if (listen(mServerSocket, SOMAXCONN) == ERROR)
     {
-        LOG(LogLevel::Error) << "Server socket listen 오류(errno:" << errno << " - "
-            << strerror(errno) << ") on listen()";
+        LOG(LogLevel::Error) << "Failed to listen on server socket"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on listen()";
         return FAILURE;
     }
 
@@ -171,15 +171,15 @@ void Network::addClient()
     int32 clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
     if (clientSocket == ERROR)
     {
-        LOG(LogLevel::Error) << "client 연결 실패(errno: " << errno << " - "
-            << strerror(errno) << ") on accept()";
+        LOG(LogLevel::Error) << "Failed to connect client on server socket"
+            << "(errno: " << errno << " - " << strerror(errno) << ") on accept()";
         return;
     }
     // client socket non-blocking 설정
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) == ERROR)
     {
-        LOG(LogLevel::Error) << "client socket non-blocking 설정 오류(errno: " << errno << " - "
-            << strerror(errno) << ") on fcntl()";
+        LOG(LogLevel::Error) << "Failed to set non-blocking fd on client socket"
+            << "(errno: " << errno << " - " << strerror(errno) << ") on fcntl()";
         close(clientSocket);
         return;
     }
@@ -200,8 +200,8 @@ void Network::recvFromClient(int32 socket)
     // 오류 발생시
     if (recvLen == ERROR)
     {
-        LOG(LogLevel::Error) << "Client(" << GetIP(socket) << ")로 부터 메세지를 전달받지 못함(errno:"
-            << errno << " - " << strerror(errno) << ") on recv()";
+        LOG(LogLevel::Error) << "Failed to receive message from client(" << GetIP(socket) << ")"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on recv()";
         close(socket);
         mSessions.erase(socket);
         return;
@@ -209,16 +209,15 @@ void Network::recvFromClient(int32 socket)
     // 상대방과 연결이 끊긴 경우
     else if (recvLen == 0)
     {
-        LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ")와 연결이 끊어짐";
+        LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ") disconnected";
         close(socket);
         mSessions.erase(socket);
         return;
     }
     // 메시지 수신 완료
     session.recvSize = recvLen;
-    LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ")로 부터 "
-        << std::strlen(session.recvBuffer) << "bytes 만큼의 메세지 수신\n" << session.recvBuffer << "\n";
-
+    LOG(LogLevel::Notice) << "Received message from client(" << GetIP(socket) << ") "
+        << std::strlen(session.recvBuffer) << "bytes : " << session.recvBuffer;
     // WRITE Test code
     std::memcpy(session.sendBuffer, session.recvBuffer, sizeof(session.recvBuffer));
     ClearReceiveBuffer(socket);

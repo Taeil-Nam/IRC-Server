@@ -172,6 +172,7 @@ int main(int argc, char** argv)
 				}
 			}
 			std::cout << "receive data " << recvLength << " bytes. : " << recvBuffer << std::endl;
+			std::memset(recvBuffer, 0, sizeof(recvBuffer));
 			break;
 		}
 		std::cout << std::endl;
