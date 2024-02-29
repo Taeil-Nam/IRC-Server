@@ -13,12 +13,12 @@
 
 #include <fstream>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #include "common.hpp"
 #include "utils/Event.hpp"
 #include "utils/Network.hpp"
 #include "utils/ConsoleWindow.hpp"
-
 
 namespace grc
 {

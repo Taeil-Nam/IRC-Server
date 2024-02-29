@@ -1,5 +1,4 @@
 #include "Core.hpp"
-#include "common.hpp"
 
 namespace grc
 {
@@ -173,6 +172,9 @@ bool Core::init()
 
 bool Core::initLog()
 {
+    struct stat st;
+    if (stat("log", &st) != 0)
+        mkdir("log", 0755);
     std::time_t current = std::time(NULL);
     std::tm* localTime = std::localtime(&current);
     std::ostringstream time;
@@ -182,16 +184,18 @@ bool Core::initLog()
              << std::setw(2) << localTime->tm_hour << ':'
              << std::setw(2) << localTime->tm_min << ':'
              << std::setw(2) << localTime->tm_sec;
-    mLogFileName = "log_" + time.str() + ".txt";
+    mLogFileName = "log/" + time.str() + ".txt";
     mLogFileFDWrite = open(mLogFileName.c_str(), O_WRONLY | O_CREAT, 0777);
     if (mLogFileFDWrite == -1)
     {
+        LOG(LogLevel::Error) << "Failed to open log file";
         return FAILURE;
     }
     mLogFileFDRead = open(mLogFileName.c_str(), O_RDONLY, 0777);
     if (mLogFileFDRead == -1)
     {
         close(mLogFileFDWrite);
+        LOG(LogLevel::Error) << "Failed to open log file";
         return FAILURE;
     }
     mLogFileStreamRead.open(mLogFileName);
