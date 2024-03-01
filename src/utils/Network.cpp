@@ -5,8 +5,8 @@ namespace grc
 {
 
 Network::Network()
+: mServerSocket(ERROR)
 {
-    mServerSocket = ERROR;
     mNewClients.reserve(128);
 }
 
@@ -44,25 +44,10 @@ void Network::Read(const int32 socket)
 
 void Network::Write(const int32 socket)
 {
-    struct session& session = mSessions[socket];
-    int sendLen = send(socket, session.sendBuffer, std::strlen(session.sendBuffer), 0);
-    // 오류 발생시
-    if (sendLen == -1)
-    {
-        LOG(LogLevel::Error) << "Failed to send message to client(" << GetIP(socket) << ")"
-            << "(errno:" << errno << " - " << strerror(errno) << ") on send()";
-        close(socket);
-        mSessions.erase(socket);
-        return;
-    }
-    // 메세지 전송 완료
-    session.sendSize = sendLen;
-    LOG(LogLevel::Notice) << "Sent message to client(" << GetIP(socket) << ") "
-        << sendLen << "bytes : " << session.sendBuffer;
-    ClearSendBuffer(socket);
+    sendToClient(socket);
 }
 
-const int32 Network::GetServerSocket() const
+int32 Network::GetServerSocket() const
 {
     return mServerSocket;
 }
@@ -73,7 +58,7 @@ const char* Network::GetIP(const int32 socket) const
     {
         return inet_ntoa(mSessions.at(socket).addr.sin_addr);
     }
-    return "Unknown client";
+    return "Unknown client(doesn't have session))";
 }
 
 const std::vector<int>& Network::FetchNewClients() const
@@ -88,7 +73,7 @@ void Network::ClearNewClients()
 
 void Network::ClearReceiveBuffer(const int32 socket)
 {
-    std::unordered_map<int, struct session>::iterator pair = mSessions.find(socket);
+    std::unordered_map<int, struct Session>::iterator pair = mSessions.find(socket);
     if (pair != mSessions.end())
     {
         std::memset(pair->second.recvBuffer, 0, sizeof(pair->second.recvBuffer));
@@ -98,7 +83,7 @@ void Network::ClearReceiveBuffer(const int32 socket)
 
 void Network::ClearSendBuffer(const int32 socket)
 {
-    std::unordered_map<int, struct session>::iterator pair = mSessions.find(socket);
+    std::unordered_map<int, struct Session>::iterator pair = mSessions.find(socket);
     if (pair != mSessions.end())
     {
         std::memset(pair->second.sendBuffer, 0, sizeof(pair->second.sendBuffer));
@@ -185,7 +170,7 @@ void Network::addClient()
         return;
     }
     // client session 추가
-    session client;
+    Session client;
     client.addr = clientAddr;
     client.socket = clientSocket;
     mSessions[clientSocket] = client;
@@ -193,10 +178,10 @@ void Network::addClient()
     mNewClients.push_back(clientSocket);
 }
 
-void Network::recvFromClient(int32 socket)
+void Network::recvFromClient(const int32 socket)
 {
     // client로부터 메세지 수신 시도
-    struct session& session = mSessions[socket];
+    struct Session& session = mSessions[socket];
     int32 recvLen = recv(socket, session.recvBuffer, sizeof(session.recvBuffer), 0);
     // 오류 발생시
     if (recvLen == ERROR)
@@ -223,6 +208,26 @@ void Network::recvFromClient(int32 socket)
     std::memcpy(session.sendBuffer, session.recvBuffer, sizeof(session.recvBuffer));
     ClearReceiveBuffer(socket);
     Write(socket);
+}
+
+void Network::sendToClient(const int32 socket)
+{
+    struct Session& session = mSessions[socket];
+    int sendLen = send(socket, session.sendBuffer, std::strlen(session.sendBuffer), 0);
+    // 오류 발생시
+    if (sendLen == -1)
+    {
+        LOG(LogLevel::Error) << "Failed to send message to client(" << GetIP(socket) << ")"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on send()";
+        close(socket);
+        mSessions.erase(socket);
+        return;
+    }
+    // 메세지 전송 완료
+    session.sendSize = sendLen;
+    LOG(LogLevel::Notice) << "Sent message to client(" << GetIP(socket) << ") "
+        << sendLen << "bytes : " << session.sendBuffer;
+    ClearSendBuffer(socket);
 }
 
 }

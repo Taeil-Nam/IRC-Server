@@ -34,7 +34,7 @@ public:
     void Read(const int32 socket);
     void Write(const int32 socket);
 
-    const int32 GetServerSocket() const;
+    int32 GetServerSocket() const;
     const char* GetIP(const int32 socket) const;
     const std::vector<int>& FetchNewClients() const;
     void ClearNewClients();
@@ -48,12 +48,12 @@ private:
     bool setServerSocket(const int32 port);
 
     void addClient();
-    void recvFromClient(int32 Socket);
-    void sendToClient();
+    void recvFromClient(const int32 socket);
+    void sendToClient(const int32 socket);
 
 private:
     static const uint64 sStaticBufferSize = 1024;
-    struct session
+    struct Session
     {
         sockaddr_in addr;
         int32 socket;
@@ -64,7 +64,7 @@ private:
         int64 sendSize;
     };
     int32 mServerSocket;
-    std::unordered_map<int32, struct session> mSessions;
+    std::unordered_map<int32, struct Session> mSessions;
     std::vector<int> mNewClients;
 };
 
