@@ -1,4 +1,5 @@
 #include "Network.hpp"
+#include <netdb.h>
 
 namespace grc
 {
@@ -56,7 +57,7 @@ void Network::Write(const int32 socket)
     }
     // 메세지 전송 완료
     session.sendSize = sendLen;
-    LOG(LogLevel::Notice) << "Sent to message to client(" << GetIP(socket) << ") "
+    LOG(LogLevel::Notice) << "Sent message to client(" << GetIP(socket) << ") "
         << sendLen << "bytes : " << session.sendBuffer;
     ClearSendBuffer(socket);
 }
@@ -87,7 +88,7 @@ void Network::ClearNewClients()
 
 void Network::ClearReceiveBuffer(const int32 socket)
 {
-    std::map<int, struct session>::iterator pair = mSessions.find(socket);
+    std::unordered_map<int, struct session>::iterator pair = mSessions.find(socket);
     if (pair != mSessions.end())
     {
         std::memset(pair->second.recvBuffer, 0, sizeof(pair->second.recvBuffer));
@@ -97,7 +98,7 @@ void Network::ClearReceiveBuffer(const int32 socket)
 
 void Network::ClearSendBuffer(const int32 socket)
 {
-    std::map<int, struct session>::iterator pair = mSessions.find(socket);
+    std::unordered_map<int, struct session>::iterator pair = mSessions.find(socket);
     if (pair != mSessions.end())
     {
         std::memset(pair->second.sendBuffer, 0, sizeof(pair->second.sendBuffer));

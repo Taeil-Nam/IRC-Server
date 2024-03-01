@@ -21,20 +21,8 @@
 
 #include "common.hpp"
 
-#define BUFFER_SIZE 1024
-
 namespace grc
 {
-
-struct session	// 연결된 client의 정보를 저장하는 구조체
-{
-    sockaddr_in addr;
-    int32 socket;
-    char recvBuffer[BUFFER_SIZE];
-    char sendBuffer[BUFFER_SIZE];
-    int64 recvSize;
-    int64 sendSize;
-};
 
 class Network
 {
@@ -64,8 +52,19 @@ private:
     void sendToClient();
 
 private:
+    static const uint64 sStaticBufferSize = 1024;
+    struct session
+    {
+        sockaddr_in addr;
+        int32 socket;
+        char hostName[NI_MAXHOST];
+        char recvBuffer[sStaticBufferSize];
+        char sendBuffer[sStaticBufferSize];
+        int64 recvSize;
+        int64 sendSize;
+    };
     int32 mServerSocket;
-    std::map<int32, struct session> mSessions;
+    std::unordered_map<int32, struct session> mSessions;
     std::vector<int> mNewClients;
 };
 
