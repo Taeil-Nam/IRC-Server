@@ -64,7 +64,7 @@ private:
         int64 sendSize;
     };
     int32 mServerSocket;
-    std::unordered_map<int32, struct Session> mSessions;
+    std::map<int32, struct Session> mSessions;
     std::vector<int> mNewClients;
 };
 

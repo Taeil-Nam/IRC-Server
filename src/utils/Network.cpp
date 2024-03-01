@@ -73,7 +73,7 @@ void Network::ClearNewClients()
 
 void Network::ClearReceiveBuffer(const int32 socket)
 {
-    std::unordered_map<int, struct Session>::iterator pair = mSessions.find(socket);
+    std::map<int, struct Session>::iterator pair = mSessions.find(socket);
     if (pair != mSessions.end())
     {
         std::memset(pair->second.recvBuffer, 0, sizeof(pair->second.recvBuffer));
@@ -83,7 +83,7 @@ void Network::ClearReceiveBuffer(const int32 socket)
 
 void Network::ClearSendBuffer(const int32 socket)
 {
-    std::unordered_map<int, struct Session>::iterator pair = mSessions.find(socket);
+    std::map<int, struct Session>::iterator pair = mSessions.find(socket);
     if (pair != mSessions.end())
     {
         std::memset(pair->second.sendBuffer, 0, sizeof(pair->second.sendBuffer));
