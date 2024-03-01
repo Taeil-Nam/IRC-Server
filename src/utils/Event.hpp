@@ -15,8 +15,6 @@
 
 #include "common.hpp"
 
-#define MAX_KEVENT_SIZE 128
-
 namespace grc
 {
 
@@ -26,19 +24,20 @@ public:
     Event();
     ~Event();
 
-    int32 Init();
+    bool Init();
     int32 AddReadEvent(const int32 fd);
     const struct kevent* GetEventList();
-    const int32 GetEventCount() const;
-    void SetTimeout(int64 ms);
+    int32 GetEventCount() const;
+    void SetTimeout(const int64 ms);
 private:
+    bool createKqueue();
+    
     Event(const Event& event); // = delete
     const Event& operator=(const Event& event); // = delete
-
-    int32 createKqueue();
 private:
+    const int32 MAX_KEVENT_SIZE;
     int32 mKqueue;
-    struct kevent mEventList[MAX_KEVENT_SIZE];
+    struct kevent* mEventList;
     int32 mEventCount;
     struct timespec mTimeout;
 };

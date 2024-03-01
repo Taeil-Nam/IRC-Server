@@ -4,21 +4,28 @@ namespace grc
 {
 
 Event::Event()
+: MAX_KEVENT_SIZE(128)
+, mKqueue(ERROR)
+, mEventCount(0)
+, mEventList(NULL)
 {
-    mKqueue = ERROR;
-    mEventCount = 0;
-    std::memset(mEventList, 0, sizeof(mEventList));
-    mTimeout.tv_sec = 0;
-    mTimeout.tv_nsec = 5 * 1000* 1000;
+    SetTimeout(5);
 }
 
 Event::~Event()
 {
     close(mKqueue);
+    delete [] mEventList;
 }
 
-int32 Event::Init()
+bool Event::Init()
 {
+    mEventList = new (std::nothrow) struct kevent[MAX_KEVENT_SIZE];
+    if (mEventList == NULL)
+    {
+        return FAILURE;
+    }
+    std::memset(mEventList, 0, sizeof(struct kevent) * MAX_KEVENT_SIZE);
     if (createKqueue() == FAILURE)
     {
         return FAILURE;
@@ -32,7 +39,7 @@ int32 Event::AddReadEvent(const int32 fd)
     EV_SET(&newEvent, fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
     if (kevent(mKqueue, &newEvent, 1, NULL, 0, NULL) == ERROR)
     {
-        LOG(LogLevel::Error) << "READ event 등록 오류(errno:" << errno << " - "
+        LOG(LogLevel::Error) << "Failed to add READ event(errno:" << errno << " - "
             << strerror(errno) << ") on kevent()";
         return FAILURE;
     }
@@ -41,34 +48,35 @@ int32 Event::AddReadEvent(const int32 fd)
 
 const struct kevent* Event::GetEventList()
 {
-    mEventCount = kevent(mKqueue, NULL, 0, mEventList, MAX_KEVENT_SIZE, &mTimeout);
+    mEventCount = kevent(mKqueue, NULL, 0,
+                         mEventList, MAX_KEVENT_SIZE, &mTimeout);
     if (mEventCount == ERROR)
     {
-        LOG(LogLevel::Error) << "Event list 생성 오류(errno:" << errno << " - "
+        LOG(LogLevel::Error) << "Failed to generate Event list (errno:" << errno << " - "
             << strerror(errno) << ") on kevent()";
         return NULL;
     }
     return mEventList;
 }
 
-const int32 Event::GetEventCount() const
+int32 Event::GetEventCount() const
 {
     return mEventCount;
 }
 
-int32 Event::createKqueue()
+bool Event::createKqueue()
 {
     mKqueue = kqueue();
     if (mKqueue == ERROR)
     {
-        LOG(LogLevel::Error) << "Kqueue 생성 오류(errno:" << errno << " - "
+        LOG(LogLevel::Error) << "Faild to excute Kqueue (errno:" << errno << " - "
             << strerror(errno) << ") on kqueue()";
         return FAILURE;
     }
     return SUCCESS;
 }
 
-void Event::SetTimeout(int64 ms)
+void Event::SetTimeout(const int64 ms)
 {
     mTimeout.tv_sec = ms / 1000;
     mTimeout.tv_nsec = (ms % 1000) * 1000 * 1000;
