@@ -6,6 +6,7 @@ namespace grc
 Core::Core(const int port, const std::string& password)
 : mPort(port)
 , mPassword(password)
+, bRunning(true)
 {
 
 }
@@ -29,9 +30,7 @@ void Core::Run()
 
     /* 메인 로직 */
     LOG(LogLevel::Notice) << "IRC Server started (Port = " << mPort << ")";
-    struct timeval consoleFrameStrat, consoleFrameEnd;
-    gettimeofday(&consoleFrameStrat, NULL);
-    while (true)
+    while (bRunning)
     {
         /* 이벤트 처리 */
         const struct kevent* eventList = mEvent.GetEventList();
@@ -39,68 +38,19 @@ void Core::Run()
         for (uint64 i = 0; i < eventCount; ++i)
         {
             const struct kevent& event = eventList[i];
-            if (event.ident == STDIN_FILENO && event.filter == EVFILT_READ)
+            if (identifyEvent(STDIN_FILENO, event))
             {
-                const char key = getchar();
-                if (key == '\t')
-                {
-                    if (mActivatedWindow == &mLogMonitor)
-                        mActivatedWindow = &mServerMonitor;
-                    else if (mActivatedWindow == &mServerMonitor)
-                        mActivatedWindow = &mLogMonitor;
-                }
-                else
-                {
-                    mActivatedWindow->PushBackCommandLine(key);
-                }
-                while (!mActivatedWindow->IsEOF())
-                {
-                    const std::string input = mActivatedWindow->In();
-                    if (mActivatedWindow == &mLogMonitor && input == "/status")
-                    {
-                        mActivatedWindow->Out("Server is running", ConsoleWindow::Green);
-                    }
-                    else if (mActivatedWindow == &mLogMonitor && input == "/test")
-                    {
-                        LOG(LogLevel::Informational) << "Test";
-                        LOG(LogLevel::Notice) << "Test";
-                        LOG(LogLevel::Warning) << "Test";
-                        LOG(LogLevel::Error) << "Test";
-                        LOG(LogLevel::Critical) << "Test";
-                        LOG(LogLevel::Alert) << "Test";
-                        LOG(LogLevel::Emergency) << "Test";
-                    }
-                    else if (input == "/exit" || input == "/quit")
-                    {
-                        return ;
-                    }
-                    else
-                    {
-                        mActivatedWindow->Out(input);
-                    }
-                }
+                inputToConsole();
+                excuteConsoleCommand();
             }
-            else if (event.ident == mLogFileFDRead && event.filter == EVFILT_READ)
+            else if (identifyEvent(mLogFileFDRead, event))
             {
-                char readBuffer;
-                std::string line;
-                while (read(mLogFileFDRead, &readBuffer, 1))
-                {
-                    if (readBuffer == '\n')
-                        break;
-                    line.push_back(readBuffer);
-                }
-                const uint64 firstSpace = line.find(' ');
-                const uint64 secondSpace = line.find(' ', firstSpace + 1);
-                const uint64 thirdSpace = line.find(' ', secondSpace + 1);
-                line.erase(firstSpace, thirdSpace - firstSpace);
-                mActivatedWindow->Out(line);
+                logFileToConsole();
             }
-            else if ((event.ident != STDIN_FILENO && event.ident != mLogFileFDRead) && event.filter == EVFILT_READ)
+            else if (event.filter == EVFILT_READ)
             {
                 mNetwork.Read(event.ident);
             }
-
         }
         /* 새로운 클라이언트 연결 */
         const std::vector<int32>& newClients = mNetwork.FetchNewClients();
@@ -117,19 +67,12 @@ void Core::Run()
         // Todo: IRC 로직 추가
 
         /* ConsoleWindow 출력 처리 */
-        gettimeofday(&consoleFrameEnd, NULL);
-        const long elapsedTime = (consoleFrameEnd.tv_sec - consoleFrameStrat.tv_sec)
-                                 * 1000L
-                                 + (consoleFrameEnd.tv_usec - consoleFrameStrat.tv_usec)
-                                 / 1000L;
-        if (elapsedTime >= 40)
+        if (isTimePassed(40))
         {
             mActivatedWindow->RefreshScreen();
-            consoleFrameStrat = consoleFrameEnd;
         }
     }
 }
-
 
 bool Core::init()
 {
@@ -143,13 +86,11 @@ bool Core::init()
         LOG(LogLevel::Error) << "Failed to init Event";
         return FAILURE;
     }
-
     if (mNetwork.Init(mPort) == FAILURE)
     {
         LOG(LogLevel::Error) << "Failed to init Network";
         return FAILURE;
     }
-
     /* Add basic events */
     if (mEvent.AddReadEvent(STDIN_FILENO) == FAILURE)
     {
@@ -166,7 +107,6 @@ bool Core::init()
         LOG(LogLevel::Error) << "Failed to add server socket READ event";
         return FAILURE;
     }
-
     return SUCCESS;
 }
 
@@ -233,6 +173,116 @@ void Core::initConsoleWindow()
     mLogMonitor.Out(std::string("                                             ░        "), grc::ConsoleWindow::Red);
     mLogMonitor.Out(std::string("GameRC v1.0.0                   IRC server application"), grc::ConsoleWindow::Red);
     mActivatedWindow = &mLogMonitor;
+    gettimeofday(&mLastConsoleRefresh, NULL);
+}
+
+bool Core::identifyEvent(const int32 fd, const struct kevent& event)
+{
+    if (event.ident == fd && event.filter == EVFILT_READ)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void Core::inputToConsole()
+{
+    const char key = getchar();
+    if (key == '\t')
+    {
+        if (mActivatedWindow == &mLogMonitor)
+            mActivatedWindow = &mServerMonitor;
+        else if (mActivatedWindow == &mServerMonitor)
+            mActivatedWindow = &mLogMonitor;
+    }
+    else
+    {
+        mActivatedWindow->PushBackCommandLine(key);
+    }
+}
+
+void Core::excuteConsoleCommand()
+{
+    while (!mActivatedWindow->IsEOF())
+    {
+        const std::string input = mActivatedWindow->In();
+        if (input == "/exit" || input == "/quit")
+        {
+            bRunning = false;
+        }
+        else if (mActivatedWindow == &mLogMonitor)
+        {
+            if (input == "/status")
+            {
+                mLogMonitor.Out("Server is running",
+                                ConsoleWindow::Green);
+                mLogMonitor.Out("IP:        127.0.0.1");
+                std::stringstream sPort; sPort << mPort;
+                mLogMonitor.Out("port:      " + sPort.str());
+                std::stringstream sPassword; sPassword << mPassword;
+                mLogMonitor.Out("password:  " + sPassword.str());
+            }
+            else if (input == "/test")
+            {
+                LOG(LogLevel::Informational) << "Test";
+                LOG(LogLevel::Notice) << "Test";
+                LOG(LogLevel::Warning) << "Test";
+                LOG(LogLevel::Error) << "Test";
+                LOG(LogLevel::Critical) << "Test";
+                LOG(LogLevel::Alert) << "Test";
+                LOG(LogLevel::Emergency) << "Test";
+            }
+            else
+            {
+                mLogMonitor.Out("command not found: " +input, ConsoleWindow::Red);
+            }
+        }
+        else if (mActivatedWindow == &mServerMonitor)
+        {
+            // 빨간 서버 모니터 콘솔창 
+        }
+    }
+}
+
+void Core::logFileToConsole()
+{
+    char readBuffer;
+    std::string line;
+    while (read(mLogFileFDRead, &readBuffer, 1))
+    {
+        if (readBuffer == '\n')
+            break;
+        line.push_back(readBuffer);
+    }
+    ASSERT(line[0] == '[');
+    const uint64 firstSpace = line.find(' ');
+    const uint64 secondSpace = line.find(' ', firstSpace + 1);
+    const uint64 thirdSpace = line.find(' ', secondSpace + 1);
+    ASSERT(line[firstSpace - 1] == ']');
+    line.erase(firstSpace, thirdSpace - firstSpace);
+    mLogMonitor.Out(line);
+}
+
+bool Core::isTimePassed(const int64 ms)
+{
+    struct timeval nowTime;
+    gettimeofday(&nowTime, NULL);
+    const int64 elapsedTime = (nowTime.tv_sec - mLastConsoleRefresh.tv_sec)
+                                * 1000L
+                                + (nowTime.tv_usec - mLastConsoleRefresh.tv_usec)
+                                / 1000L;
+    if (elapsedTime >= ms)
+    {
+        mLastConsoleRefresh = nowTime;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 }

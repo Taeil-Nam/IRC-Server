@@ -38,9 +38,20 @@ private:
     bool init();
     bool initLog();
     void initConsoleWindow();
+
+    /* about event */
+    bool identifyEvent(const int fd, const struct kevent& event);
+    void inputToConsole();
+    void excuteConsoleCommand();
+    void logFileToConsole();
+
+    /* about console print */
+    bool isTimePassed(const int64 ms);
+
 private:
     const int mPort;
     const std::string mPassword;
+    bool bRunning;
     Event mEvent;
     Network mNetwork;
     int32 mLogFileFDRead;
@@ -50,6 +61,7 @@ private:
     ConsoleWindow mLogMonitor;
     ConsoleWindow mServerMonitor;
     ConsoleWindow* mActivatedWindow;
+    struct timeval mLastConsoleRefresh;
 };
 
 }
