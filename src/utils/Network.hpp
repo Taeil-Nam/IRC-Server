@@ -35,7 +35,7 @@ public:
     void Write(const int32 socket);
 
     int32 GetServerSocket() const;
-    const char* GetIP(const int32 socket) const;
+    const char* GetIPString(const int32 socket) const;
     const std::vector<int>& FetchNewClients() const;
     void ClearNewClients();
     void ClearReceiveBuffer(const int32 socket);

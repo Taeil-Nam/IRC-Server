@@ -52,7 +52,7 @@ int32 Network::GetServerSocket() const
     return mServerSocket;
 }
 
-const char* Network::GetIP(const int32 socket) const
+const char* Network::GetIPString(const int32 socket) const
 {
     if (mSessions.find(socket) != mSessions.end())
     {
@@ -186,7 +186,7 @@ void Network::recvFromClient(const int32 socket)
     // 오류 발생시
     if (recvLen == ERROR)
     {
-        LOG(LogLevel::Error) << "Failed to receive message from client(" << GetIP(socket) << ")"
+        LOG(LogLevel::Error) << "Failed to receive message from client(" << GetIPString(socket) << ")"
             << "(errno:" << errno << " - " << strerror(errno) << ") on recv()";
         close(socket);
         mSessions.erase(socket);
@@ -195,14 +195,14 @@ void Network::recvFromClient(const int32 socket)
     // 상대방과 연결이 끊긴 경우
     else if (recvLen == 0)
     {
-        LOG(LogLevel::Notice) << "Client(" << GetIP(socket) << ") disconnected";
+        LOG(LogLevel::Notice) << "Client(" << GetIPString(socket) << ") disconnected";
         close(socket);
         mSessions.erase(socket);
         return;
     }
     // 메시지 수신 완료
     session.recvSize = recvLen;
-    LOG(LogLevel::Notice) << "Received message from client(" << GetIP(socket) << ") "
+    LOG(LogLevel::Notice) << "Received message from client(" << GetIPString(socket) << ") "
         << std::strlen(session.recvBuffer) << "bytes : " << session.recvBuffer;
     // WRITE Test code
     std::memcpy(session.sendBuffer, session.recvBuffer, sizeof(session.recvBuffer));
@@ -217,7 +217,7 @@ void Network::sendToClient(const int32 socket)
     // 오류 발생시
     if (sendLen == -1)
     {
-        LOG(LogLevel::Error) << "Failed to send message to client(" << GetIP(socket) << ")"
+        LOG(LogLevel::Error) << "Failed to send message to client(" << GetIPString(socket) << ")"
             << "(errno:" << errno << " - " << strerror(errno) << ") on send()";
         close(socket);
         mSessions.erase(socket);
@@ -225,7 +225,7 @@ void Network::sendToClient(const int32 socket)
     }
     // 메세지 전송 완료
     session.sendSize = sendLen;
-    LOG(LogLevel::Notice) << "Sent message to client(" << GetIP(socket) << ") "
+    LOG(LogLevel::Notice) << "Sent message to client(" << GetIPString(socket) << ") "
         << sendLen << "bytes : " << session.sendBuffer;
     ClearSendBuffer(socket);
 }

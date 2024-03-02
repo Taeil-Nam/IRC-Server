@@ -110,7 +110,7 @@ void Core::Run()
             {
                 continue;
             }
-            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIP(newClients[i]) << ") connected";
+            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClients[i]) << ") connected";
             mNetwork.ClearNewClients();
         }
         /* IRC 로직 수행 */
