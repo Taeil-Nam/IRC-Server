@@ -5,7 +5,7 @@ CXX			=	c++
 CXXFLAGS	=	-I./src -MMD #-Wall -Wextra -Werror -std=c++98
 
 SRCS		=	src/main.cpp						\
-				$(wildcard src/core/*.cpp)			\
+				$(wildcard src/grc/core/*.cpp)		\
 				$(wildcard src/utils/*.cpp)
 				
 OBJS		=	$(SRCS:.cpp=.o)

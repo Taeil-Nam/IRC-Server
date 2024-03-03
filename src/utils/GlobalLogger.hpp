@@ -1,5 +1,5 @@
 /**
- * @file LogManager.hpp
+ * @file GlobalLogger.hpp
  * @author Jeekun Park (jeekunp@naver.com)
  * @brief 에러 로거 클래스 헤더
  * @version 0.1
@@ -11,30 +11,26 @@
 
 #pragma once
 
-#include <fstream>
 #include <sstream>
+#include <iomanip>
 #include <ctime>
-#include <iostream>
 #include <vector>
 #include <unistd.h>
-#include <sys/stat.h>
 #include <pthread.h>
 
 #if !defined(__clang__) && !defined(__GNUC__)
     #define __PRETTY_FUNCTION__ __FUNCTION__
 #endif
 
-#define LOG(level) LogManager::LogStream(level, __PRETTY_FUNCTION__, __FILE__, __LINE__)
+#define LOG(level) GlobalLogger::LogStream(level, __PRETTY_FUNCTION__, __FILE__, __LINE__)
+#define LOG_SET_FD(fd) GlobalLogger::GetInstance().SetFD(fd)
+#define LOG_SET_LEVEL(level) GlobalLogger::GetInstance().SetLevel(level)
 
-#define SET_CONSOLE_LEVEL(level) LogManager::mConsoleLevel = level
-#define SET_FILE_LEVEL(level) LogManager::mFileLevel = level
 
-class LogManager
+class GlobalLogger
 {
 public:
-    LogManager();
-    ~LogManager();
-    enum eSeverityLevel // 로그의 심각도 수준
+    enum eSeverityLevel
     {
         Emergency = 0,  // system is unusable
         Alert,          // action must be taken immediately
@@ -45,15 +41,14 @@ public:
         Informational,  // informational messages
         Debug,          // debug-level messages
     };
-    
-    static LogManager& GetInstance();
-    void ConsoleLog(eSeverityLevel level, const std::string& message,
-                    const char* functionName, const char* fileName,
-                    const int lineNumber);
-    void FileLog(eSeverityLevel level, const std::string& message,
-                 const char* functionName, const char* fileName,
-                 const int lineNumber);
-    
+    GlobalLogger();
+    ~GlobalLogger();
+    static GlobalLogger& GetInstance();
+    void Log(eSeverityLevel level, const std::string& message,
+             const char* functionName, const char* fileName,
+             const int lineNumber);
+    void SetFD(int fd);
+    void SetLevel(eSeverityLevel level);
     class LogStream
     {
     public:
@@ -67,7 +62,6 @@ public:
             mStream << message;
             return *this;
         }
-
     private:
         eSeverityLevel mLevel;
         const char* mFunctionName;
@@ -75,25 +69,18 @@ public:
         const int mLineNumber;
         std::ostringstream mStream;
     };
-
 private:
-    LogManager(const LogManager&); // = delete
-    LogManager& operator=(const LogManager&); // = delete
-    void createLogFile();
-    std::string getCurrentTime();
-
-public:
-    static eSeverityLevel mConsoleLevel;
-    static eSeverityLevel mFileLevel;
-    
+    GlobalLogger(const GlobalLogger&);              // = delete
+    GlobalLogger& operator=(const GlobalLogger&);   // = delete
+    std::string getCurrentTime(); 
 private:
-    std::ofstream mLogFile;
+    int mFD;
+    eSeverityLevel mLevel;
     std::vector<std::string> mLevelStr;
-    pthread_mutex_t mConsoleMutex;
     pthread_mutex_t mFileMutex;
     char mHostname[256];
 };
 
 // for alias
-class LogLevel : public LogManager
+class LogLevel : public GlobalLogger
 {};

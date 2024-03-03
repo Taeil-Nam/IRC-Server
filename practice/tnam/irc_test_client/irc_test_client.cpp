@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 	// 2. 서버 주소 설정
 	sockaddr_in server;
 	char* serverIP = argv[1];
-	const int serverPort = 194;
+	const int serverPort = 6667;
 	std::memset(&server, 0, sizeof(server));
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = inet_addr(argv[1]);
@@ -152,28 +152,29 @@ int main(int argc, char** argv)
 			break;
 		}
 
-		//// Todo: 데이터 수신
-		//while (true)
-		//{
-		//	recvLength = recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
-		//	if (recvLength <= 0)
-		//	{
-		//		if (errno == EAGAIN) // non-blocking으로 인한 return인 경우
-		//		{
-		//			continue;
-		//		}
-		//		else
-		//		{
-		//			std::cerr << "error receiving data." << std::endl;
-		//			perror("recv()");
-		//			std::cerr << "errno: " << errno << std::endl;
-		//			close(clientSocket);
-		//			return EXIT_FAILURE;
-		//		}
-		//	}
-		//	std::cout << "receive data " << recvLength << " bytes. : " << recvBuffer << std::endl;
-		//	break;
-		//}
+		// Todo: 데이터 수신
+		while (true)
+		{
+			recvLength = recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
+			if (recvLength <= 0)
+			{
+				if (errno == EAGAIN) // non-blocking으로 인한 return인 경우
+				{
+					continue;
+				}
+				else
+				{
+					std::cerr << "error receiving data." << std::endl;
+					perror("recv()");
+					std::cerr << "errno: " << errno << std::endl;
+					close(clientSocket);
+					return EXIT_FAILURE;
+				}
+			}
+			std::cout << "receive data " << recvLength << " bytes. : " << recvBuffer << std::endl;
+			std::memset(recvBuffer, 0, sizeof(recvBuffer));
+			break;
+		}
 		std::cout << std::endl;
 	}
 	

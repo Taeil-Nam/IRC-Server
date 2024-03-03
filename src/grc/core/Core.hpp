@@ -11,7 +11,14 @@
 
 #pragma once
 
+#include <fstream>
+#include <sys/time.h>
+#include <sys/stat.h>
+
 #include "common.hpp"
+#include "utils/Event.hpp"
+#include "utils/Network.hpp"
+#include "utils/ConsoleWindow.hpp"
 
 namespace grc
 {
@@ -25,12 +32,36 @@ public:
     void Run();
 private:
     Core();
-    Core(const Core& core);
-    const Core& operator=(const Core& core);
+    Core(const Core& core); // = delete
+    const Core& operator=(const Core& core); // = delete
+
+    bool init();
+    bool initLog();
+    void initConsoleWindow();
+
+    /* about event */
+    bool identifyEvent(const int fd, const struct kevent& event);
+    void inputToConsole();
+    void excuteConsoleCommand();
+    void logFileToConsole();
+
+    /* about console print */
+    bool isTimePassed(const int64 ms);
 
 private:
     const int mPort;
     const std::string mPassword;
+    bool bRunning;
+    Event mEvent;
+    Network mNetwork;
+    int32 mLogFileFDRead;
+    int32 mLogFileFDWrite;
+    std::ifstream mLogFileStreamRead;
+    std::string mLogFileName;
+    ConsoleWindow mLogMonitor;
+    ConsoleWindow mServerMonitor;
+    ConsoleWindow* mActivatedWindow;
+    struct timeval mLastConsoleRefresh;
 };
 
 }
