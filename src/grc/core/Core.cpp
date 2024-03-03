@@ -6,7 +6,7 @@ namespace grc
 Core::Core(const int port, const std::string& password)
 : mPort(port)
 , mPassword(password)
-, bRunning(true)
+, bRunning(false)
 {
 
 }
@@ -21,18 +21,8 @@ Core::~Core()
 
 void Core::Run()
 {
-    /* 초기화 */
-    if (init() == FAILURE)
-    {
-        LOG(LogLevel::Error) << "Failed to init Core";
-        return;
-    }
-
-    /* 메인 로직 */
-    LOG(LogLevel::Notice) << "IRC Server started (Port = " << mPort << ")";
     while (bRunning)
     {
-        /* 이벤트 처리 */
         const struct kevent* eventList = mEvent.GetEventList();
         const int eventCount = mEvent.GetEventCount();
         for (uint64 i = 0; i < eventCount; ++i)
@@ -50,31 +40,20 @@ void Core::Run()
             else if (event.filter == EVFILT_READ)
             {
                 mNetwork.Read(event.ident);
+                acceptNewClients();
             }
         }
-        /* 새로운 클라이언트 연결 */
-        const std::vector<int32>& newClients = mNetwork.FetchNewClients();
-        for (uint64 i = 0; i < newClients.size(); ++i)
-        {
-            if (mEvent.AddReadEvent(newClients[i]) == FAILURE)
-            {
-                continue;
-            }
-            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClients[i]) << ") connected";
-            mNetwork.ClearNewClients();
-        }
+        
         /* IRC 로직 수행 */
-        // Todo: IRC 로직 추가
 
-        /* ConsoleWindow 출력 처리 */
         if (isTimePassed(40))
         {
-            mActivatedWindow->RefreshScreen();
+            mActivatedWindow->RefreshConsole();
         }
     }
 }
 
-bool Core::init()
+bool Core::Init()
 {
     if (initLog() == FAILURE)
     {
@@ -107,6 +86,8 @@ bool Core::init()
         LOG(LogLevel::Error) << "Failed to add server socket READ event";
         return FAILURE;
     }
+    bRunning = true;
+    LOG(LogLevel::Notice) << "IRC Server is ready (Port = " << mPort << ")";
     return SUCCESS;
 }
 
@@ -264,6 +245,20 @@ void Core::logFileToConsole()
     ASSERT(line[firstSpace - 1] == ']');
     line.erase(firstSpace, thirdSpace - firstSpace);
     mLogMonitor.Out(line);
+}
+
+void Core::acceptNewClients()
+{
+    const std::vector<int32>& newClients = mNetwork.FetchNewClients();
+    for (uint64 i = 0; i < newClients.size(); ++i)
+    {
+        if (mEvent.AddReadEvent(newClients[i]) == FAILURE)
+        {
+            continue;
+        }
+        LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClients[i]) << ") connected";
+        mNetwork.ClearNewClients();
+    }
 }
 
 bool Core::isTimePassed(const int64 ms)

@@ -113,7 +113,7 @@ bool ConsoleWindow::IsEOF() const
     else return false;
 }
 
-void ConsoleWindow::RefreshScreen()
+void ConsoleWindow::RefreshConsole()
 {
     updateConsoleSize();
     printClear();
