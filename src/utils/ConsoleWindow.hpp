@@ -31,7 +31,7 @@ public:
     void Out(const std::string& str, const eANSIColor color = Default);
     bool IsEOF() const;
     
-    void RefreshScreen();
+    void RefreshConsole();
     void SetHeaderColor(const eANSIColor color);
     void SetFooterColor(const eANSIColor color);
     void SetHeader(const std::string& str);
