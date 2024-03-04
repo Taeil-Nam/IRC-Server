@@ -2,9 +2,6 @@
 이 프로젝트는 C++98을 사용하여 ```IRC``` (Internet Relay Chat) 서버를 만드는 프로젝트이다.  
 (This project involves creating an ```IRC``` (Internet Relay Chat) server using C++98).
 
-[소프트웨어 구조](https://github.com/Taeil-Nam/ft_irc/blob/main/ARCHITECTURE.md)  
-([Software Architecture](https://github.com/Taeil-Nam/ft_irc/blob/main/ARCHITECTURE.md))
-
 ## 현재 진행도 (Progress) (20%)
 - 프로젝트 세팅.
 - GlobalLogger 구현.
@@ -12,6 +9,9 @@
 - Event 구현.
 - ConsoleWindow 구현.
 - Network 구현.
+
+## 구조
+ARCHITECTURE.md 파일 참고.
 
 ## 기능 (Features)
 ### TCP/IP 통신 (TCP/IP Communication)
