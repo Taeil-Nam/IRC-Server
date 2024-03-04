@@ -204,9 +204,9 @@ void Network::recvFromClient(const int32 socket)
     session.recvSize = recvLen;
     LOG(LogLevel::Notice) << "Received message from client(" << GetIPString(socket) << ") "
         << std::strlen(session.recvBuffer) << "bytes";// << session.recvBuffer;
-    ClearReceiveBuffer(socket);
     // Test code
     std::cerr << session.recvBuffer;
+    ClearReceiveBuffer(socket);
 }
 
 void Network::sendToClient(const int32 socket)
