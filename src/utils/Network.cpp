@@ -203,11 +203,10 @@ void Network::recvFromClient(const int32 socket)
     // 메시지 수신 완료
     session.recvSize = recvLen;
     LOG(LogLevel::Notice) << "Received message from client(" << GetIPString(socket) << ") "
-        << std::strlen(session.recvBuffer) << "bytes : " << session.recvBuffer;
-    // WRITE Test code
-    std::memcpy(session.sendBuffer, session.recvBuffer, sizeof(session.recvBuffer));
+        << std::strlen(session.recvBuffer) << "bytes";// << session.recvBuffer;
     ClearReceiveBuffer(socket);
-    Write(socket);
+    // Test code
+    std::cerr << session.recvBuffer;
 }
 
 void Network::sendToClient(const int32 socket)
@@ -226,7 +225,7 @@ void Network::sendToClient(const int32 socket)
     // 메세지 전송 완료
     session.sendSize = sendLen;
     LOG(LogLevel::Notice) << "Sent message to client(" << GetIPString(socket) << ") "
-        << sendLen << "bytes : " << session.sendBuffer;
+        << sendLen << "bytes";
     ClearSendBuffer(socket);
 }
 
