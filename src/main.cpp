@@ -24,9 +24,13 @@ int main(const int argc, const char **argv)
     }
     const int port = std::atoi(argv[1]);
     const std::string password(argv[2]);
-    grc::Core server(port, password);
 
-    server.Run();
+    {
+        grc::Core server(port, password);
 
+        server.Init();
+        
+        server.Run();
+    }
     return EXIT_SUCCESS;
 }

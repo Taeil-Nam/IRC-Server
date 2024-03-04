@@ -29,13 +29,14 @@ public:
     Core(const int port, const std::string& password);
     ~Core();
 
+    bool Init();
     void Run();
+
 private:
     Core();
     Core(const Core& core); // = delete
     const Core& operator=(const Core& core); // = delete
 
-    bool init();
     bool initLog();
     void initConsoleWindow();
 
@@ -44,6 +45,9 @@ private:
     void inputToConsole();
     void excuteConsoleCommand();
     void logFileToConsole();
+
+    /* about connet client */
+    void acceptNewClients();
 
     /* about console print */
     bool isTimePassed(const int64 ms);
