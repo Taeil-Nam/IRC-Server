@@ -38,11 +38,11 @@ See ```ARCHITECTURE.md```.
 Recommand to using Makefile
 1. Git clone
 ```bash
-$> git clone <this repo>
+$> git clone [this repo]
 ```
 2. Move to project directory
 ```bash
-$> cd <this repo>
+$> cd [this repo]
 ```
 3. Use "make" command to create program
 ```bash
@@ -52,7 +52,7 @@ $> make
 ### Usage
 Execute program as below:
 ```
-$> ./ircserv <port> <password>
+$> ./ircserv [port] [password]
 ```
 - port = port number for IRC server.
 - password = password to connection registration for client.

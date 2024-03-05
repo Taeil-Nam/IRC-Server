@@ -46,11 +46,11 @@
 Makefile 사용을 권장한다.
 1. Git clone
 ```bash
-$> git clone <this repo>
+$> git clone [this repo]
 ```
 2. 프로젝트 폴더로 이동  
 ```bash
-$> cd <this repo>
+$> cd [this repo]
 ```
 3. "make" 명령어로 프로그램 생성  
 ```bash
@@ -59,8 +59,8 @@ $> make
 
 ### 사용법
 아래와 같이 프로그램을 실행한다:
-```
-$> ./ircserv <port> <password>
+```bash
+$> ./ircserv [port] [password]
 ```
 - port = IRC 서버에서 사용할 포트 번호.
 - password = 클라이언트 연결 등록을 위한 비밀번호.
