@@ -164,7 +164,7 @@ void Display::SetTimestamp(const bool enable)
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 
-void Display::setTerminalMode(bool enable)
+/* void Display::setTerminalMode(bool enable)
 {
     static struct termios oldt, newt;
     if (enable)
@@ -180,7 +180,7 @@ void Display::setTerminalMode(bool enable)
         tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
     }
 }
-
+ */
 std::string Display::getCurrentTimeString() const
 {
     time_t currentTime = time(0);
@@ -193,13 +193,13 @@ std::string Display::getCurrentTimeString() const
     return timeStream.str();
 }
 
-void Display::updateConsoleSize()
+/* void Display::updateConsoleSize()
 {
     struct winsize window;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &window);
     mConsoleWidth = window.ws_col;
     mConsoleHeight = window.ws_row;
-}
+} */
 
 void Display::locateCursorToLine(const int32 line) const
 {
@@ -224,10 +224,10 @@ uint64 Display::strlenMultiByte(const std::string& str) const
     return res;
 }
 
-void Display::printClear() const
+/* void Display::printClear() const
 {
     std::cout << "\033[H\033[J";
-}
+} */
 
 void Display::printErrorScreenFull() const
 {
