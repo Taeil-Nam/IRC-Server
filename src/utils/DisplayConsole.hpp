@@ -41,7 +41,7 @@ public:
 private:
     void setTerminalMode(const bool IN enable);
     void updateConsoleSize();
-
+    uint64 strlenMultiByte(const std::string& str) const;
     void appendHeader(std::string& OUT consoleFrameBuffer);
     void appendContent(std::string& OUT consoleFrameBuffer);
     void appendFooter(std::string& OUT consoleFrameBuffer);

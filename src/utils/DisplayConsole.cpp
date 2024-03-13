@@ -1,13 +1,11 @@
 #include "DisplayConsole.hpp"
-#include "types.hpp"
-#include "utils/Display.hpp"
-#include <sstream>
+#include <cstdio>
 
 namespace grc
 {
 
-int32 DisplayConsole::sStaticInstanceCount = 0;
-
+uint64 DisplayConsole::sStaticInstanceCount = 0;
+struct termios DisplayConsole::sStaticOldTerminal;
 DisplayConsole::DisplayConsole(const std::string& IN header,
                                const std::string& IN footer,
                                const Display::eColor IN headerColor,
@@ -23,6 +21,8 @@ DisplayConsole::DisplayConsole(const std::string& IN header,
     mANSIColors[Display::WhiteCharRedBG] = "\033[41;37m";
     mDisplay.SetHeader(header);
     mDisplay.SetFooter(footer);
+    mHeaderColor = mANSIColors[headerColor];
+    mFooterColor = mANSIColors[footerColor];
     mDisplay.SetContentBufferCapacity(1024);
     if (sStaticInstanceCount == 0)
     {
@@ -108,6 +108,7 @@ void DisplayConsole::SetTimestamp(const bool IN enable)
 
 void DisplayConsole::RenderScreenString(std::string& OUT screenStringBuffer)
 {
+    updateConsoleSize(); printf("ch");
     screenStringBuffer.clear();
     screenStringBuffer = "\033[H\033[J"; // clear;
     if (mConsoleHeight < 8 || mConsoleWidth < 18)
@@ -116,7 +117,7 @@ void DisplayConsole::RenderScreenString(std::string& OUT screenStringBuffer)
     }
     else
     {
-
+        appendHeader(screenStringBuffer);
     }
 
 }
@@ -155,6 +156,24 @@ void DisplayConsole::updateConsoleSize()
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &window);
     mConsoleWidth = window.ws_col;
     mConsoleHeight = window.ws_row;
+}
+
+uint64 DisplayConsole::strlenMultiByte(const std::string& str) const
+{
+    const char* c_str = str.c_str();
+    uint64 res = 0, index = 0;
+    while (c_str[index])
+    {
+        if (c_str[index] < 0)
+        {
+            index += 3; res += 1;
+        }
+        else
+        {
+            index += 1; res += 1;
+        }
+    }
+    return res;
 }
 
 void DisplayConsole::appendHeader(std::string& OUT consoleFrameBuffer)
