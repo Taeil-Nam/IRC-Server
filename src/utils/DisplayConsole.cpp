@@ -1,5 +1,4 @@
 #include "DisplayConsole.hpp"
-#include <cstring>
 
 namespace grc
 {
@@ -117,13 +116,14 @@ void DisplayConsole::SetTimestamp(const bool IN enable)
     bIsTimestampEnabled = enable;
 }
 
-void DisplayConsole::NonBlockWrite()
+void DisplayConsole::ScreenNonBlockWrite()
 {
     if (bIsScreenUpdated)
     {
         renderScreenString(mScreenBuffer);
         mScreenBufferIndex = 0;
         bIsScreenBufferRemain = true;
+        bIsScreenUpdated = false;
     }
     if (bIsScreenBufferRemain)
     {
@@ -138,7 +138,6 @@ void DisplayConsole::NonBlockWrite()
         }
     }
 }
-
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */

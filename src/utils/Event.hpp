@@ -26,6 +26,7 @@ public:
 
     bool Init();
     int32 AddReadEvent(const int32 fd);
+    int32 AddWriteEvent(const int32 fd);
     const struct kevent* GetEventList();
     int32 GetEventCount() const;
     void SetTimeout(const int64 ms);

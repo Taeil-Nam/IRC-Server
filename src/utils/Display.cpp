@@ -40,12 +40,12 @@ void Display::Clear()
 void Display::PushContent(const std::string& IN str, Display::eColor IN color)
 {
     Content toPush;
-    mContentBuffer.push_front(toPush);
-    mContentBuffer.front().String = str;
-    getCurrentTimeString(mContentBuffer.front().TimeStamp);
-    mContentBuffer.front().Color = color;
+    mContentBuffer.push_back(toPush);
+    mContentBuffer.back().String = str;
+    getCurrentTimeString(mContentBuffer.back().TimeStamp);
+    mContentBuffer.back().Color = color;
     if (mContentBuffer.size() > mContentBufferCapacity)
-        mContentBuffer.pop_back();
+        mContentBuffer.pop_front();
 }
 
 const std::deque<Display::Content>& Display::GetContentBuffer() const

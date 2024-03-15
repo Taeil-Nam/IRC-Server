@@ -18,17 +18,18 @@ namespace grc
 class DisplayConsole
 {
 public:
-    DisplayConsole(const std::string& IN header,
-                   const std::string& IN footer,
-                   const Display::eColor IN headerColor,
-                   const Display::eColor IN footerColor);
+    DisplayConsole(const std::string& IN header = "header",
+                   const std::string& IN footer = "footer",
+                   const Display::eColor IN headerColor = Display::WhiteCharBlueBG,
+                   const Display::eColor IN footerColor = Display::WhiteCharBlueBG);
     virtual ~DisplayConsole();
+    
+    void ScreenNonBlockWrite();
+
     void PushCharPrompt(const char IN ch);
     bool pollPromptQueue(std::string& OUT prompt);
-    void PushContent(const std::string& IN content, Display::eColor IN color);
+    void PushContent(const std::string& IN content, Display::eColor IN color = Display::Default);
     void ClearContent();
-
-
 
     void SetHeader(const std::string& IN str);
     void SetFooter(const std::string& IN str);
@@ -37,7 +38,6 @@ public:
     void SetTimestamp(const bool IN enable);
 
     
-    void NonBlockWrite();
 private: // function
     void setTerminalMode(const bool IN enable);
     void updateConsoleSize();

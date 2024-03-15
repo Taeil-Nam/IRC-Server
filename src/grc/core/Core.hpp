@@ -18,7 +18,7 @@
 #include "common.hpp"
 #include "utils/Event.hpp"
 #include "utils/Network.hpp"
-#include "utils/ConsoleWindow.hpp"
+#include "utils/DisplayConsole.hpp"
 
 namespace grc
 {
@@ -33,6 +33,12 @@ public:
     void Run();
 
 private:
+    enum eEventType
+    {
+        Read = EVFILT_READ,
+        Write = EVFILT_WRITE
+    };
+private:
     Core();
     Core(const Core& core); // = delete
     const Core& operator=(const Core& core); // = delete
@@ -41,10 +47,10 @@ private:
     void initConsoleWindow();
 
     /* about event */
-    bool identifyEvent(const int fd, const struct kevent& event);
+    bool identifyEvent(const int32 fd, const eEventType type, const struct kevent& event);
     void inputToConsole();
     void excuteConsoleCommand();
-    void logFileToConsole();
+    void handleLogBuffer();
 
     /* about connet client */
     void acceptNewClients();
@@ -58,14 +64,15 @@ private:
     bool bRunning;
     Event mEvent;
     Network mNetwork;
-    int32 mLogFileFDRead;
     int32 mLogFileFDWrite;
-    std::ifstream mLogFileStreamRead;
     std::string mLogFileName;
-    ConsoleWindow mLogMonitor;
-    ConsoleWindow mServerMonitor;
-    ConsoleWindow* mActivatedWindow;
+    std::string mLogBuffer;
+    uint64 mLogBufferIndex;
+    DisplayConsole mLogMonitor;
+    DisplayConsole mServerMonitor;
+    DisplayConsole* mActivatedWindow;
     struct timeval mLastConsoleRefresh;
+    
 };
 
 }
