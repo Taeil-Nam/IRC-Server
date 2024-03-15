@@ -23,7 +23,7 @@
 #endif
 
 #define LOG(level) GlobalLogger::LogStream(level, __PRETTY_FUNCTION__, __FILE__, __LINE__)
-#define LOG_SET_FD(fd) GlobalLogger::GetInstance().SetFD(fd)
+#define LOG_SET_TARGET(target) GlobalLogger::GetInstance().SetTarget(target)
 #define LOG_SET_LEVEL(level) GlobalLogger::GetInstance().SetLevel(level)
 
 
@@ -47,7 +47,8 @@ public:
     void Log(eSeverityLevel level, const std::string& message,
              const char* functionName, const char* fileName,
              const int lineNumber);
-    void SetFD(int fd);
+    void SetTarget(std::string& str);
+    void SetTarget(int fd);
     void SetLevel(eSeverityLevel level);
     class LogStream
     {
@@ -69,12 +70,15 @@ public:
         const int mLineNumber;
         std::ostringstream mStream;
     };
+
 private:
     GlobalLogger(const GlobalLogger&);              // = delete
     GlobalLogger& operator=(const GlobalLogger&);   // = delete
     std::string getCurrentTime(); 
 private:
-    int mFD;
+    bool bIsStringTarget;
+    std::string* mStringTarget;
+    int mFDTarget;
     eSeverityLevel mLevel;
     std::vector<std::string> mLevelStr;
     pthread_mutex_t mFileMutex;
