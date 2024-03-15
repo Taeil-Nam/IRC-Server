@@ -7,13 +7,14 @@ using namespace grc;
 int main()
 {
     DisplayConsole monitor("monitor", "time", Display::WhiteCharBlueBG, Display::WhiteCharBlueBG);
-    std::string buf;
-
+    monitor.PushContent("hello", Display::Default);
+    monitor.PushCharPrompt('c');
     while (1)
     {
-        monitor.RenderScreenString(buf);
+        monitor.NonBlockWrite();
         
-        std::cout << buf <<  std::endl;
+        monitor.PushCharPrompt('h');
+        monitor.PushCharPrompt('h');
         usleep(1000 * 16);
     }
     return 0;

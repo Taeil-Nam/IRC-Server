@@ -1,12 +1,12 @@
 #pragma once
 
-
-#include <sys/termios.h>
+#include <deque>
+#include <map>
+#include <sstream>
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <deque>
-#include <map>
+#include <fcntl.h>
 
 #include "common.hpp"
 
@@ -36,32 +36,45 @@ public:
     void SetFooterColor(const Display::eColor IN color);
     void SetTimestamp(const bool IN enable);
 
-    void RenderScreenString(std::string& OUT consoleFrameBuffer);
-
-private:
+    
+    void NonBlockWrite();
+private: // function
     void setTerminalMode(const bool IN enable);
     void updateConsoleSize();
+    std::string cursorToLine(const int32 line) const;
     uint64 strlenMultiByte(const std::string& str) const;
-    void appendHeader(std::string& OUT consoleFrameBuffer);
-    void appendContent(std::string& OUT consoleFrameBuffer);
-    void appendFooter(std::string& OUT consoleFrameBuffer);
-    void appendPrompt(std::string& OUT consoleFrameBuffer);
-private:
+    
+    void renderScreenString(std::string& OUT screenBuffer);
+    void appendHeader(std::string& OUT screenBuffer);
+    void appendContent(std::string& OUT screenBuffer);
+    void appendFooter(std::string& OUT screenBuffer);
+    void appendPrompt(std::string& OUT screenBuffer);
+private: // variables
     static uint64 sStaticInstanceCount;
     static struct termios sStaticOldTerminal;
     
-
     Display mDisplay;
+    // general
     std::map<Display::eColor, std::string> mANSIColors;
     std::string mHeaderColor;
     std::string mFooterColor;
     bool bIsTimestampEnabled;
 
+    // input
     std::string mPromptBuffer;
     std::deque<std::string> mPromptQueue;
 
+    // attr
     int32 mConsoleWidth;
     int32 mConsoleHeight;
+
+    // screen buffer
+    bool bIsScreenUpdated;
+    std::string mScreenBuffer;
+    uint64 mScreenBufferIndex;
+    bool bIsScreenBufferRemain;
+    
+    
 
 };
 

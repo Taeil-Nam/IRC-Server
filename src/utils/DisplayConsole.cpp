@@ -1,5 +1,5 @@
 #include "DisplayConsole.hpp"
-#include <cstdio>
+#include <cstring>
 
 namespace grc
 {
@@ -11,6 +11,9 @@ DisplayConsole::DisplayConsole(const std::string& IN header,
                                const Display::eColor IN headerColor,
                                const Display::eColor IN footerColor)
 : bIsTimestampEnabled(true)
+, bIsScreenUpdated(true)
+, bIsScreenBufferRemain(true)
+, mScreenBufferIndex(0)
 {
     mANSIColors[Display::Default] = "\033[0m";
     mANSIColors[Display::Cyan] = "\033[36m";
@@ -42,6 +45,7 @@ DisplayConsole::~DisplayConsole()
 
 void DisplayConsole::PushCharPrompt(const char IN ch)
 {
+    bIsScreenUpdated = true;
     if (ch == '\n' || ch == '\x04')
     {
         mPromptQueue.push_back(mPromptBuffer);
@@ -73,54 +77,68 @@ bool DisplayConsole::pollPromptQueue(std::string& OUT prompt)
 
 void DisplayConsole::PushContent(const std::string& IN content, Display::eColor IN color)
 {
+    bIsScreenUpdated = true;
     mDisplay.PushContent(content, color);
 }
 
 void DisplayConsole::ClearContent()
 {
+    bIsScreenUpdated = true;
     mDisplay.Clear();
 }
 
 void DisplayConsole::SetHeader(const std::string& IN str)
 {
+    bIsScreenUpdated = true;
     mDisplay.SetHeader(str);
 }
 
 void DisplayConsole::SetFooter(const std::string& IN str)
 {
+    bIsScreenUpdated = true;
     mDisplay.SetFooter(str);
 }
 
 void DisplayConsole::SetHeaderColor(const Display::eColor IN color)
 {
+    bIsScreenUpdated = true;
     mHeaderColor = mANSIColors[color];
 }
 
 void DisplayConsole::SetFooterColor(const Display::eColor IN color)
 {
+    bIsScreenUpdated = true;
     mFooterColor = mANSIColors[color];
 }
 
 void DisplayConsole::SetTimestamp(const bool IN enable)
 {
+    bIsScreenUpdated = true;
     bIsTimestampEnabled = enable;
 }
 
-void DisplayConsole::RenderScreenString(std::string& OUT screenStringBuffer)
+void DisplayConsole::NonBlockWrite()
 {
-    updateConsoleSize(); printf("ch");
-    screenStringBuffer.clear();
-    screenStringBuffer = "\033[H\033[J"; // clear;
-    if (mConsoleHeight < 8 || mConsoleWidth < 18)
+    if (bIsScreenUpdated)
     {
-        return ;
+        renderScreenString(mScreenBuffer);
+        mScreenBufferIndex = 0;
+        bIsScreenBufferRemain = true;
     }
-    else
+    if (bIsScreenBufferRemain)
     {
-        appendHeader(screenStringBuffer);
+        const char *buf = mScreenBuffer.c_str();
+        const uint64 len = std::strlen(&buf[mScreenBufferIndex]);
+        const int64 wrote = write(1, &buf[mScreenBufferIndex], len);
+        mScreenBufferIndex += wrote;
+        if (wrote == len)
+        {
+            bIsScreenBufferRemain = false;
+            mScreenBufferIndex = 0;
+        }
     }
-
 }
+
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
@@ -158,6 +176,12 @@ void DisplayConsole::updateConsoleSize()
     mConsoleHeight = window.ws_row;
 }
 
+std::string DisplayConsole::cursorToLine(const int32 line) const
+{
+    std::stringstream ss; ss << line;
+    return std::string("\033[" + ss.str() + ";1H");
+}
+
 uint64 DisplayConsole::strlenMultiByte(const std::string& str) const
 {
     const char* c_str = str.c_str();
@@ -176,26 +200,44 @@ uint64 DisplayConsole::strlenMultiByte(const std::string& str) const
     return res;
 }
 
-void DisplayConsole::appendHeader(std::string& OUT consoleFrameBuffer)
+void DisplayConsole::renderScreenString(std::string& OUT screenBuffer)
+{
+    updateConsoleSize();
+    screenBuffer.clear();
+    screenBuffer = "\033[H\033[J"; // clear;
+    if (mConsoleHeight < 8 || mConsoleWidth < 18)
+    {
+        return ;
+    }
+    else
+    {
+        appendHeader(screenBuffer);
+        appendContent(screenBuffer);
+        appendFooter(screenBuffer);
+        appendPrompt(screenBuffer);
+    }
+}
+
+void DisplayConsole::appendHeader(std::string& OUT screenBuffer)
 {
 
     const uint64 headerWidth = mDisplay.GetHeader().size();
     if (headerWidth + 1 <= mConsoleWidth)
     {
         uint64 emptyLength = mConsoleWidth - (headerWidth + 1);
-        consoleFrameBuffer += mHeaderColor + ' ' + mDisplay.GetHeader()
+        screenBuffer += mHeaderColor + ' ' + mDisplay.GetHeader()
                            + std::string(emptyLength, ' ')
                            + mANSIColors.at(Display::Default) + '\n';
     }
     else
     {
-        consoleFrameBuffer += mHeaderColor + ' '
+        screenBuffer += mHeaderColor + ' '
                            + mDisplay.GetHeader().substr(0, mConsoleWidth - 1)
                            + mANSIColors.at(Display::Default) + '\n';
     }
 }
 
-void DisplayConsole::appendContent(std::string& OUT consoleFrameBuffer)
+void DisplayConsole::appendContent(std::string& OUT screenBuffer)
 {
     const uint64 leftHeight = mConsoleHeight - 3;
     uint64 outBufferIndex = 0;
@@ -206,7 +248,7 @@ void DisplayConsole::appendContent(std::string& OUT consoleFrameBuffer)
     {
         if (bIsTimestampEnabled)
         {
-            consoleFrameBuffer += contentBuffer[i].TimeStamp + ' '
+            screenBuffer += contentBuffer[i].TimeStamp + ' '
                                + mANSIColors.at(Display::BrightBlue) + '-'
                                + mANSIColors.at(Display::Default) + '!'
                                + mANSIColors.at(Display::BrightBlue) + '-'
@@ -218,31 +260,66 @@ void DisplayConsole::appendContent(std::string& OUT consoleFrameBuffer)
         {
             const uint64 leftWidth = mConsoleWidth
                                      - (bIsTimestampEnabled ? 10 : 0);
-            std::cout << mANSIColors.at(contentBuffer[i].Color);
+            screenBuffer += mANSIColors.at(contentBuffer[i].Color);
             const char* c_str = contentBuffer[i].String.c_str();
             for (uint64 j = 0, strIndex = 0; j < leftWidth - 3; ++j)
             {
                 if (c_str[strIndex] < 0)
                 {
-                    std::cout << c_str[strIndex++];
-                    std::cout << c_str[strIndex++];
-                    std::cout << c_str[strIndex++];
+                    screenBuffer += c_str[strIndex++];
+                    screenBuffer += c_str[strIndex++];
+                    screenBuffer += c_str[strIndex++];
                 }
                 else
                 {
-                    std::cout << c_str[strIndex++];
+                    screenBuffer += c_str[strIndex++];
                 }
 
             }
-            std::cout << "...\n" << mANSIColors.at(Display::Default);
+            screenBuffer += "...\n" + mANSIColors.at(Display::Default);
         }
         else
         {
-            std::cout << mANSIColors.at(contentBuffer[i].Color)
-                      << contentBuffer[i].String << '\n'
-                      << mANSIColors.at(Display::Default); 
+            screenBuffer += mANSIColors.at(contentBuffer[i].Color)
+                               + contentBuffer[i].String + '\n'
+                               + mANSIColors.at(Display::Default); 
         }
     }    
+}
+
+void DisplayConsole::appendFooter(std::string& OUT screenBuffer)
+{
+    screenBuffer += cursorToLine(mConsoleHeight - 1);
+    const uint64 Footer = mDisplay.GetFooter().size();
+    if (Footer + 1 <= mConsoleWidth)
+    {
+        uint64 emptyLength = mConsoleWidth - (Footer + 1);
+        screenBuffer += mFooterColor + ' ' + mDisplay.GetFooter()
+                           + std::string(emptyLength, ' ')
+                           + mANSIColors.at(Display::Default) + '\n';
+    }
+    else
+    {
+        screenBuffer += mFooterColor + ' '
+                           + mDisplay.GetFooter().substr(0, mConsoleWidth - 1)
+                           + mANSIColors.at(Display::Default) + '\n';
+    }
+}
+
+void DisplayConsole::appendPrompt(std::string& OUT screenBuffer)
+{
+    screenBuffer += cursorToLine(mConsoleHeight);
+    if (mPromptBuffer.size() + 11 <= mConsoleWidth)
+    {
+        screenBuffer += "[(status)] " + mPromptBuffer;
+    }
+    else
+    {
+        uint64 leftWidth = mConsoleWidth - 11;
+        screenBuffer += "[(status)] "
+                           + mPromptBuffer.substr(mPromptBuffer.size()
+                                                  - leftWidth);
+    }
 }
 
 }
