@@ -40,7 +40,7 @@ public:
     
 private: // function
     void setTerminalMode(const bool IN enable);
-    void updateConsoleSize();
+    bool updateConsoleSize();
     std::string cursorToLine(const int32 line) const;
     uint64 strlenMultiByte(const std::string& str) const;
     

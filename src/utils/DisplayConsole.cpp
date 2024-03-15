@@ -118,7 +118,7 @@ void DisplayConsole::SetTimestamp(const bool IN enable)
 
 void DisplayConsole::ScreenNonBlockWrite()
 {
-    if (bIsScreenUpdated)
+    if (bIsScreenUpdated || updateConsoleSize())
     {
         renderScreenString(mScreenBuffer);
         mScreenBufferIndex = 0;
@@ -167,12 +167,20 @@ void DisplayConsole::setTerminalMode(const bool IN enable)
     }
 }
 
-void DisplayConsole::updateConsoleSize()
+bool DisplayConsole::updateConsoleSize()
 {
     struct winsize window;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &window);
-    mConsoleWidth = window.ws_col;
-    mConsoleHeight = window.ws_row;
+    if (mConsoleWidth != window.ws_col || mConsoleHeight != window.ws_row)
+    {
+        mConsoleWidth = window.ws_col;
+        mConsoleHeight = window.ws_row;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 std::string DisplayConsole::cursorToLine(const int32 line) const
