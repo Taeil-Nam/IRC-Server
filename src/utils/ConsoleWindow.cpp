@@ -3,7 +3,7 @@
 namespace grc
 {
 
-ConsoleWindow::ConsoleWindow()
+Display::Display()
 {
     std::ios_base::sync_with_stdio(false);
     std::cout.tie(NULL);
@@ -24,13 +24,13 @@ ConsoleWindow::ConsoleWindow()
     updateConsoleSize();
 }
 
-ConsoleWindow::~ConsoleWindow()
+Display::~Display()
 {
     setTerminalMode(false);
     printClear();
 }
 
-ConsoleWindow::ConsoleWindow(const ConsoleWindow& copy)
+Display::Display(const Display& copy)
 {
     mHeaderColor = copy.mHeaderColor;
     mHeader = copy.mHeader;
@@ -46,7 +46,7 @@ ConsoleWindow::ConsoleWindow(const ConsoleWindow& copy)
     mOutputBufferCapacity = copy.mOutputBufferCapacity;
 }
 
-ConsoleWindow& ConsoleWindow::operator=(const ConsoleWindow& copy)
+Display& Display::operator=(const Display& copy)
 {
     if (this != &copy)
     {
@@ -66,7 +66,7 @@ ConsoleWindow& ConsoleWindow::operator=(const ConsoleWindow& copy)
     return *this;
 }
 
-void ConsoleWindow::PushBackCommandLine(const char c)
+void Display::PushBackCommandLine(const char c)
 {
     if (c == '\n' || c == '\x04')
     {
@@ -88,7 +88,7 @@ void ConsoleWindow::PushBackCommandLine(const char c)
     }
 }
 
-std::string ConsoleWindow::In()
+std::string Display::In()
 {
     ASSERT(mInputBuffer.size());
     std::string res = mInputBuffer.front();
@@ -96,7 +96,7 @@ std::string ConsoleWindow::In()
     return res;
 }
 
-void ConsoleWindow::Out(const std::string& str, eANSIColor color)
+void Display::Out(const std::string& str, eANSIColor color)
 {
     OutputFormat toPush;
     toPush.TimeStamp = getCurrentTimeString();
@@ -107,13 +107,13 @@ void ConsoleWindow::Out(const std::string& str, eANSIColor color)
         mOutputBuffer.pop_front();
 }
 
-bool ConsoleWindow::IsEOF() const
+bool Display::IsEOF() const
 {
     if (mInputBuffer.empty()) return true;
     else return false;
 }
 
-void ConsoleWindow::RefreshConsole()
+void Display::RefreshConsole()
 {
     updateConsoleSize();
     printClear();
@@ -131,27 +131,27 @@ void ConsoleWindow::RefreshConsole()
     printFlush();
 }
 
-void ConsoleWindow::SetHeaderColor(const eANSIColor color)
+void Display::SetHeaderColor(const eANSIColor color)
 {
     mHeaderColor = mANSIColors[color];
 }
 
-void ConsoleWindow::SetFooterColor(const eANSIColor color)
+void Display::SetFooterColor(const eANSIColor color)
 {
     mFooterColor = mANSIColors[color];
 }
 
-void ConsoleWindow::SetHeader(const std::string& str)
+void Display::SetHeader(const std::string& str)
 {
     mHeader = str;
 }
 
-void ConsoleWindow::SetFooter(const std::string& str)
+void Display::SetFooter(const std::string& str)
 {
     mFooter = str;
 }
 
-void ConsoleWindow::SetTimestamp(const bool enable)
+void Display::SetTimestamp(const bool enable)
 {
     bIsTimestampEnabled = enable;
 }
@@ -164,7 +164,7 @@ void ConsoleWindow::SetTimestamp(const bool enable)
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 
-void ConsoleWindow::setTerminalMode(bool enable)
+/* void Display::setTerminalMode(bool enable)
 {
     static struct termios oldt, newt;
     if (enable)
@@ -180,8 +180,8 @@ void ConsoleWindow::setTerminalMode(bool enable)
         tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
     }
 }
-
-std::string ConsoleWindow::getCurrentTimeString() const
+ */
+std::string Display::getCurrentTimeString() const
 {
     time_t currentTime = time(0);
     struct tm *localTime = localtime(&currentTime);
@@ -193,20 +193,20 @@ std::string ConsoleWindow::getCurrentTimeString() const
     return timeStream.str();
 }
 
-void ConsoleWindow::updateConsoleSize()
+/* void Display::updateConsoleSize()
 {
     struct winsize window;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &window);
     mConsoleWidth = window.ws_col;
     mConsoleHeight = window.ws_row;
-}
+} */
 
-void ConsoleWindow::locateCursorToLine(const int32 line) const
+void Display::locateCursorToLine(const int32 line) const
 {
     std::cout << "\033[" << line << ";1H" << std::flush;
 }
 
-uint64 ConsoleWindow::strlenMultiByte(const std::string& str) const
+uint64 Display::strlenMultiByte(const std::string& str) const
 {
     const char* c_str = str.c_str();
     uint64 res = 0, index = 0;
@@ -224,19 +224,19 @@ uint64 ConsoleWindow::strlenMultiByte(const std::string& str) const
     return res;
 }
 
-void ConsoleWindow::printClear() const
+/* void Display::printClear() const
 {
     std::cout << "\033[H\033[J";
-}
+} */
 
-void ConsoleWindow::printErrorScreenFull() const
+void Display::printErrorScreenFull() const
 {
     std::cout << mANSIColors.at(WhiteCharBlueBG)
               << std::string(mConsoleHeight * mConsoleWidth, ' ')
               << mANSIColors.at(Default);
 }
 
-void ConsoleWindow::printHeader() const
+void Display::printHeader() const
 {
     const uint64 headerWidth = mHeader.size();
     if (headerWidth + 1 <= mConsoleWidth)
@@ -254,7 +254,7 @@ void ConsoleWindow::printHeader() const
     }
 }
 
-void ConsoleWindow::printOutput() const
+void Display::printOutput() const
 {
     const uint64 leftHeight = mConsoleHeight - 3;
     uint64 outBufferIndex = 0;
@@ -303,7 +303,7 @@ void ConsoleWindow::printOutput() const
     }
 }
 
-void ConsoleWindow::printFooter() const
+void Display::printFooter() const
 {  
     locateCursorToLine(mConsoleHeight - 1);
     std::cout << mFooterColor
@@ -314,7 +314,7 @@ void ConsoleWindow::printFooter() const
                 << mANSIColors.at(Default);
 }
 
-void ConsoleWindow::printCommandLine() const
+void Display::printCommandLine() const
 {
     locateCursorToLine(mConsoleHeight);
     if (mCommandLineBuffer.size() + 11 <= mConsoleWidth)
@@ -330,7 +330,7 @@ void ConsoleWindow::printCommandLine() const
     }
 }
 
-void ConsoleWindow::printFlush() const
+void Display::printFlush() const
 {
     std::cout << std::flush;
 }
