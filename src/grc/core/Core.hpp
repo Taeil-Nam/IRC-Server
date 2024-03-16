@@ -35,8 +35,13 @@ public:
 private:
     enum eEventType
     {
-        Read = EVFILT_READ,
-        Write = EVFILT_WRITE
+        READ = EVFILT_READ,
+        WRITE = EVFILT_WRITE
+    };
+    enum eFD
+    {
+        STDIN = STDIN_FILENO,
+        STDOUT = STDOUT_FILENO
     };
 private:
     Core();
@@ -48,6 +53,7 @@ private:
 
     /* about event */
     bool identifyEvent(const int32 fd, const eEventType type, const struct kevent& event);
+    bool identifyEvent(const eEventType type, const struct kevent& event);
     void inputToConsole();
     void excuteConsoleCommand();
     void handleLogBuffer();
@@ -64,7 +70,7 @@ private:
     bool bRunning;
     Event mEvent;
     Network mNetwork;
-    int32 mLogFileFDWrite;
+    int32 mLogFileFD;
     std::string mLogFileName;
     std::string mLogBuffer;
     uint64 mLogBufferIndex;

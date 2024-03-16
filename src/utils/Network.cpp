@@ -195,7 +195,7 @@ void Network::recvFromClient(const int32 socket)
     // 상대방과 연결이 끊긴 경우
     else if (recvLen == 0)
     {
-        LOG(LogLevel::Notice) << "Client(" << GetIPString(socket) << ") disconnected";
+        LOG(LogLevel::Notice) << "Client(IP: " << GetIPString(socket) << ", socket: " << socket << ") disconnected";
         close(socket);
         mSessions.erase(socket);
         return;
@@ -203,9 +203,8 @@ void Network::recvFromClient(const int32 socket)
     // 메시지 수신 완료
     session.recvSize = recvLen;
     LOG(LogLevel::Notice) << "Received message from client(" << GetIPString(socket) << ") "
-        << std::strlen(session.recvBuffer) << "bytes";// << session.recvBuffer;
-    // Test code
-    std::cerr << session.recvBuffer;
+        << std::strlen(session.recvBuffer) << "bytes\n" << session.recvBuffer;
+
     ClearReceiveBuffer(socket);
 }
 

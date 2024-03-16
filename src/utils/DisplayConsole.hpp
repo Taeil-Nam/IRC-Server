@@ -25,7 +25,7 @@ public:
     virtual ~DisplayConsole();
     
     void ScreenNonBlockWrite();
-
+    void SetIsScreenUpdated(bool status);
     void PushCharPrompt(const char IN ch);
     bool pollPromptQueue(std::string& OUT prompt);
     void PushContent(const std::string& IN content, Display::eColor IN color = Display::Default);

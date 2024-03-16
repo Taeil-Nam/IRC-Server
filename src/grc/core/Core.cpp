@@ -14,7 +14,7 @@ Core::Core(const int port, const std::string& password)
 
 Core::~Core()
 {
-    close(mLogFileFDWrite);
+    close(mLogFileFD);
     LOG_SET_TARGET(STDOUT_FILENO);
     LOG_SET_LEVEL(LogLevel::Informational);
 }
@@ -28,20 +28,20 @@ void Core::Run()
         for (uint64 i = 0; i < eventCount; ++i)
         {
             const struct kevent& event = eventList[i];
-            if (identifyEvent(STDIN_FILENO, Read, event))
+            if (identifyEvent(STDIN, READ, event))
             {
                 inputToConsole();
                 excuteConsoleCommand();
             }
-            else if (identifyEvent(STDOUT_FILENO, Write, event))
+            else if (identifyEvent(STDOUT, WRITE, event))
             {
                 mActivatedWindow->ScreenNonBlockWrite();
             }
-            else if (identifyEvent(mLogFileFDWrite, Write, event))
+            else if (identifyEvent(mLogFileFD, WRITE, event))
             {
                 handleLogBuffer();
             }
-            else if (event.filter == EVFILT_READ)
+            else if (identifyEvent(READ, event))
             {
                 mNetwork.Read(event.ident);
                 acceptNewClients();
@@ -83,7 +83,7 @@ bool Core::Init()
         return FAILURE;
     }
     fcntl(STDOUT_FILENO, F_SETFL, O_NONBLOCK);
-    if (mEvent.AddWriteEvent(mLogFileFDWrite) == FAILURE)
+    if (mEvent.AddWriteEvent(mLogFileFD) == FAILURE)
     {
         LOG(LogLevel::Error) << "Failed to add log file WRITE event";
         return FAILURE;
@@ -113,13 +113,13 @@ bool Core::initLog()
          << std::setw(2) << localTime->tm_min << ':'
          << std::setw(2) << localTime->tm_sec;
     mLogFileName = "log/" + time.str() + ".txt";
-    mLogFileFDWrite = open(mLogFileName.c_str(), O_WRONLY | O_CREAT, 0777);
-    if (mLogFileFDWrite == -1)
+    mLogFileFD = open(mLogFileName.c_str(), O_WRONLY | O_CREAT, 0777);
+    if (mLogFileFD == -1)
     {
         LOG(LogLevel::Error) << "Failed to open log file";
         return FAILURE;
     }
-    fcntl(mLogFileFDWrite, F_SETFL, O_NONBLOCK);
+    fcntl(mLogFileFD, F_SETFL, O_NONBLOCK);
     LOG_SET_TARGET(mLogBuffer);
     LOG_SET_LEVEL(LogLevel::Informational);
     return SUCCESS;
@@ -163,6 +163,18 @@ bool Core::identifyEvent(const int32 fd, const eEventType type, const struct kev
     }
 }
 
+bool Core::identifyEvent(const eEventType type, const struct kevent& event)
+{
+    if (event.filter == type)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void Core::inputToConsole()
 {
     const char key = getchar();
@@ -172,6 +184,7 @@ void Core::inputToConsole()
             mActivatedWindow = &mServerMonitor;
         else if (mActivatedWindow == &mServerMonitor)
             mActivatedWindow = &mLogMonitor;
+        mActivatedWindow->SetIsScreenUpdated(true);
     }
     else
     {
@@ -236,7 +249,7 @@ void Core::handleLogBuffer()
     /* to log file */
     const char *buf = mLogBuffer.c_str();
     const uint64 len = std::strlen(&buf[mLogBufferIndex]);
-    const int64 wrote = write(mLogFileFDWrite, &buf[mLogBufferIndex], len);
+    const int64 wrote = write(mLogFileFD, &buf[mLogBufferIndex], len);
     
 
     /* to log monitor */
@@ -244,7 +257,20 @@ void Core::handleLogBuffer()
     std::stringstream ss(toLogMonitor);
     std::string line;
     while (std::getline(ss, line))
+    {
+        if (line[0] == '[')
+        {
+            const uint64 firstSpace = line.find(' ');
+            const uint64 secondSpace = line.find(' ', firstSpace + 1);
+            const uint64 thirdSpace = line.find(' ', secondSpace + 1);
+            if (line[firstSpace - 1] == ']')
+            {
+                ASSERT(firstSpace < thirdSpace) << "Log format has problem";
+                line.erase(firstSpace, thirdSpace - firstSpace);
+            }
+        }
         mLogMonitor.PushContent(line);
+    }
 
     mLogBufferIndex += wrote;
     if (wrote == len)
