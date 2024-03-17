@@ -1,14 +1,6 @@
 # 💬 ft_irc
 이 프로젝트는 C++98을 사용하여 ```IRC``` (Internet Relay Chat) 서버를 만드는 프로젝트이다.
 
-## 현재 진행도 (Progress) (20%)
-- 프로젝트 세팅.
-- GlobalLogger 구현.
-- AssertManager 구현.
-- Event 구현.
-- ConsoleWindow 구현.
-- Network 구현.
-
 ## 구조
 ```ARCHITECTURE.md``` 파일 참고.
 
@@ -43,7 +35,6 @@
 - Clang Version = 12.0.0.
 
 ### 설치
-Makefile 사용을 권장한다.
 1. Git clone
 ```bash
 $> git clone [this repo]
@@ -71,7 +62,8 @@ $> ./ircserv [port] [password]
 </a> 
 
 ## 라이센스
-MIT 라이센스에 따라 배포된다. 자세한 내용은 ```LICENSE.txt``` 파일 참고.
+MIT 라이센스를 따른다.  
+자세한 내용은 ```LICENSE.txt``` 파일 참고.
 
 ## 팀 멤버
 - [Taeil Nam (Tayden)](https://github.com/Taeil-Nam) - nam0314@gmail.com
