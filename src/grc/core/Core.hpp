@@ -18,7 +18,7 @@
 #include "common.hpp"
 #include "utils/Event.hpp"
 #include "utils/Network.hpp"
-#include "utils/ConsoleWindow.hpp"
+#include "utils/DisplayConsole.hpp"
 
 namespace grc
 {
@@ -33,6 +33,17 @@ public:
     void Run();
 
 private:
+    enum eEventType
+    {
+        READ = EVFILT_READ,
+        WRITE = EVFILT_WRITE
+    };
+    enum eFD
+    {
+        STDIN = STDIN_FILENO,
+        STDOUT = STDOUT_FILENO
+    };
+private:
     Core();
     Core(const Core& core); // = delete
     const Core& operator=(const Core& core); // = delete
@@ -41,16 +52,21 @@ private:
     void initConsoleWindow();
 
     /* about event */
-    bool identifyEvent(const int fd, const struct kevent& event);
+    bool identifyEvent(const int32 fd, const eEventType type, const struct kevent& event);
+    bool identifyEvent(const eEventType type, const struct kevent& event);
     void inputToConsole();
     void excuteConsoleCommand();
-    void logFileToConsole();
+    void handleLogBuffer();
 
-    /* about connet client */
-    void acceptNewClients();
+    /* about network connection */
+    void SetupNewClient();
 
     /* about console print */
     bool isTimePassed(const int64 ms);
+
+    /* about idenfify network socket */
+    bool isServerSocket(const int32 socket);
+    bool isClientSocket(const int32 socket);
 
 private:
     const int mPort;
@@ -58,13 +74,13 @@ private:
     bool bRunning;
     Event mEvent;
     Network mNetwork;
-    int32 mLogFileFDRead;
-    int32 mLogFileFDWrite;
-    std::ifstream mLogFileStreamRead;
+    int32 mLogFileFD;
     std::string mLogFileName;
-    ConsoleWindow mLogMonitor;
-    ConsoleWindow mServerMonitor;
-    ConsoleWindow* mActivatedWindow;
+    std::string mLogBuffer;
+    uint64 mLogBufferIndex;
+    DisplayConsole mLogMonitor;
+    DisplayConsole mServerMonitor;
+    DisplayConsole* mActivatedWindow;
     struct timeval mLastConsoleRefresh;
 };
 

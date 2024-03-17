@@ -1,4 +1,6 @@
 #include "Core.hpp"
+#include "common.hpp"
+#include <sys/event.h>
 
 namespace grc
 {
@@ -7,15 +9,15 @@ Core::Core(const int port, const std::string& password)
 : mPort(port)
 , mPassword(password)
 , bRunning(false)
+, mLogBufferIndex(0)
 {
 
 }
 
 Core::~Core()
 {
-    close(mLogFileFDRead);
-    close(mLogFileFDWrite);
-    LOG_SET_FD(STDOUT_FILENO);
+    close(mLogFileFD);
+    LOG_SET_TARGET(STDOUT_FILENO);
     LOG_SET_LEVEL(LogLevel::Informational);
 }
 
@@ -28,28 +30,35 @@ void Core::Run()
         for (uint64 i = 0; i < eventCount; ++i)
         {
             const struct kevent& event = eventList[i];
-            if (identifyEvent(STDIN_FILENO, event))
+            if (identifyEvent(STDIN, READ, event))
             {
                 inputToConsole();
                 excuteConsoleCommand();
             }
-            else if (identifyEvent(mLogFileFDRead, event))
+            else if (identifyEvent(STDOUT, WRITE, event))
             {
-                logFileToConsole();
+                mActivatedWindow->ScreenNonBlockWrite();
             }
-            else if (event.filter == EVFILT_READ)
+            else if (identifyEvent(mLogFileFD, WRITE, event))
             {
-                mNetwork.Read(event.ident);
-                acceptNewClients();
+                handleLogBuffer();
+            }
+            else if (isServerSocket(event.ident) && event.filter == READ)
+            {
+                SetupNewClient();
+            }
+            else if (isClientSocket(event.ident) && event.filter == READ)
+            {
+                mNetwork.RecvFromClient(event.ident);
+            }
+            else if (isClientSocket(event.ident) && event.filter == WRITE)
+            {
+                mNetwork.SendToClient(event.ident);
             }
         }
-        
+
         /* IRC 로직 수행 */
 
-        if (isTimePassed(40))
-        {
-            mActivatedWindow->RefreshConsole();
-        }
     }
 }
 
@@ -76,9 +85,15 @@ bool Core::Init()
         LOG(LogLevel::Error) << "Failed to add STDIN READ event";
         return FAILURE;
     }
-    if (mEvent.AddReadEvent(mLogFileFDRead) == FAILURE)
+    if (mEvent.AddWriteEvent(STDOUT_FILENO) == FAILURE)
     {
-        LOG(LogLevel::Error) << "Failed to add Log file READ event";
+        LOG(LogLevel::Error) << "Failed to add STDOUT WRITE event";
+        return FAILURE;
+    }
+    fcntl(STDOUT_FILENO, F_SETFL, O_NONBLOCK);
+    if (mEvent.AddWriteEvent(mLogFileFD) == FAILURE)
+    {
+        LOG(LogLevel::Error) << "Failed to add log file WRITE event";
         return FAILURE;
     }
     if (mEvent.AddReadEvent(mNetwork.GetServerSocket()) == FAILURE)
@@ -100,33 +115,20 @@ bool Core::initLog()
     std::tm* localTime = std::localtime(&current);
     std::ostringstream time;
     time << (localTime->tm_year + 1900) << '-'
-             << std::setfill('0') << std::setw(2) << (localTime->tm_mon + 1) << '-'
-             << std::setw(2) << localTime->tm_mday << 'T'
-             << std::setw(2) << localTime->tm_hour << ':'
-             << std::setw(2) << localTime->tm_min << ':'
-             << std::setw(2) << localTime->tm_sec;
+         << std::setfill('0') << std::setw(2) << (localTime->tm_mon + 1) << '-'
+         << std::setw(2) << localTime->tm_mday << 'T'
+         << std::setw(2) << localTime->tm_hour << ':'
+         << std::setw(2) << localTime->tm_min << ':'
+         << std::setw(2) << localTime->tm_sec;
     mLogFileName = "log/" + time.str() + ".txt";
-    mLogFileFDWrite = open(mLogFileName.c_str(), O_WRONLY | O_CREAT, 0777);
-    if (mLogFileFDWrite == -1)
+    mLogFileFD = open(mLogFileName.c_str(), O_WRONLY | O_CREAT, 0777);
+    if (mLogFileFD == -1)
     {
         LOG(LogLevel::Error) << "Failed to open log file";
         return FAILURE;
     }
-    mLogFileFDRead = open(mLogFileName.c_str(), O_RDONLY, 0777);
-    if (mLogFileFDRead == -1)
-    {
-        close(mLogFileFDWrite);
-        LOG(LogLevel::Error) << "Failed to open log file";
-        return FAILURE;
-    }
-    mLogFileStreamRead.open(mLogFileName);
-    if (mLogFileStreamRead.is_open() == false)
-    {
-        close(mLogFileFDWrite);
-        close(mLogFileFDRead);
-        return FAILURE;
-    }
-    LOG_SET_FD(mLogFileFDWrite);
+    fcntl(mLogFileFD, F_SETFL, O_NONBLOCK);
+    LOG_SET_TARGET(mLogBuffer);
     LOG_SET_LEVEL(LogLevel::Informational);
     return SUCCESS;
 }
@@ -134,32 +136,44 @@ bool Core::initLog()
 void Core::initConsoleWindow()
 {
     mLogMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Log monitor");
-    mLogMonitor.SetHeaderColor(ConsoleWindow::WhiteCharBlueBG);
-    mLogMonitor.SetFooterColor(ConsoleWindow::WhiteCharBlueBG);
+    mLogMonitor.SetHeaderColor(Display::WhiteCharBlueBG);
+    mLogMonitor.SetFooterColor(Display::WhiteCharBlueBG);
     mLogMonitor.SetTimestamp(true);
     mServerMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Server monitor");
-    mServerMonitor.SetHeaderColor(ConsoleWindow::WhiteCharRedBG);
-    mServerMonitor.SetFooterColor(ConsoleWindow::WhiteCharRedBG);
+    mServerMonitor.SetHeaderColor(Display::WhiteCharRedBG);
+    mServerMonitor.SetFooterColor(Display::WhiteCharRedBG);
     mServerMonitor.SetTimestamp(false);
-    mLogMonitor.Out(std::string("                                                      "), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("  ▄████  ▄▄▄       ███▄ ▄███▓▓█████  ██▀███   ▄████▄  "), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string(" ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀ ▓██ ▒ ██▒▒██▀ ▀█  "), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███   ▓██ ░▄█ ▒▒▓█    ▄ "), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄ ▒██▀▀█▄  ▒▓▓▄ ▄██▒"), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒░██▓ ▒██▒▒ ▓███▀ ░"), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string(" ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░░ ▒▓ ░▒▓░░ ░▒ ▒  ░"), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("  ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░  ░▒ ░ ▒░  ░  ▒   "), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("░ ░   ░   ░   ▒   ░      ░      ░     ░░   ░ ░        "), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("      ░       ░  ░       ░      ░  ░   ░     ░ ░      "), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("                                             ░        "), grc::ConsoleWindow::Red);
-    mLogMonitor.Out(std::string("GameRC v1.0.0                   IRC server application"), grc::ConsoleWindow::Red);
+    mLogMonitor.PushContent(std::string("                                                      "), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("  ▄████  ▄▄▄       ███▄ ▄███▓▓█████  ██▀███   ▄████▄  "), grc::Display::Red);
+    mLogMonitor.PushContent(std::string(" ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀ ▓██ ▒ ██▒▒██▀ ▀█  "), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███   ▓██ ░▄█ ▒▒▓█    ▄ "), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄ ▒██▀▀█▄  ▒▓▓▄ ▄██▒"), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒░██▓ ▒██▒▒ ▓███▀ ░"), grc::Display::Red);
+    mLogMonitor.PushContent(std::string(" ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░░ ▒▓ ░▒▓░░ ░▒ ▒  ░"), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("  ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░  ░▒ ░ ▒░  ░  ▒   "), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("░ ░   ░   ░   ▒   ░      ░      ░     ░░   ░ ░        "), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("      ░       ░  ░       ░      ░  ░   ░     ░ ░      "), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("                                             ░        "), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("GameRC v1.0.0                   IRC server application"), grc::Display::Red);
     mActivatedWindow = &mLogMonitor;
     gettimeofday(&mLastConsoleRefresh, NULL);
 }
 
-bool Core::identifyEvent(const int32 fd, const struct kevent& event)
+bool Core::identifyEvent(const int32 fd, const eEventType type, const struct kevent& event)
 {
-    if (event.ident == fd && event.filter == EVFILT_READ)
+    if (event.ident == fd && event.filter == type)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool Core::identifyEvent(const eEventType type, const struct kevent& event)
+{
+    if (event.filter == type)
     {
         return true;
     }
@@ -178,35 +192,36 @@ void Core::inputToConsole()
             mActivatedWindow = &mServerMonitor;
         else if (mActivatedWindow == &mServerMonitor)
             mActivatedWindow = &mLogMonitor;
+        mActivatedWindow->SetIsScreenUpdated(true);
     }
     else
     {
-        mActivatedWindow->PushBackCommandLine(key);
+        mActivatedWindow->PushCharPrompt(key);
     }
 }
 
 void Core::excuteConsoleCommand()
 {
-    while (!mActivatedWindow->IsEOF())
+    std::string prompt;
+    while (mActivatedWindow->pollPromptQueue(prompt))
     {
-        const std::string input = mActivatedWindow->In();
-        if (input == "/exit" || input == "/quit")
+        if (prompt == "/exit" || prompt == "/quit")
         {
             bRunning = false;
         }
         else if (mActivatedWindow == &mLogMonitor)
         {
-            if (input == "/status")
+            if (prompt == "/status")
             {
-                mLogMonitor.Out("Server is running",
-                                ConsoleWindow::Green);
-                mLogMonitor.Out("IP:        127.0.0.1");
+                mLogMonitor.PushContent("Server is running",
+                                        Display::Green);
+                mLogMonitor.PushContent("IP:        127.0.0.1");
                 std::stringstream sPort; sPort << mPort;
-                mLogMonitor.Out("port:      " + sPort.str());
+                mLogMonitor.PushContent("port:      " + sPort.str());
                 std::stringstream sPassword; sPassword << mPassword;
-                mLogMonitor.Out("password:  " + sPassword.str());
+                mLogMonitor.PushContent("password:  " + sPassword.str());
             }
-            else if (input == "/test")
+            else if (prompt == "/test")
             {
                 LOG(LogLevel::Informational) << "Test";
                 LOG(LogLevel::Notice) << "Test";
@@ -216,9 +231,13 @@ void Core::excuteConsoleCommand()
                 LOG(LogLevel::Alert) << "Test";
                 LOG(LogLevel::Emergency) << "Test";
             }
+            else if (prompt == "/clear")
+            {
+                mLogMonitor.ClearContent();
+            }
             else
             {
-                mLogMonitor.Out("command not found: " +input, ConsoleWindow::Red);
+                mLogMonitor.PushContent("command not found: " +prompt, Display::Red);
             }
         }
         else if (mActivatedWindow == &mServerMonitor)
@@ -228,36 +247,56 @@ void Core::excuteConsoleCommand()
     }
 }
 
-void Core::logFileToConsole()
+void Core::handleLogBuffer()
 {
-    char readBuffer;
-    std::string line;
-    while (read(mLogFileFDRead, &readBuffer, 1))
+    if (mLogBuffer.empty())
     {
-        if (readBuffer == '\n')
-            break;
-        line.push_back(readBuffer);
+        return ;
     }
-    ASSERT(line[0] == '[');
-    const uint64 firstSpace = line.find(' ');
-    const uint64 secondSpace = line.find(' ', firstSpace + 1);
-    const uint64 thirdSpace = line.find(' ', secondSpace + 1);
-    ASSERT(line[firstSpace - 1] == ']');
-    line.erase(firstSpace, thirdSpace - firstSpace);
-    mLogMonitor.Out(line);
+
+    /* to log file */
+    const char *buf = mLogBuffer.c_str();
+    const uint64 len = std::strlen(&buf[mLogBufferIndex]);
+    const int64 wrote = write(mLogFileFD, &buf[mLogBufferIndex], len);
+    
+
+    /* to log monitor */
+    std::string toLogMonitor = mLogBuffer.substr(mLogBufferIndex, wrote);
+    std::stringstream ss(toLogMonitor);
+    std::string line;
+    while (std::getline(ss, line))
+    {
+        if (line[0] == '[')
+        {
+            const uint64 firstSpace = line.find(' ');
+            const uint64 secondSpace = line.find(' ', firstSpace + 1);
+            const uint64 thirdSpace = line.find(' ', secondSpace + 1);
+            if (line[firstSpace - 1] == ']')
+            {
+                ASSERT(firstSpace < thirdSpace) << "Log format has problem";
+                line.erase(firstSpace, thirdSpace - firstSpace);
+            }
+        }
+        mLogMonitor.PushContent(line);
+    }
+
+    mLogBufferIndex += wrote;
+    if (wrote == len)
+    {
+        mLogBuffer.clear();
+        mLogBufferIndex = 0;
+    }
 }
 
-void Core::acceptNewClients()
+void Core::SetupNewClient()
 {
-    const std::vector<int32>& newClients = mNetwork.FetchNewClients();
-    for (uint64 i = 0; i < newClients.size(); ++i)
+    const int32 newClient = mNetwork.ConnectNewClient();
+    if (newClient != ERROR)
     {
-        if (mEvent.AddReadEvent(newClients[i]) == FAILURE)
+        if (mEvent.AddReadEvent(newClient))
         {
-            continue;
+            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClient) << ") connected";
         }
-        LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClients[i]) << ") connected";
-        mNetwork.ClearNewClients();
     }
 }
 
@@ -272,6 +311,33 @@ bool Core::isTimePassed(const int64 ms)
     if (elapsedTime >= ms)
     {
         mLastConsoleRefresh = nowTime;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool Core::isServerSocket(const int32 socket)
+{
+    if (socket == mNetwork.GetServerSocket())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool Core::isClientSocket(const int32 socket)
+{
+    if (socket != mNetwork.GetServerSocket()
+        && socket != STDIN
+        && socket != STDOUT
+        && socket != mLogFileFD)
+    {
         return true;
     }
     else

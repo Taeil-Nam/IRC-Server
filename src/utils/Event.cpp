@@ -33,7 +33,7 @@ bool Event::Init()
     return SUCCESS;
 }
 
-int32 Event::AddReadEvent(const int32 fd)
+bool Event::AddReadEvent(const int32 fd)
 {
     struct kevent newEvent;
     EV_SET(&newEvent, fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
@@ -45,6 +45,20 @@ int32 Event::AddReadEvent(const int32 fd)
     }
     return SUCCESS;
 }
+
+bool Event::AddWriteEvent(const int32 fd)
+{
+    struct kevent newEvent;
+    EV_SET(&newEvent, fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+    if (kevent(mKqueue, &newEvent, 1, NULL, 0, NULL) == ERROR)
+    {
+        LOG(LogLevel::Error) << "Failed to add WRITE event(errno:" << errno << " - "
+            << strerror(errno) << ") on kevent()";
+        return FAILURE;
+    }
+    return SUCCESS;
+}
+
 
 const struct kevent* Event::GetEventList()
 {

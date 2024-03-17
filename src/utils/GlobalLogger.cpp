@@ -1,9 +1,12 @@
 #include "GlobalLogger.hpp"
 
 GlobalLogger::GlobalLogger()
-: mLevelStr(8)
+: bIsStringTarget(false)
+, mStringTarget(NULL)
+, mFDTarget(STDOUT_FILENO)
+, mLevel(Informational)
+, mLevelStr(8)
 {
-    gethostname(mHostname, sizeof(mHostname));
     mLevelStr[Emergency] = "Emergency";
     mLevelStr[Alert] = "Alert";
     mLevelStr[Critical] = "Critical";
@@ -12,8 +15,7 @@ GlobalLogger::GlobalLogger()
     mLevelStr[Notice] = "Notice";
     mLevelStr[Informational] = "Informational";
     mLevelStr[Debug] = "Debug";
-    mFD = STDOUT_FILENO;
-    mLevel = Informational;
+    gethostname(mHostname, sizeof(mHostname));
     pthread_mutex_init(&mFileMutex, NULL);
 }
 
@@ -50,13 +52,29 @@ void GlobalLogger::Log(eSeverityLevel level, const std::string& message,
     }
     ss << std::endl;
     std::string toWriteString = ss.str();
-    write(mFD, toWriteString.c_str(), toWriteString.size());
+    if (bIsStringTarget)
+    {
+        *mStringTarget += toWriteString;
+    }
+    else
+    {
+        write(mFDTarget, toWriteString.c_str(), toWriteString.size());
+    }
     pthread_mutex_unlock(&mFileMutex);
 }
 
-void GlobalLogger::SetFD(int fd)
+void GlobalLogger::SetTarget(std::string& str)
 {
-    mFD = fd;
+    mStringTarget = &str;
+    bIsStringTarget = true;
+}
+
+void GlobalLogger::SetTarget(int fd)
+{
+    if (fd == 0)
+        write(1, "GlobalLogger: LOG_SET_TARGET gets stdin(0) file descriptor.\n", 61);
+    mFDTarget = fd;
+    bIsStringTarget = false;
 }
 
 void GlobalLogger::SetLevel(eSeverityLevel level)
@@ -88,10 +106,10 @@ std::string GlobalLogger::getCurrentTime()
     std::ostringstream time;
 
     time << (localTime->tm_year + 1900) << '-'
-             << std::setfill('0') << std::setw(2) << (localTime->tm_mon + 1) << '-'
-             << std::setw(2) << localTime->tm_mday << 'T'
-             << std::setw(2) << localTime->tm_hour << ':'
-             << std::setw(2) << localTime->tm_min << ':'
-             << std::setw(2) << localTime->tm_sec;
+         << std::setfill('0') << std::setw(2) << (localTime->tm_mon + 1) << '-'
+         << std::setw(2) << localTime->tm_mday << 'T'
+         << std::setw(2) << localTime->tm_hour << ':'
+         << std::setw(2) << localTime->tm_min << ':'
+         << std::setw(2) << localTime->tm_sec;
     return time.str();
 }

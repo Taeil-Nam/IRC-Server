@@ -31,13 +31,12 @@ public:
     ~Network();
 
     bool Init(const int32 port);
-    void Read(const int32 socket);
-    void Write(const int32 socket);
+    const int32 ConnectNewClient();
+    void RecvFromClient(const int32 socket);
+    void SendToClient(const int32 socket);
 
     int32 GetServerSocket() const;
     const char* GetIPString(const int32 socket) const;
-    const std::vector<int>& FetchNewClients() const;
-    void ClearNewClients();
     void ClearReceiveBuffer(const int32 socket);
     void ClearSendBuffer(const int32 socket);
 private:
@@ -47,25 +46,25 @@ private:
     bool createServerSocket();
     bool setServerSocket(const int32 port);
 
-    void addClient();
-    void recvFromClient(const int32 socket);
-    void sendToClient(const int32 socket);
-
 private:
-    static const uint64 sStaticBufferSize = 1024;
+    enum eBufferSize
+    {
+        RecvBufferSize = 1024,
+        SendBufferSize = 1024,
+    };
     struct Session
     {
         sockaddr_in addr;
         int32 socket;
         char hostName[NI_MAXHOST];
-        char recvBuffer[sStaticBufferSize];
-        char sendBuffer[sStaticBufferSize];
+        char recvBuffer[RecvBufferSize];
+        char sendBuffer[SendBufferSize];
         int64 recvSize;
         int64 sendSize;
     };
+private:
     int32 mServerSocket;
     std::map<int32, struct Session> mSessions;
-    std::vector<int> mNewClients;
 };
 
 }
