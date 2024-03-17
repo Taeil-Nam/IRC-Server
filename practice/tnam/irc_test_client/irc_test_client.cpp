@@ -101,6 +101,7 @@ int main(int argc, char** argv)
 
 	// 4. 데이터 전송
 	char sendBuffer[512];
+	std::memset(sendBuffer, 0, sizeof(sendBuffer));
 	ssize_t sendLength = 0;
 	char recvBuffer[512];
 	ssize_t recvLength = 0;
@@ -149,32 +150,33 @@ int main(int argc, char** argv)
 			}
 			std::cout << "send data " << sendLength << " bytes to " << inet_ntoa(server.sin_addr)
 			<< ": " << sendBuffer << std::endl;
+			std::memset(sendBuffer, 0, sizeof(sendBuffer));
 			break;
 		}
 
-		// Todo: 데이터 수신
-		while (true)
-		{
-			recvLength = recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
-			if (recvLength <= 0)
-			{
-				if (errno == EAGAIN) // non-blocking으로 인한 return인 경우
-				{
-					continue;
-				}
-				else
-				{
-					std::cerr << "error receiving data." << std::endl;
-					perror("recv()");
-					std::cerr << "errno: " << errno << std::endl;
-					close(clientSocket);
-					return EXIT_FAILURE;
-				}
-			}
-			std::cout << "receive data " << recvLength << " bytes. : " << recvBuffer << std::endl;
-			std::memset(recvBuffer, 0, sizeof(recvBuffer));
-			break;
-		}
+		// // Todo: 데이터 수신
+		// while (true)
+		// {
+		// 	recvLength = recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
+		// 	if (recvLength <= 0)
+		// 	{
+		// 		if (errno == EAGAIN) // non-blocking으로 인한 return인 경우
+		// 		{
+		// 			continue;
+		// 		}
+		// 		else
+		// 		{
+		// 			std::cerr << "error receiving data." << std::endl;
+		// 			perror("recv()");
+		// 			std::cerr << "errno: " << errno << std::endl;
+		// 			close(clientSocket);
+		// 			return EXIT_FAILURE;
+		// 		}
+		// 	}
+		// 	std::cout << "receive data " << recvLength << " bytes. : " << recvBuffer << std::endl;
+		// 	std::memset(recvBuffer, 0, sizeof(recvBuffer));
+		// 	break;
+		// }
 		std::cout << std::endl;
 	}
 	

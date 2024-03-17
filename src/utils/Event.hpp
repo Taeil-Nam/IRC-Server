@@ -25,16 +25,17 @@ public:
     ~Event();
 
     bool Init();
-    int32 AddReadEvent(const int32 fd);
-    int32 AddWriteEvent(const int32 fd);
+    bool AddReadEvent(const int32 fd);
+    bool AddWriteEvent(const int32 fd);
     const struct kevent* GetEventList();
     int32 GetEventCount() const;
     void SetTimeout(const int64 ms);
 private:
-    bool createKqueue();
-    
     Event(const Event& event); // = delete
     const Event& operator=(const Event& event); // = delete
+    
+    bool createKqueue();
+
 private:
     const int32 MAX_KEVENT_SIZE;
     int32 mKqueue;
