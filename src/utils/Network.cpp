@@ -1,4 +1,5 @@
 #include "Network.hpp"
+#include "common.hpp"
 #include <netdb.h>
 
 namespace grc
@@ -7,7 +8,7 @@ namespace grc
 Network::Network()
 : mServerSocket(ERROR)
 {
-    mNewClients.reserve(128);
+
 }
 
 Network::~Network()
@@ -30,21 +31,81 @@ bool Network::Init(const int32 port)
     return SUCCESS;
 }
 
-void Network::Read(const int32 socket)
+const int32 Network::ConnectNewClient()
 {
-    if (socket == mServerSocket)
+    // client 연결
+    sockaddr_in clientAddr;
+    std::memset(&clientAddr, 0, sizeof(clientAddr));
+    socklen_t clientAddrLength = sizeof(clientAddr);
+    int32 clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
+    if (clientSocket == ERROR)
     {
-        addClient();
+        LOG(LogLevel::Error) << "Failed to connect client on server socket"
+            << "(errno: " << errno << " - " << strerror(errno) << ") on accept()";
+        return ERROR;
     }
-    else
+    // client socket non-blocking 설정
+    if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) == ERROR)
     {
-        recvFromClient(socket);
+        LOG(LogLevel::Error) << "Failed to set non-blocking fd on client socket"
+            << "(errno: " << errno << " - " << strerror(errno) << ") on fcntl()";
+        close(clientSocket);
+        return ERROR;
     }
+    // client session 추가
+    Session client;
+    client.addr = clientAddr;
+    client.socket = clientSocket;
+    mSessions[clientSocket] = client;
+    return clientSocket;
 }
 
-void Network::Write(const int32 socket)
+void Network::RecvFromClient(const int32 socket)
 {
-    sendToClient(socket);
+    // client로부터 메세지 수신 시도
+    struct Session& session = mSessions[socket];
+    int32 recvLen = recv(socket, session.recvBuffer, sizeof(session.recvBuffer), 0);
+    // 오류 발생시
+    if (recvLen == ERROR)
+    {
+        LOG(LogLevel::Error) << "Failed to receive message from client(" << GetIPString(socket) << ")"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on recv()";
+        close(socket);
+        mSessions.erase(socket);
+        return;
+    }
+    // 상대방과 연결이 끊긴 경우
+    else if (recvLen == 0)
+    {
+        LOG(LogLevel::Notice) << "Client(IP: " << GetIPString(socket) << ") disconnected";
+        close(socket);
+        mSessions.erase(socket);
+        return;
+    }
+    // 메시지 수신 완료
+    session.recvSize = recvLen;
+    LOG(LogLevel::Notice) << "Received message from client(" << GetIPString(socket) << ") "
+        << std::strlen(session.recvBuffer) << "bytes\n" << session.recvBuffer;
+}
+
+void Network::SendToClient(const int32 socket)
+{
+    struct Session& session = mSessions[socket];
+    int sendLen = send(socket, session.sendBuffer, std::strlen(session.sendBuffer), 0);
+    // 오류 발생시
+    if (sendLen == -1)
+    {
+        LOG(LogLevel::Error) << "Failed to send message to client(" << GetIPString(socket) << ")"
+            << "(errno:" << errno << " - " << strerror(errno) << ") on send()";
+        close(socket);
+        mSessions.erase(socket);
+        return;
+    }
+    // 메세지 전송 완료
+    session.sendSize = sendLen;
+    LOG(LogLevel::Notice) << "Sent message to client(" << GetIPString(socket) << ") "
+        << sendLen << "bytes";
+    ClearSendBuffer(socket);
 }
 
 int32 Network::GetServerSocket() const
@@ -59,16 +120,6 @@ const char* Network::GetIPString(const int32 socket) const
         return inet_ntoa(mSessions.at(socket).addr.sin_addr);
     }
     return "Unknown client(doesn't have session))";
-}
-
-const std::vector<int>& Network::FetchNewClients() const
-{
-    return mNewClients;
-}
-
-void Network::ClearNewClients()
-{
-    mNewClients.clear();
 }
 
 void Network::ClearReceiveBuffer(const int32 socket)
@@ -146,86 +197,6 @@ bool Network::setServerSocket(const int32 port)
     }
 
     return SUCCESS;
-}
-
-void Network::addClient()
-{
-    // client 연결
-    sockaddr_in clientAddr;
-    std::memset(&clientAddr, 0, sizeof(clientAddr));
-    socklen_t clientAddrLength = sizeof(clientAddr);
-    int32 clientSocket = accept(mServerSocket, (sockaddr*)&clientAddr, &clientAddrLength);
-    if (clientSocket == ERROR)
-    {
-        LOG(LogLevel::Error) << "Failed to connect client on server socket"
-            << "(errno: " << errno << " - " << strerror(errno) << ") on accept()";
-        return;
-    }
-    // client socket non-blocking 설정
-    if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) == ERROR)
-    {
-        LOG(LogLevel::Error) << "Failed to set non-blocking fd on client socket"
-            << "(errno: " << errno << " - " << strerror(errno) << ") on fcntl()";
-        close(clientSocket);
-        return;
-    }
-    // client session 추가
-    Session client;
-    client.addr = clientAddr;
-    client.socket = clientSocket;
-    mSessions[clientSocket] = client;
-    // 새로운 클라이언트 목록에 추가
-    mNewClients.push_back(clientSocket);
-}
-
-void Network::recvFromClient(const int32 socket)
-{
-    // client로부터 메세지 수신 시도
-    struct Session& session = mSessions[socket];
-    int32 recvLen = recv(socket, session.recvBuffer, sizeof(session.recvBuffer), 0);
-    // 오류 발생시
-    if (recvLen == ERROR)
-    {
-        LOG(LogLevel::Error) << "Failed to receive message from client(" << GetIPString(socket) << ")"
-            << "(errno:" << errno << " - " << strerror(errno) << ") on recv()";
-        close(socket);
-        mSessions.erase(socket);
-        return;
-    }
-    // 상대방과 연결이 끊긴 경우
-    else if (recvLen == 0)
-    {
-        LOG(LogLevel::Notice) << "Client(IP: " << GetIPString(socket) << ", socket: " << socket << ") disconnected";
-        close(socket);
-        mSessions.erase(socket);
-        return;
-    }
-    // 메시지 수신 완료
-    session.recvSize = recvLen;
-    LOG(LogLevel::Notice) << "Received message from client(" << GetIPString(socket) << ") "
-        << std::strlen(session.recvBuffer) << "bytes\n" << session.recvBuffer;
-
-    ClearReceiveBuffer(socket);
-}
-
-void Network::sendToClient(const int32 socket)
-{
-    struct Session& session = mSessions[socket];
-    int sendLen = send(socket, session.sendBuffer, std::strlen(session.sendBuffer), 0);
-    // 오류 발생시
-    if (sendLen == -1)
-    {
-        LOG(LogLevel::Error) << "Failed to send message to client(" << GetIPString(socket) << ")"
-            << "(errno:" << errno << " - " << strerror(errno) << ") on send()";
-        close(socket);
-        mSessions.erase(socket);
-        return;
-    }
-    // 메세지 전송 완료
-    session.sendSize = sendLen;
-    LOG(LogLevel::Notice) << "Sent message to client(" << GetIPString(socket) << ") "
-        << sendLen << "bytes";
-    ClearSendBuffer(socket);
 }
 
 }

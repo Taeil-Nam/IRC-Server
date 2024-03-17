@@ -58,11 +58,15 @@ private:
     void excuteConsoleCommand();
     void handleLogBuffer();
 
-    /* about connet client */
-    void acceptNewClients();
+    /* about network connection */
+    void SetupNewClient();
 
     /* about console print */
     bool isTimePassed(const int64 ms);
+
+    /* about idenfify network socket */
+    bool isServerSocket(const int32 socket);
+    bool isClientSocket(const int32 socket);
 
 private:
     const int mPort;
@@ -78,7 +82,6 @@ private:
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
     struct timeval mLastConsoleRefresh;
-    
 };
 
 }

@@ -33,7 +33,7 @@ bool Event::Init()
     return SUCCESS;
 }
 
-int32 Event::AddReadEvent(const int32 fd)
+bool Event::AddReadEvent(const int32 fd)
 {
     struct kevent newEvent;
     EV_SET(&newEvent, fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
@@ -46,7 +46,7 @@ int32 Event::AddReadEvent(const int32 fd)
     return SUCCESS;
 }
 
-int32 Event::AddWriteEvent(const int32 fd)
+bool Event::AddWriteEvent(const int32 fd)
 {
     struct kevent newEvent;
     EV_SET(&newEvent, fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);

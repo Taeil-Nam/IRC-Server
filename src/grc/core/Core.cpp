@@ -1,4 +1,6 @@
 #include "Core.hpp"
+#include "common.hpp"
+#include <sys/event.h>
 
 namespace grc
 {
@@ -41,12 +43,18 @@ void Core::Run()
             {
                 handleLogBuffer();
             }
-            else if (identifyEvent(READ, event))
+            else if (isServerSocket(event.ident) && event.filter == READ)
             {
-                mNetwork.Read(event.ident);
-                acceptNewClients();
+                SetupNewClient();
             }
-            
+            else if (isClientSocket(event.ident) && event.filter == READ)
+            {
+                mNetwork.RecvFromClient(event.ident);
+            }
+            else if (isClientSocket(event.ident) && event.filter == WRITE)
+            {
+                mNetwork.SendToClient(event.ident);
+            }
         }
 
         /* IRC 로직 수행 */
@@ -279,17 +287,16 @@ void Core::handleLogBuffer()
         mLogBufferIndex = 0;
     }
 }
-void Core::acceptNewClients()
+
+void Core::SetupNewClient()
 {
-    const std::vector<int32>& newClients = mNetwork.FetchNewClients();
-    for (uint64 i = 0; i < newClients.size(); ++i)
+    const int32 newClient = mNetwork.ConnectNewClient();
+    if (newClient != ERROR)
     {
-        if (mEvent.AddReadEvent(newClients[i]) == FAILURE)
+        if (mEvent.AddReadEvent(newClient))
         {
-            continue;
+            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClient) << ") connected";
         }
-        LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClients[i]) << ") connected";
-        mNetwork.ClearNewClients();
     }
 }
 
@@ -304,6 +311,33 @@ bool Core::isTimePassed(const int64 ms)
     if (elapsedTime >= ms)
     {
         mLastConsoleRefresh = nowTime;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool Core::isServerSocket(const int32 socket)
+{
+    if (socket == mNetwork.GetServerSocket())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool Core::isClientSocket(const int32 socket)
+{
+    if (socket != mNetwork.GetServerSocket()
+        && socket != STDIN
+        && socket != STDOUT
+        && socket != mLogFileFD)
+    {
         return true;
     }
     else

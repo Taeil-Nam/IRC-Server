@@ -74,7 +74,8 @@ public:
 private:
     GlobalLogger(const GlobalLogger&);              // = delete
     GlobalLogger& operator=(const GlobalLogger&);   // = delete
-    std::string getCurrentTime(); 
+    std::string getCurrentTime();
+
 private:
     bool bIsStringTarget;
     std::string* mStringTarget;
