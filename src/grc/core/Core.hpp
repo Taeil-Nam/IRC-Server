@@ -52,21 +52,18 @@ private:
     void initConsoleWindow();
 
     /* about event */
-    bool identifyEvent(const int32 fd, const eEventType type, const struct kevent& event);
-    bool identifyEvent(const eEventType type, const struct kevent& event);
-    void inputToConsole();
-    void excuteConsoleCommand();
+    bool identifyEvent(const struct kevent& event, const eEventType type, const int32 fd);
+    bool identifyEvent(const struct kevent& event, const eEventType type);
+    void handleMonitorInput();
+    void handleMonitorCommand();
     void handleLogBuffer();
 
     /* about network connection */
-    void SetupNewClient();
-
-    /* about console print */
-    bool isTimePassed(const int64 ms);
+    void setupNewClient();
 
     /* about idenfify network socket */
-    bool isServerSocket(const int32 socket);
-    bool isClientSocket(const int32 socket);
+    bool isServerSocket(const struct kevent& event);
+    bool isClientSocket(const struct kevent& event);
 
 private:
     const int mPort;
@@ -81,7 +78,6 @@ private:
     DisplayConsole mLogMonitor;
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
-    struct timeval mLastConsoleRefresh;
 };
 
 }

@@ -24,10 +24,10 @@ public:
                    const Display::eColor IN footerColor = Display::WhiteCharBlueBG);
     virtual ~DisplayConsole();
     
-    void ScreenNonBlockWrite();
+    void Refresh();
     void SetIsScreenUpdated(bool status);
     void PushCharPrompt(const char IN ch);
-    bool pollPromptQueue(std::string& OUT prompt);
+    bool PollPromptQueue(std::string& OUT prompt);
     void PushContent(const std::string& IN content, Display::eColor IN color = Display::Default);
     void ClearContent();
 
