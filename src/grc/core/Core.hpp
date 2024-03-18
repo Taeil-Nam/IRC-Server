@@ -16,9 +16,8 @@
 #include <sys/stat.h>
 
 #include "common.hpp"
-#include "utils/Event.hpp"
-#include "utils/Network.hpp"
-#include "utils/DisplayConsole.hpp"
+
+using namespace gdf;
 
 namespace grc
 {

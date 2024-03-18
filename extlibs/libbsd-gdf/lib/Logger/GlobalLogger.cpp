@@ -1,4 +1,4 @@
-#include "GlobalLogger.hpp"
+#include "../../include/BSD-GDF/Logger/GlobalLogger.hpp"
 
 GlobalLogger::GlobalLogger()
 : bIsStringTarget(false)

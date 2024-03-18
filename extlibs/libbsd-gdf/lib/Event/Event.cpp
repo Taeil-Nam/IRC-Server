@@ -1,13 +1,13 @@
-#include "Event.hpp"
+#include "../../include/BSD-GDF/Event/Event.hpp"
 
-namespace grc
+namespace gdf
 {
 
 Event::Event()
 : MAX_KEVENT_SIZE(128)
 , mKqueue(ERROR)
-, mEventCount(0)
 , mEventList(NULL)
+, mEventCount(0)
 {
     SetTimeout(5);
 }

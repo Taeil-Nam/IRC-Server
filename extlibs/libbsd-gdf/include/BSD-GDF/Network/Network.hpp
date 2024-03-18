@@ -1,16 +1,6 @@
-/**
- * @file Network.hpp
- * @author Taeil-Nam (nam0314@gmail.com)
- * @brief 네트워크와 관련된 역할을 수행하는 클래스
- * @version 0.1
- * @date 2024-02-15
- * 
- * @copyright Copyright (c) 2024
- * 
- */
-
 #pragma once
 
+#include <map>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -19,9 +9,10 @@
 #include <netinet/tcp.h>
 #include <fcntl.h>
 
-#include "common.hpp"
+#include "../Config.hpp"
+#include "../Logger.hpp"
 
-namespace grc
+namespace gdf
 {
 
 class Network
@@ -31,7 +22,7 @@ public:
     ~Network();
 
     bool Init(const int32 port);
-    const int32 ConnectNewClient();
+    int32 ConnectNewClient();
     void RecvFromClient(const int32 socket);
     void SendToClient(const int32 socket);
 

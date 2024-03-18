@@ -8,11 +8,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "common.hpp"
+#include "../Config.hpp"
 
-#include "Display.hpp"
+#include "./DisplayBuffer.hpp"
 
-namespace grc
+namespace gdf
 {
 
 class DisplayConsole
@@ -20,21 +20,22 @@ class DisplayConsole
 public:
     DisplayConsole(const std::string& IN header = "header",
                    const std::string& IN footer = "footer",
-                   const Display::eColor IN headerColor = Display::WhiteCharBlueBG,
-                   const Display::eColor IN footerColor = Display::WhiteCharBlueBG);
+                   const DisplayBuffer::eColor IN headerColor = DisplayBuffer::WhiteCharBlueBG,
+                   const DisplayBuffer::eColor IN footerColor = DisplayBuffer::WhiteCharBlueBG);
     virtual ~DisplayConsole();
     
     void Refresh();
     void SetIsScreenUpdated(bool status);
     void PushCharPrompt(const char IN ch);
     bool PollPromptQueue(std::string& OUT prompt);
-    void PushContent(const std::string& IN content, Display::eColor IN color = Display::Default);
+    void PushContent(const std::string& IN content, DisplayBuffer::eColor IN color = DisplayBuffer::Default);
     void ClearContent();
+    bool IsFailed();
 
     void SetHeader(const std::string& IN str);
     void SetFooter(const std::string& IN str);
-    void SetHeaderColor(const Display::eColor IN color);
-    void SetFooterColor(const Display::eColor IN color);
+    void SetHeaderColor(const DisplayBuffer::eColor IN color);
+    void SetFooterColor(const DisplayBuffer::eColor IN color);
     void SetTimestamp(const bool IN enable);
 
     
@@ -53,20 +54,21 @@ private: // variables
     static uint64 sStaticInstanceCount;
     static struct termios sStaticOldTerminal;
     
-    Display mDisplay;
+    DisplayBuffer mDisplay;
     // general
-    std::map<Display::eColor, std::string> mANSIColors;
+    std::map<DisplayBuffer::eColor, std::string> mANSIColors;
     std::string mHeaderColor;
     std::string mFooterColor;
     bool bIsTimestampEnabled;
+    bool bIsFailed;
 
     // input
     std::string mPromptBuffer;
     std::deque<std::string> mPromptQueue;
 
     // attr
-    int32 mConsoleWidth;
-    int32 mConsoleHeight;
+    uint64 mConsoleWidth;
+    uint64 mConsoleHeight;
 
     // screen buffer
     bool bIsScreenUpdated;

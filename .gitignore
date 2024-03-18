@@ -5,3 +5,5 @@ ircserv
 log
 *.d
 a.out
+*.dylib
+.DS_Store

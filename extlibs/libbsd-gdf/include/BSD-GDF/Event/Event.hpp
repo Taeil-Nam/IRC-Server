@@ -11,11 +11,16 @@
 
 #pragma once
 
+#include <new>
+#include <ctime>
+#include <cstring>
+#include <unistd.h>
 #include <sys/event.h>
 
-#include "common.hpp"
+#include "../Config.hpp"
+#include "../Logger.hpp"
 
-namespace grc
+namespace gdf
 {
 
 class Event

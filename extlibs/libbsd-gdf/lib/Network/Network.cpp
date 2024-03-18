@@ -1,8 +1,6 @@
-#include "Network.hpp"
-#include "common.hpp"
-#include <netdb.h>
+#include "../../include/BSD-GDF/Network/Network.hpp"
 
-namespace grc
+namespace gdf
 {
 
 Network::Network()
@@ -31,7 +29,7 @@ bool Network::Init(const int32 port)
     return SUCCESS;
 }
 
-const int32 Network::ConnectNewClient()
+int32 Network::ConnectNewClient()
 {
     // client 연결
     sockaddr_in clientAddr;

@@ -1,26 +1,28 @@
-#include "DisplayConsole.hpp"
+#include "../../include/BSD-GDF/Display/DisplayConsole.hpp"
 
-namespace grc
+namespace gdf
 {
 
 uint64 DisplayConsole::sStaticInstanceCount = 0;
 struct termios DisplayConsole::sStaticOldTerminal;
 DisplayConsole::DisplayConsole(const std::string& IN header,
                                const std::string& IN footer,
-                               const Display::eColor IN headerColor,
-                               const Display::eColor IN footerColor)
+                               const DisplayBuffer::eColor IN headerColor,
+                               const DisplayBuffer::eColor IN footerColor)
 : bIsTimestampEnabled(true)
+, bIsFailed(false)
 , bIsScreenUpdated(true)
-, bIsScreenBufferRemain(true)
 , mScreenBufferIndex(0)
+, bIsScreenBufferRemain(true)
+
 {
-    mANSIColors[Display::Default] = "\033[0m";
-    mANSIColors[Display::Cyan] = "\033[36m";
-    mANSIColors[Display::Red] = "\033[31m";
-    mANSIColors[Display::Green] = "\033[32m";
-    mANSIColors[Display::BrightBlue] = "\033[34;1m";
-    mANSIColors[Display::WhiteCharBlueBG] = "\033[44;37m";
-    mANSIColors[Display::WhiteCharRedBG] = "\033[41;37m";
+    mANSIColors[DisplayBuffer::Default] = "\033[0m";
+    mANSIColors[DisplayBuffer::Cyan] = "\033[36m";
+    mANSIColors[DisplayBuffer::Red] = "\033[31m";
+    mANSIColors[DisplayBuffer::Green] = "\033[32m";
+    mANSIColors[DisplayBuffer::BrightBlue] = "\033[34;1m";
+    mANSIColors[DisplayBuffer::WhiteCharBlueBG] = "\033[44;37m";
+    mANSIColors[DisplayBuffer::WhiteCharRedBG] = "\033[41;37m";
     mDisplay.SetHeader(header);
     mDisplay.SetFooter(footer);
     mHeaderColor = mANSIColors[headerColor];
@@ -74,7 +76,7 @@ bool DisplayConsole::PollPromptQueue(std::string& OUT prompt)
     return true;
 }
 
-void DisplayConsole::PushContent(const std::string& IN content, Display::eColor IN color)
+void DisplayConsole::PushContent(const std::string& IN content, DisplayBuffer::eColor IN color)
 {
     bIsScreenUpdated = true;
     mDisplay.PushContent(content, color);
@@ -84,6 +86,11 @@ void DisplayConsole::ClearContent()
 {
     bIsScreenUpdated = true;
     mDisplay.Clear();
+}
+
+bool DisplayConsole::IsFailed()
+{
+    return bIsFailed;
 }
 
 void DisplayConsole::SetHeader(const std::string& IN str)
@@ -98,13 +105,13 @@ void DisplayConsole::SetFooter(const std::string& IN str)
     mDisplay.SetFooter(str);
 }
 
-void DisplayConsole::SetHeaderColor(const Display::eColor IN color)
+void DisplayConsole::SetHeaderColor(const DisplayBuffer::eColor IN color)
 {
     bIsScreenUpdated = true;
     mHeaderColor = mANSIColors[color];
 }
 
-void DisplayConsole::SetFooterColor(const Display::eColor IN color)
+void DisplayConsole::SetFooterColor(const DisplayBuffer::eColor IN color)
 {
     bIsScreenUpdated = true;
     mFooterColor = mANSIColors[color];
@@ -130,8 +137,14 @@ void DisplayConsole::Refresh()
         const char *buf = mScreenBuffer.c_str();
         const uint64 len = std::strlen(&buf[mScreenBufferIndex]);
         const int64 wrote = write(1, &buf[mScreenBufferIndex], len);
+        if (wrote == -1)
+        {
+            bIsFailed = true;
+            return ;
+        }
+
         mScreenBufferIndex += wrote;
-        if (wrote == len)
+        if (static_cast<uint64>(wrote) == len)
         {
             bIsScreenBufferRemain = false;
             mScreenBufferIndex = 0;
@@ -159,7 +172,6 @@ void DisplayConsole::setTerminalMode(const bool IN enable)
     struct termios newTerminal;
     if (enable)
     {
-        ASSERT(sStaticInstanceCount == 0);
         tcgetattr(STDIN_FILENO, &sStaticOldTerminal);
         newTerminal = sStaticOldTerminal;
         newTerminal.c_lflag &= ~(ICANON);
@@ -239,13 +251,13 @@ void DisplayConsole::appendHeader(std::string& OUT screenBuffer)
         uint64 emptyLength = mConsoleWidth - (headerWidth + 1);
         screenBuffer += mHeaderColor + ' ' + mDisplay.GetHeader()
                            + std::string(emptyLength, ' ')
-                           + mANSIColors.at(Display::Default) + '\n';
+                           + mANSIColors.at(DisplayBuffer::Default) + '\n';
     }
     else
     {
         screenBuffer += mHeaderColor + ' '
                            + mDisplay.GetHeader().substr(0, mConsoleWidth - 1)
-                           + mANSIColors.at(Display::Default) + '\n';
+                           + mANSIColors.at(DisplayBuffer::Default) + '\n';
     }
 }
 
@@ -253,7 +265,7 @@ void DisplayConsole::appendContent(std::string& OUT screenBuffer)
 {
     const uint64 leftHeight = mConsoleHeight - 3;
     uint64 outBufferIndex = 0;
-    const std::deque<Display::Content>& contentBuffer = mDisplay.GetContentBuffer();
+    const std::deque<DisplayBuffer::Content>& contentBuffer = mDisplay.GetContentBuffer();
     if (contentBuffer.size() > leftHeight)
         outBufferIndex = contentBuffer.size() - leftHeight;
     for (uint64 i = outBufferIndex; i < contentBuffer.size(); ++i)
@@ -261,10 +273,10 @@ void DisplayConsole::appendContent(std::string& OUT screenBuffer)
         if (bIsTimestampEnabled)
         {
             screenBuffer += contentBuffer[i].TimeStamp + ' '
-                               + mANSIColors.at(Display::BrightBlue) + '-'
-                               + mANSIColors.at(Display::Default) + '!'
-                               + mANSIColors.at(Display::BrightBlue) + '-'
-                               + mANSIColors.at(Display::Default) + ' ';
+                               + mANSIColors.at(DisplayBuffer::BrightBlue) + '-'
+                               + mANSIColors.at(DisplayBuffer::Default) + '!'
+                               + mANSIColors.at(DisplayBuffer::BrightBlue) + '-'
+                               + mANSIColors.at(DisplayBuffer::Default) + ' ';
         }
         if (strlenMultiByte(contentBuffer[i].String)
             + (bIsTimestampEnabled ? 10 : 0)
@@ -288,13 +300,13 @@ void DisplayConsole::appendContent(std::string& OUT screenBuffer)
                 }
 
             }
-            screenBuffer += "...\n" + mANSIColors.at(Display::Default);
+            screenBuffer += "...\n" + mANSIColors.at(DisplayBuffer::Default);
         }
         else
         {
             screenBuffer += mANSIColors.at(contentBuffer[i].Color)
                                + contentBuffer[i].String + '\n'
-                               + mANSIColors.at(Display::Default); 
+                               + mANSIColors.at(DisplayBuffer::Default); 
         }
     }    
 }
@@ -308,13 +320,13 @@ void DisplayConsole::appendFooter(std::string& OUT screenBuffer)
         uint64 emptyLength = mConsoleWidth - (Footer + 1);
         screenBuffer += mFooterColor + ' ' + mDisplay.GetFooter()
                            + std::string(emptyLength, ' ')
-                           + mANSIColors.at(Display::Default) + '\n';
+                           + mANSIColors.at(DisplayBuffer::Default) + '\n';
     }
     else
     {
         screenBuffer += mFooterColor + ' '
                            + mDisplay.GetFooter().substr(0, mConsoleWidth - 1)
-                           + mANSIColors.at(Display::Default) + '\n';
+                           + mANSIColors.at(DisplayBuffer::Default) + '\n';
     }
 }
 

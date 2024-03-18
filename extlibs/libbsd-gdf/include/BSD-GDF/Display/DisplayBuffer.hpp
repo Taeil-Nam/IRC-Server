@@ -1,13 +1,17 @@
 #pragma once
 
 #include <ctime>
+#include <iostream>
+#include <deque>
+#include <sstream>
+#include <iomanip>
 
-#include "common.hpp"
+#include "../Config.hpp"
 
-namespace grc
+namespace gdf
 {
 
-class Display
+class DisplayBuffer
 {
 public:
     enum eColor
@@ -26,13 +30,13 @@ public:
         std::string String;
         eColor Color;
     };
-    Display();
-    virtual ~Display();
-    Display(const Display& copy);
-    Display& operator=(const Display& IN copy);
+    DisplayBuffer();
+    virtual ~DisplayBuffer();
+    DisplayBuffer(const DisplayBuffer& copy);
+    DisplayBuffer& operator=(const DisplayBuffer& IN copy);
     void Clear();
-    void PushContent(const std::string& IN str, Display::eColor IN color);
-    const std::deque<Display::Content>& GetContentBuffer() const;
+    void PushContent(const std::string& IN str, DisplayBuffer::eColor IN color);
+    const std::deque<DisplayBuffer::Content>& GetContentBuffer() const;
     const std::string& GetHeader() const;
     const std::string& GetFooter() const;
     void SetHeader(const std::string& IN str);
