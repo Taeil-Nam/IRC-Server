@@ -16,23 +16,18 @@
 // standard (표준 헤더)
 #include <iostream>
 #include <string>
-#include <iomanip>
-#include <map>
-#include <unordered_map>
-#include <deque>
+
+// BSD-GDF 라이브러리
+#include <BSD-GDF/Assert.hpp>
+#include <BSD-GDF/Logger.hpp>
+#include <BSD-GDF/Display.hpp>
+#include <BSD-GDF/Event.hpp>
+#include <BSD-GDF/Network.hpp>
 
 // custom (사용자 정의 헤더)
-#include "types.hpp"
 #include "utils/isInt.hpp"
-#include "utils/GlobalLogger.hpp"
-#include "utils/AssertManager.hpp"
+
 
 // 공용 매크로
-#define SUCCESS true
-#define FAILURE false
-#define ERROR -1
-
 #define IRC_MESSAGE_SIZE 512
 
-#define IN
-#define OUT

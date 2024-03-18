@@ -136,25 +136,25 @@ bool Core::initLog()
 void Core::initConsoleWindow()
 {
     mLogMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Log monitor");
-    mLogMonitor.SetHeaderColor(Display::WhiteCharBlueBG);
-    mLogMonitor.SetFooterColor(Display::WhiteCharBlueBG);
+    mLogMonitor.SetHeaderColor(DisplayBuffer::WhiteCharBlueBG);
+    mLogMonitor.SetFooterColor(DisplayBuffer::WhiteCharBlueBG);
     mLogMonitor.SetTimestamp(true);
     mServerMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Server monitor");
-    mServerMonitor.SetHeaderColor(Display::WhiteCharRedBG);
-    mServerMonitor.SetFooterColor(Display::WhiteCharRedBG);
+    mServerMonitor.SetHeaderColor(DisplayBuffer::WhiteCharRedBG);
+    mServerMonitor.SetFooterColor(DisplayBuffer::WhiteCharRedBG);
     mServerMonitor.SetTimestamp(false);
-    mLogMonitor.PushContent(std::string("                                                      "), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("  ▄████  ▄▄▄       ███▄ ▄███▓▓█████  ██▀███   ▄████▄  "), grc::Display::Red);
-    mLogMonitor.PushContent(std::string(" ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀ ▓██ ▒ ██▒▒██▀ ▀█  "), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███   ▓██ ░▄█ ▒▒▓█    ▄ "), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄ ▒██▀▀█▄  ▒▓▓▄ ▄██▒"), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒░██▓ ▒██▒▒ ▓███▀ ░"), grc::Display::Red);
-    mLogMonitor.PushContent(std::string(" ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░░ ▒▓ ░▒▓░░ ░▒ ▒  ░"), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("  ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░  ░▒ ░ ▒░  ░  ▒   "), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("░ ░   ░   ░   ▒   ░      ░      ░     ░░   ░ ░        "), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("      ░       ░  ░       ░      ░  ░   ░     ░ ░      "), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("                                             ░        "), grc::Display::Red);
-    mLogMonitor.PushContent(std::string("GameRC v1.0.0                   IRC server application"), grc::Display::Red);
+    mLogMonitor.PushContent(std::string("                                                      "), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("  ▄████  ▄▄▄       ███▄ ▄███▓▓█████  ██▀███   ▄████▄  "), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string(" ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀ ▓██ ▒ ██▒▒██▀ ▀█  "), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███   ▓██ ░▄█ ▒▒▓█    ▄ "), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄ ▒██▀▀█▄  ▒▓▓▄ ▄██▒"), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒░██▓ ▒██▒▒ ▓███▀ ░"), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string(" ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░░ ▒▓ ░▒▓░░ ░▒ ▒  ░"), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("  ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░  ░▒ ░ ▒░  ░  ▒   "), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("░ ░   ░   ░   ▒   ░      ░      ░     ░░   ░ ░        "), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("      ░       ░  ░       ░      ░  ░   ░     ░ ░      "), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("                                             ░        "), DisplayBuffer::Red);
+    mLogMonitor.PushContent(std::string("GameRC v1.0.0                   IRC server application"), DisplayBuffer::Red);
     mActivatedWindow = &mLogMonitor;
 }
 
@@ -213,7 +213,7 @@ void Core::handleMonitorCommand()
             if (prompt == "/status")
             {
                 mLogMonitor.PushContent("Server is running",
-                                        Display::Green);
+                                        DisplayBuffer::Green);
                 mLogMonitor.PushContent("IP:        127.0.0.1");
                 std::stringstream sPort; sPort << mPort;
                 mLogMonitor.PushContent("port:      " + sPort.str());
@@ -236,7 +236,7 @@ void Core::handleMonitorCommand()
             }
             else
             {
-                mLogMonitor.PushContent("command not found: " +prompt, Display::Red);
+                mLogMonitor.PushContent("command not found: " +prompt, DisplayBuffer::Red);
             }
         }
         else if (mActivatedWindow == &mServerMonitor)
