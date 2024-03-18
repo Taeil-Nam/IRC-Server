@@ -65,7 +65,7 @@ void DisplayConsole::PushCharPrompt(const char IN ch)
     }
 }
 
-bool DisplayConsole::pollPromptQueue(std::string& OUT prompt)
+bool DisplayConsole::PollPromptQueue(std::string& OUT prompt)
 {
     if (mPromptQueue.empty())
         return false;
@@ -116,7 +116,7 @@ void DisplayConsole::SetTimestamp(const bool IN enable)
     bIsTimestampEnabled = enable;
 }
 
-void DisplayConsole::ScreenNonBlockWrite()
+void DisplayConsole::Refresh()
 {
     if (bIsScreenUpdated || updateConsoleSize())
     {

@@ -30,28 +30,28 @@ void Core::Run()
         for (uint64 i = 0; i < eventCount; ++i)
         {
             const struct kevent& event = eventList[i];
-            if (identifyEvent(STDIN, READ, event))
+            if (identifyEvent(event, READ, STDIN))
             {
-                inputToConsole();
-                excuteConsoleCommand();
+                handleMonitorInput();
+                handleMonitorCommand();
             }
-            else if (identifyEvent(STDOUT, WRITE, event))
+            else if (identifyEvent(event, WRITE, STDOUT))
             {
-                mActivatedWindow->ScreenNonBlockWrite();
+                mActivatedWindow->Refresh();
             }
-            else if (identifyEvent(mLogFileFD, WRITE, event))
+            else if (identifyEvent(event, WRITE, mLogFileFD))
             {
                 handleLogBuffer();
             }
-            else if (isServerSocket(event.ident) && event.filter == READ)
+            else if (identifyEvent(event, READ) && isServerSocket(event))
             {
-                SetupNewClient();
+                setupNewClient();
             }
-            else if (isClientSocket(event.ident) && event.filter == READ)
+            else if (identifyEvent(event, READ) && isClientSocket(event))
             {
                 mNetwork.RecvFromClient(event.ident);
             }
-            else if (isClientSocket(event.ident) && event.filter == WRITE)
+            else if (identifyEvent(event, WRITE) && isClientSocket(event))
             {
                 mNetwork.SendToClient(event.ident);
             }
@@ -156,10 +156,9 @@ void Core::initConsoleWindow()
     mLogMonitor.PushContent(std::string("                                             ░        "), grc::Display::Red);
     mLogMonitor.PushContent(std::string("GameRC v1.0.0                   IRC server application"), grc::Display::Red);
     mActivatedWindow = &mLogMonitor;
-    gettimeofday(&mLastConsoleRefresh, NULL);
 }
 
-bool Core::identifyEvent(const int32 fd, const eEventType type, const struct kevent& event)
+bool Core::identifyEvent(const struct kevent& event, const eEventType type, const int32 fd)
 {
     if (event.ident == fd && event.filter == type)
     {
@@ -171,7 +170,7 @@ bool Core::identifyEvent(const int32 fd, const eEventType type, const struct kev
     }
 }
 
-bool Core::identifyEvent(const eEventType type, const struct kevent& event)
+bool Core::identifyEvent(const struct kevent& event, const eEventType type)
 {
     if (event.filter == type)
     {
@@ -183,7 +182,7 @@ bool Core::identifyEvent(const eEventType type, const struct kevent& event)
     }
 }
 
-void Core::inputToConsole()
+void Core::handleMonitorInput()
 {
     const char key = getchar();
     if (key == '\t')
@@ -200,10 +199,10 @@ void Core::inputToConsole()
     }
 }
 
-void Core::excuteConsoleCommand()
+void Core::handleMonitorCommand()
 {
     std::string prompt;
-    while (mActivatedWindow->pollPromptQueue(prompt))
+    while (mActivatedWindow->PollPromptQueue(prompt))
     {
         if (prompt == "/exit" || prompt == "/quit")
         {
@@ -288,7 +287,7 @@ void Core::handleLogBuffer()
     }
 }
 
-void Core::SetupNewClient()
+void Core::setupNewClient()
 {
     const int32 newClient = mNetwork.ConnectNewClient();
     if (newClient != ERROR)
@@ -300,28 +299,9 @@ void Core::SetupNewClient()
     }
 }
 
-bool Core::isTimePassed(const int64 ms)
+bool Core::isServerSocket(const struct kevent& event)
 {
-    struct timeval nowTime;
-    gettimeofday(&nowTime, NULL);
-    const int64 elapsedTime = (nowTime.tv_sec - mLastConsoleRefresh.tv_sec)
-                                * 1000L
-                                + (nowTime.tv_usec - mLastConsoleRefresh.tv_usec)
-                                / 1000L;
-    if (elapsedTime >= ms)
-    {
-        mLastConsoleRefresh = nowTime;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool Core::isServerSocket(const int32 socket)
-{
-    if (socket == mNetwork.GetServerSocket())
+    if (event.ident == mNetwork.GetServerSocket())
     {
         return true;
     }
@@ -331,12 +311,12 @@ bool Core::isServerSocket(const int32 socket)
     }
 }
 
-bool Core::isClientSocket(const int32 socket)
+bool Core::isClientSocket(const struct kevent& event)
 {
-    if (socket != mNetwork.GetServerSocket()
-        && socket != STDIN
-        && socket != STDOUT
-        && socket != mLogFileFD)
+    if (event.ident != mNetwork.GetServerSocket()
+        && event.ident != STDIN
+        && event.ident != STDOUT
+        && event.ident != mLogFileFD)
     {
         return true;
     }
