@@ -18,7 +18,7 @@
 #include <sys/event.h>
 
 #include "../Config.hpp"
-#include "../Logger.hpp"
+#include <BSD-GDF/Logger.hpp>
 
 namespace gdf
 {
