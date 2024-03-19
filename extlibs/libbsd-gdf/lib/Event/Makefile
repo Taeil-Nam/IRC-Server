@@ -1,11 +1,11 @@
 NAME				:=	../libbsd-gdf-event.dylib
 CXX					:=	c++
-CXXFLAGS			:=	-Wall -Wextra -Werror -std=c++98
-LDFLAGS				:=	-dynamiclib -install_name '@rpath/libbsd-gdf-event.dylib'
+CXXFLAGS			:=	-Wall -Wextra -Werror -std=c++98 -I../../include
+LDFLAGS				:=	-dynamiclib -install_name '@rpath/libbsd-gdf-event.dylib' -L../../lib -Wl,-rpath,../../lib
+LDLIBS				:=	-lbsd-gdf-logger
 
 FILE_DIR			:=	./
-FILE_NAME			:=	Event.cpp						\
-						../Logger/GlobalLogger.cpp
+FILE_NAME			:=	Event.cpp
 
 FILE_SRCS 			:=	$(addprefix $(FILE_DIR), $(FILE_NAME))
 FILE_OBJS			:=	$(FILE_SRCS:.cpp=.o)
@@ -13,7 +13,7 @@ FILE_OBJS			:=	$(FILE_SRCS:.cpp=.o)
 all : $(NAME)
 
 $(NAME) : $(FILE_OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $^
+	$(CXX) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
 %.o : %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
