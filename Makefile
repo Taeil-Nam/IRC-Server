@@ -43,5 +43,6 @@ bonus :
 
 #----------------------------------#
 clangd :
-	/bin/bash clangd_gen.sh
+	echo "CompileFlags:" > .clangd
+	echo "  Add: [-I$(PWD)/src, -I$(PWD)/extlibs/libbsd-gdf/include, -std=c++98]" >> .clangd
 #----------------------------------#
