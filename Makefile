@@ -48,7 +48,7 @@ clangd :
 
 
 lib :
-	git init
+	git submodule init
 	git submodule update
 
 lib-update:
