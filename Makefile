@@ -45,4 +45,12 @@ bonus :
 clangd :
 	echo "CompileFlags:" > .clangd
 	echo "  Add: [-I$(PWD)/src, -I$(PWD)/extlibs/libbsd-gdf/include, -std=c++98]" >> .clangd
+
+
+lib :
+	git init
+	git submodule update
+
+lib-update:
+	git submodule update --remote
 #----------------------------------#
