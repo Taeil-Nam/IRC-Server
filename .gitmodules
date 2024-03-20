@@ -1,0 +1,3 @@
+[submodule "extlibs/libbsd-gdf"]
+	path = extlibs/libbsd-gdf
+	url = https://github.com/jeekpark/libbsd-gdf.git
