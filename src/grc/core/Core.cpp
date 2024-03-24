@@ -25,37 +25,36 @@ void Core::Run()
 {
     while (bRunning)
     {
-        const struct kevent* eventList = mEvent.GetEventList();
-        const int eventCount = mEvent.GetEventCount();
-        for (uint64 i = 0; i < eventCount; ++i)
+        KernelEvent event;
+        while (mKernelQueue.Poll(event))
         {
-            const struct kevent& event = eventList[i];
-            if (identifyEvent(event, READ, STDIN))
+            if (event.IdentifyFD(STDIN) && event.IsReadType())
             {
                 handleMonitorInput();
                 handleMonitorCommand();
             }
-            else if (identifyEvent(event, WRITE, STDOUT))
+            else if (event.IdentifyFD(STDOUT) && event.IsWriteType())
             {
                 mActivatedWindow->Refresh();
             }
-            else if (identifyEvent(event, WRITE, mLogFileFD))
+            else if (event.IdentifyFD(mLogFileFD) && event.IsWriteType())
             {
                 handleLogBuffer();
             }
-            else if (identifyEvent(event, READ) && isServerSocket(event))
+            else if (event.IdentifySocket(mNetwork.GetServerSocket()) && event.IsReadType())
             {
                 setupNewClient();
             }
-            else if (identifyEvent(event, READ) && isClientSocket(event))
+            else if (event.IsReadType())
             {
-                mNetwork.RecvFromClient(event.ident);
+                mNetwork.RecvFromClient(event.GetIdentifier());
             }
-            else if (identifyEvent(event, WRITE) && isClientSocket(event))
+            else if (event.IsWriteType())
             {
-                mNetwork.SendToClient(event.ident);
+                mNetwork.SendToClient(event.GetIdentifier());
             }
         }
+
 
         /* IRC 로직 수행 */
 
@@ -69,7 +68,7 @@ bool Core::Init()
         return FAILURE;
     }
     initConsoleWindow();
-    if (mEvent.Init() == FAILURE)
+    if (mKernelQueue.Init() == FAILURE)
     {
         LOG(LogLevel::Error) << "Failed to init Event";
         return FAILURE;
@@ -80,23 +79,23 @@ bool Core::Init()
         return FAILURE;
     }
     /* Add basic events */
-    if (mEvent.AddReadEvent(STDIN_FILENO) == FAILURE)
+    if (mKernelQueue.AddReadEvent(STDIN_FILENO) == FAILURE)
     {
         LOG(LogLevel::Error) << "Failed to add STDIN READ event";
         return FAILURE;
     }
-    if (mEvent.AddWriteEvent(STDOUT_FILENO) == FAILURE)
+    if (mKernelQueue.AddWriteEvent(STDOUT_FILENO) == FAILURE)
     {
         LOG(LogLevel::Error) << "Failed to add STDOUT WRITE event";
         return FAILURE;
     }
     fcntl(STDOUT_FILENO, F_SETFL, O_NONBLOCK);
-    if (mEvent.AddWriteEvent(mLogFileFD) == FAILURE)
+    if (mKernelQueue.AddWriteEvent(mLogFileFD) == FAILURE)
     {
         LOG(LogLevel::Error) << "Failed to add log file WRITE event";
         return FAILURE;
     }
-    if (mEvent.AddReadEvent(mNetwork.GetServerSocket()) == FAILURE)
+    if (mKernelQueue.AddReadEvent(mNetwork.GetServerSocket()) == FAILURE)
     {
         LOG(LogLevel::Error) << "Failed to add server socket READ event";
         return FAILURE;
@@ -257,7 +256,11 @@ void Core::handleLogBuffer()
     const char *buf = mLogBuffer.c_str();
     const uint64 len = std::strlen(&buf[mLogBufferIndex]);
     const int64 wrote = write(mLogFileFD, &buf[mLogBufferIndex], len);
-    
+    if (wrote == -1)
+    {
+        LOG(LogLevel::Notice) << "Failed to write on logfile.";
+        return ;
+    }
 
     /* to log monitor */
     std::string toLogMonitor = mLogBuffer.substr(mLogBufferIndex, wrote);
@@ -292,7 +295,7 @@ void Core::setupNewClient()
     const int32 newClient = mNetwork.ConnectNewClient();
     if (newClient != ERROR)
     {
-        if (mEvent.AddReadEvent(newClient))
+        if (mKernelQueue.AddReadEvent(newClient))
         {
             LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClient) << ") connected";
         }

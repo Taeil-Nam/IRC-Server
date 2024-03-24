@@ -68,7 +68,7 @@ private:
     const int mPort;
     const std::string mPassword;
     bool bRunning;
-    Event mEvent;
+    KernelQueue mKernelQueue;
     Network mNetwork;
     int32 mLogFileFD;
     std::string mLogFileName;
