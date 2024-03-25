@@ -3,7 +3,7 @@
 구현을 위한 최소한의 내용만 정리되어 있으며, 더 많은 정보는 [RFC 1459](https://datatracker.ietf.org/doc/html/rfc1459)를 참고한다.  
 현대의 IRC의 기능에 대해서는 [Modern IRC](https://modern.ircdocs.horse/)를 참고한다.
 
-## 목차
+# 목차
 - [1. 소개](#1-소개)
   - [1.1. Servers](#11-servers)
   - [1.2. Clients](#12-clients)
@@ -16,7 +16,7 @@
   - [2.3. Messages](#23-messages)
     - [2.3.1. Message format in 'pseudo' BNF](#231-message-format-in-pseudo-bnf)
 
-### 1. 소개
+## 1. 소개
 IRC는 텍스트 기반 회의를 위해 설계되었다.  
 IRC 자체가 원격회의 시스템으로, Client-Server 모델의 분산 방식으로 운영하기에 적합하다.  
 일반적으로, 단일 server를 중심으로 client(또는 다른 server)가 연결될 수 있게 하고, 필요한 메시지 전달과 같은 기능들을 수행한다.  
@@ -71,7 +71,7 @@ Channel operator는 아래와 같이 channel을 통제하고 조율을 유지할
   
 Channel operator는 nickname 옆에 '@' 기호로 식별된다. (NAMES, WHO, WHOIS 명령어 응답시에도 사용)
 
-### 2. IRC Protocol 명세
+## 2. IRC Protocol 명세
 ### 2.1. 개요
 여기에 설명된 protocol은 server-to-server, client-to-server 연결에 둘 다 사용된다.  
 
