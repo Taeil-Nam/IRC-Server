@@ -12,7 +12,7 @@
 #include "common.hpp"
 #include "grc/core/Core.hpp"
 
-int main(const int argc, const char **argv)
+int main(const int IN argc, const char** IN argv)
 {
     if (argc != 3
         || isInt(argv[1]) == false
@@ -27,9 +27,7 @@ int main(const int argc, const char **argv)
 
     {
         grc::Core server(port, password);
-
         server.Init();
-        
         server.Run();
     }
     return EXIT_SUCCESS;

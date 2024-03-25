@@ -5,7 +5,7 @@
 namespace grc
 {
 
-Core::Core(const int port, const std::string& password)
+Core::Core(const int IN port, const std::string& IN password)
 : mPort(port)
 , mPassword(password)
 , bRunning(false)
@@ -157,30 +157,6 @@ void Core::initConsoleWindow()
     mActivatedWindow = &mLogMonitor;
 }
 
-bool Core::identifyEvent(const struct kevent& event, const eEventType type, const int32 fd)
-{
-    if (event.ident == fd && event.filter == type)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool Core::identifyEvent(const struct kevent& event, const eEventType type)
-{
-    if (event.filter == type)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
 void Core::handleMonitorInput()
 {
     const char key = getchar();
@@ -299,33 +275,6 @@ void Core::setupNewClient()
         {
             LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClient) << ") connected";
         }
-    }
-}
-
-bool Core::isServerSocket(const struct kevent& event)
-{
-    if (event.ident == mNetwork.GetServerSocket())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool Core::isClientSocket(const struct kevent& event)
-{
-    if (event.ident != mNetwork.GetServerSocket()
-        && event.ident != STDIN
-        && event.ident != STDOUT
-        && event.ident != mLogFileFD)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
     }
 }
 
