@@ -25,7 +25,7 @@ namespace grc
 class Core
 {
 public:
-    Core(const int port, const std::string& password);
+    Core(const int IN port, const std::string& IN password);
     ~Core();
 
     bool Init();
@@ -43,7 +43,7 @@ private:
         STDOUT = STDOUT_FILENO
     };
 private:
-    Core();
+    Core(); // = delete
     Core(const Core& core); // = delete
     const Core& operator=(const Core& core); // = delete
 
@@ -51,18 +51,12 @@ private:
     void initConsoleWindow();
 
     /* about event */
-    bool identifyEvent(const struct kevent& event, const eEventType type, const int32 fd);
-    bool identifyEvent(const struct kevent& event, const eEventType type);
     void handleMonitorInput();
     void handleMonitorCommand();
     void handleLogBuffer();
 
     /* about network connection */
     void setupNewClient();
-
-    /* about idenfify network socket */
-    bool isServerSocket(const struct kevent& event);
-    bool isClientSocket(const struct kevent& event);
 
 private:
     const int mPort;
