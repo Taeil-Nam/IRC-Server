@@ -1,7 +1,7 @@
 NAME		=	ircserv
 
 CXX			=	c++
-CXXFLAGS	=	-I./src	-I./extlibs/libbsd-gdf/include -MMD #-Wall -Wextra -Werror -std=c++98
+CXXFLAGS	=	-I./src	-I./extlibs/libbsd-gdf/include -MMD -Wall -Wextra -Werror -std=c++98
 
 LDFLAGS		=	-L./extlibs/libbsd-gdf/lib -Wl,-rpath,./extlibs/libbsd-gdf/lib
 LDLIBS		=	-lbsd-gdf-assert -lbsd-gdf-logger -lbsd-gdf-display -lbsd-gdf-network -lbsd-gdf-event
@@ -30,7 +30,6 @@ clean :
 	$(MAKE) clean -C extlibs/libbsd-gdf
 	$(RM) $(OBJS) $(DEPS)
 re :
-	$(MAKE) re -C extlibs/libbsd-gdf
 	$(MAKE) fclean
 	$(MAKE) all
 	

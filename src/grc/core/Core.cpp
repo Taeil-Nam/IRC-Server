@@ -259,7 +259,7 @@ void Core::handleLogBuffer()
     }
 
     mLogBufferIndex += wrote;
-    if (wrote == len)
+    if ((uint64)wrote == len)
     {
         mLogBuffer.clear();
         mLogBufferIndex = 0;
