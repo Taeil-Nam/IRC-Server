@@ -1,8 +1,11 @@
 # 💬 ft_irc
-이 프로젝트는 C++98을 사용하여 ```IRC``` (Internet Relay Chat) 서버를 만드는 프로젝트이다.
+이 프로젝트는 C++98을 사용하여 `IRC` (Internet Relay Chat) 서버를 만드는 프로젝트이다.
 
 ## 구조
-```ARCHITECTURE.md``` 파일 참고.
+`docs/ARCHITECTURE.md` 파일 참고.
+
+## IRC Protocol
+`docs/IRC.md` 파일 참고.
 
 ## 기능
 ### TCP/IP 통신
@@ -62,8 +65,15 @@ $> ./ircserv [port] [password]
 </a> 
 
 ## 라이센스
-MIT 라이센스를 따른다.  
-자세한 내용은 ```LICENSE.txt``` 파일 참고.
+이 프로그램은 MIT 라이센스에 따라 라이센스가 부여됩니다:
+
+Copyright © 2024 Game Development Forever.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## 팀 멤버
 - [Taeil Nam (Tayden)](https://github.com/Taeil-Nam) - nam0314@gmail.com
