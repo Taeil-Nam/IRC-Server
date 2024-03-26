@@ -1,11 +1,12 @@
 # 💬 ft_irc
 이 프로젝트는 C++98을 사용하여 `IRC` (Internet Relay Chat) 서버를 만드는 프로젝트이다.
 
+---
+
 ## 구조
 `docs/ARCHITECTURE.md` 파일 참고.
 
-## IRC Protocol
-`docs/IRC.md` 파일 참고.
+---
 
 ## 기능
 ### TCP/IP 통신
@@ -31,6 +32,16 @@
 - 로그 파일에 메세지 로깅.
 - [syslog severity](https://datatracker.ietf.org/doc/html/rfc5424#section-6.2.1)를 사용하여 메세지 분류.
 
+### 동적 라이브러리
+BSD 계열 시스템에서 자주 사용될 기능을 동적 라이브러리로 구현:
+- Display : 콘솔 입출력.
+- Network : 네트워크.
+- Event : IO 멀티플렉싱.
+- Logger : 로깅.
+- Assert : 커스텀 Assert.
+
+---
+
 ## 시작하기
 ### 사전 요구사항
 - Intel CPU Mac.
@@ -46,7 +57,11 @@ $> git clone [this repo]
 ```bash
 $> cd [this repo]
 ```
-3. "make" 명령어로 프로그램 생성  
+3. "make lib" 명령어로 동적 라이브러리 생성  
+```bash
+$> make lib
+```
+4. "make" 명령어로 프로그램 생성  
 ```bash
 $> make
 ```
@@ -59,13 +74,17 @@ $> ./ircserv [port] [password]
 - port = IRC 서버에서 사용할 포트 번호.
 - password = 클라이언트 연결 등록을 위한 비밀번호.
 
+---
+
 ## 프로그래밍 언어
 <a href="https://www.w3schools.com/cpp/" target="_blank" rel="noreferrer"> 
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/cplusplus/cplusplus-original.svg" alt="cplusplus" width="40" height="40"/> 
-</a> 
+</a>
+
+---
 
 ## 라이센스
-이 프로그램은 MIT 라이센스에 따라 라이센스가 부여됩니다:
+이 프로그램은 MIT 라이센스에 따라 라이센스가 부여된다:
 
 Copyright © 2024 Game Development Forever.
 
@@ -74,6 +93,8 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
 
 ## 팀 멤버
 - [Taeil Nam (Tayden)](https://github.com/Taeil-Nam) - nam0314@gmail.com
