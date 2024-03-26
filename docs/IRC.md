@@ -5,14 +5,14 @@
 
 ---
 
-# 목차
-- [1. 소개](#1-소개)
+# Table of Contents
+- [1. INTRODUCTION](#1-introduction)
   - [1.1. Servers](#11-servers)
   - [1.2. Clients](#12-clients)
     - [1.2.1. Operators](#121-operators)
   - [1.3. Channels](#13-channels)
     - [1.3.1. Channel Operators](#131-channel-operators)
-- [2. IRC Protocol 명세](#2-irc-protocol-명세)
+- [2. THE IRC SPECIFICATION](#2-the-irc-specification)
   - [2.1. 개요](#21-개요)
   - [2.2. 문자 코드 (Character codes)](#22-문자-코드-character-codes)
   - [2.3. Messages](#23-messages)
@@ -47,7 +47,7 @@
     - [6.2. Command responses](#62-command-responses)
 ---
 
-## 1. 소개
+## 1. INTRODUCTION
 IRC는 텍스트 기반 회의를 위해 설계되었다.  
 IRC 자체가 원격회의 시스템으로, Client-Server 모델의 분산 방식으로 운영하기에 적합하다.  
 일반적으로, 단일 server를 중심으로 client(또는 다른 server)가 연결될 수 있게 하고, 필요한 메시지 전달과 같은 기능들을 수행한다.
@@ -110,7 +110,7 @@ Channel operator는 nickname 옆에 '@' 기호로 식별된다. (NAMES, WHO, WHO
 
 ---
 
-## 2. IRC Protocol 명세
+## 2. THE IRC SPECIFICATION
 ### 2.1. 개요
 여기에 설명된 protocol은 server-to-server, client-to-server 연결에 둘 다 사용된다.
 
@@ -205,7 +205,7 @@ NOTES:
 Server로 보내는 대부분의 메시지는 어떤 형태의 응답을 생성한다.  
 가장 일반적인 응답은, error와 정상 답변 모두에 사용되는 숫자형 응답(Numeric replies)이다.  
 숫자형 응답은 발신자 prefix, 세 자리 숫자, 응답의 대상으로 이루어진 하나의 메시지로 보내져야 한다.  
-다양한 응답의 목록은 section 6에서 제공된다.
+다양한 응답의 목록은 [section 6](#6-replies)에서 제공된다.
 
 ---
 
@@ -241,9 +241,6 @@ Client 2, 4 사이의 메시지는 server A, B, C, D와 client 4가 볼 수 있�
 ---
 
 ### 3.2. One-to-Many
-
----
-
 #### 3.2.2. To a group (channel)
 IRC에서 channel은 multicast 그룹과 동등한 역할을 한다.  
 Channel은, 사람들이 channel에 참여하고 떠남에 따라 생성되고 사라지는 동적인 존재다.  
@@ -284,8 +281,6 @@ Client나 Server 연결이 등록되는데 `PASS` command가 필요하지 않지
 2. Nick message
 3. User message
 
----
-
 #### 4.1.1. Password message
 ```
    Command: PASS
@@ -304,8 +299,6 @@ PASS command는 "연결 비밀번호"를 설정하는데 사용된다.
   
 제공된 비밀번호는 server, client간 일치해야 한다.  
 비밀번호 등록 전에 PASS command를 여러 개 보낼 수 있지만, 등록되는데 사용되는 것은 마지막으로 보낸 것 뿐이며, 등록된 후에는 변경할 수 없다.
-
----
 
 #### 4.1.2. Nick message
 ```
@@ -328,8 +321,6 @@ NICK 메시지는 사용자에게 닉네임을 부여하거나 이전 닉네임�
   
 Server가 직접 연결된 client로 부터 동일한 NICK을 받으면 ERR_NICKCOLLISION을 client에게 전송하며, NICK 명령을 무시하고 어떠한 KILL도 생성하지 않는다.  
 
----
-
 #### 4.1.3. User message
 ```
    Command: USER
@@ -346,8 +337,6 @@ USER 메시지는 연결의 시작에서 새로운 사용자의 username, hostna
 일반적으로 직접 연결된 client로부터 USER 명령이 오는 경우에는 hostname과 servername이 보안상의 이유로 무시된다.  
   
 realname 매개변수는 마지막 매개변수여야 하며, 공백 문자를 포함할 수 있으므로 앞에 콜론(':')을 붙여야 인식 가능하다.  
-
----
 
 #### 4.1.6. Quit
 ```
@@ -368,8 +357,6 @@ Server는 quit message를 보낸 client와 연결을 종료해야 한다.
 
 ### 4.2. Channel operations
 이 섹션은 channel을 조작하는데 관련되어 있다.  
-
----
 
 #### 4.2.1. Join message
 ```
@@ -410,8 +397,6 @@ JOIN에 대한 조건은 다음과 같다:
 JOIN이 성공하면 사용자에게 채널의 주제(PRL_TOPIC 사용) 및 channel에 있는 사용자 목록(RPL_NAMREPLY)이 전송된다.  
 이 목록에는 해당 사용자도 포함되어야 한다.
 
----
-
 #### 4.2.2. Part message
 ```
    Command: PART
@@ -429,16 +414,12 @@ Example:
 ```
 Part 메시지는 해당 메시지를 보낸 client를 매개 변수 문자열에 나열된 channel에서 제거하기 위해 사용된다.  
 
----
-
 #### 4.2.3. Mode message
 ```
    Command: MODE
 ```
 Username과 channel의 mode를 변경할 수 있는 command이다.  
 MODE 메시지를 파싱할 때, 전체 메시지를 먼저 파싱 후 변경 사항을 적용하는 것이 권장된다.
-
----
 
 ##### 4.2.3.1. Channel modes
 ```
@@ -464,8 +445,6 @@ k - 채널 키(암호)를 설정한다.
 'o' 및 'b' 옵션을 사용할 때, 모드 명령 당 총 세 개의 제한이 설정되어 있다.  
 즉, 'o'와 'b'의 임의의 조합은 한 번의 MODE 명령에서 최대 세 번까지만 사용할 수 있다.
 
----
-
 #### 4.2.4. Topic message
 ```
    Command: TOPIC
@@ -487,8 +466,6 @@ TOPIC 메시지는 channel의 topic을 변경하거나 확인하기 위해 사�
 만약 `<topic>`이 명시되지 않은 경우, `<channel>`의 topic이 반환된다.  
 `<topic>`이 parameter로 명시된 경우, channel의 mode가 이를 허용한다면, `<channel>`의 topic을 변경한다.
 
----
-
 #### 4.2.7. Invite message
 ```
    Command: INVITE
@@ -507,8 +484,6 @@ INVITE 메시지는 사용자를 channel로 초대하는 데 사용된다.
 `<nickname>`매개변수는 `<channel>`에 초대될 사람의 nickname이다.  
 해당 channel이 반드시 존재하거나 유효해야 하는 요구 사항은 없다.  
 초대 전용 채널(MODE + i)에 사용자를 초대하려면 초대를 보내는 client가 해당 channel operator로 인식되어야 한다.
-
----
 
 #### 4.2.8. Kick command
 ```
@@ -538,8 +513,6 @@ KICK 메시지를 받은 server는, 사용자를 추방하기 전에 발신자�
 IRC Protocol의 주요 목적은 client가 서로 통신할 수 있는 기반을 제공하는 것이다.  
 PRIVMSG와 NOTICE는 실제로 한 client에서 다른 client로 텍스트 메시지를 전달하는 데 사용되는 유일한 메시지이다.  
 
----
-
 #### 4.4.1. Private messages
 ```
    Command: PRIVMSG
@@ -565,8 +538,6 @@ PRIVMSG는 사용자간 개인 메시지를 전송할 때 사용된다.
 마스크에는 적어도 1개의 '.'이 있어야 하며, 마지막 '.' 뒤에 와일드카드('*', '?')가 없어야 한다.  
 이러한 확장된 PRIVMSG는 operator(channel operator가 아닌, server 운영자)만 사용 가능하다.  
 
----
-
 #### 4.4.2. Notice
 ```
    Command: NOTICE
@@ -584,8 +555,6 @@ NOTICE와 PRIVMSG와의 차이점은, NOTICE에 대한 자동 응답은 절대 �
 ### 4.6 Miscellaneous messages
 이 섹션에서는 위에서 언급한 카테고리에는 속하지 않지만, 프로토콜에 필요한 메시지들을 설명한다.
 
----
-
 #### 4.6.2. Ping message
 ```
    Command: PING
@@ -602,8 +571,6 @@ PING 메시지는 현재 연결이 계속 연결되어 있는지 확인하기 �
 일정 시간 내에 PING 메시지에 응답하지 않으면 해당 연결을 닫는다.  
   
 PING 메시지를 받은 server 또는 client는 가능한 빨리 `<token>`(PING을 보낸 곳)에 적절한 PONG 메시지로 응답하여 여전히 활성 상태임을 나타내야 한다.
-
----
 
 #### 4.6.3. Pong message
 ```
