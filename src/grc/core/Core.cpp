@@ -47,17 +47,22 @@ void Core::Run()
             }
             else if (event.IsReadType())
             {
-                mNetwork.RecvFromClient(event.GetIdentifier());
+                if (mNetwork.RecvFromClient(event.GetIdentifier()) == FAILURE)
+                {
+                    mUsers.erase(event.GetIdentifier());
+                    continue;
+                }
+                processIRCMessage(event.GetIdentifier());
             }
             else if (event.IsWriteType())
             {
-                mNetwork.SendToClient(event.GetIdentifier());
+                if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
+                {
+                    mUsers.erase(event.GetIdentifier());
+                    continue;
+                }
             }
         }
-
-
-        /* IRC 로직 수행 */
-
     }
 }
 
@@ -275,6 +280,17 @@ void Core::setupNewClient()
         {
             LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClient) << ") connected";
         }
+    }
+    User newUser;
+    mUsers[newClient] = newUser;
+}
+
+void Core::processIRCMessage(const int32 IN socket)
+{
+    std::string message;
+    while (mNetwork.PullFromRecvBuffer(socket, message, "\r\n") == true)
+    {
+        // TODO(all): message 유효성 검사 및 message에 알맞는 로직 수행.
     }
 }
 
