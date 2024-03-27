@@ -8,6 +8,7 @@ LDLIBS		=	-lbsd-gdf-assert -lbsd-gdf-logger -lbsd-gdf-display -lbsd-gdf-network 
 
 SRCS		=	src/main.cpp						\
 				$(wildcard src/grc/core/*.cpp)		\
+				$(wildcard src/grc/irc/*.cpp)		\
 				$(wildcard src/utils/*.cpp)
 				
 OBJS		=	$(SRCS:.cpp=.o)

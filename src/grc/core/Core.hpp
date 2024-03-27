@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 
 #include "common.hpp"
+#include "../irc/User.hpp"
 
 using namespace gdf;
 
@@ -58,6 +59,9 @@ private:
     /* about network connection */
     void setupNewClient();
 
+    /* about IRC */
+    void processIRCMessage(const int32 IN socket);
+
 private:
     const int mPort;
     const std::string mPassword;
@@ -71,6 +75,7 @@ private:
     DisplayConsole mLogMonitor;
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
+    std::map<int, User> mUsers;
 };
 
 }
