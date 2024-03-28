@@ -1,4 +1,5 @@
 #include "Core.hpp"
+#include "BSD-GDF/Logger/GlobalLogger.hpp"
 #include "common.hpp"
 #include <sys/event.h>
 
@@ -8,10 +9,22 @@ namespace grc
 Core::Core(const int IN port, const std::string& IN password)
 : mPort(port)
 , mPassword(password)
-, bRunning(false)
+, mbRunning(false)
 , mLogBufferIndex(0)
 {
-
+    mIRCCommand[kPass] = "PASS";
+    mIRCCommand[kNick] = "NICK";
+    mIRCCommand[kUser] = "USER";
+    mIRCCommand[kQuit] = "QUIT";
+    mIRCCommand[kJoin] = "JOIN";
+    mIRCCommand[kPart] = "PART";
+    mIRCCommand[kMode] = "MODE";
+    mIRCCommand[kTopic] = "TOPIC";
+    mIRCCommand[kInvite] = "INVITE";
+    mIRCCommand[kKick] = "KICK";
+    mIRCCommand[kPrivmsg] = "PRIVMSG";
+    mIRCCommand[kPing] = "PING";
+    mIRCCommand[kPong] = "PONG";
 }
 
 Core::~Core()
@@ -23,7 +36,7 @@ Core::~Core()
 
 void Core::Run()
 {
-    while (bRunning)
+    while (mbRunning)
     {
         KernelEvent event;
         while (mKernelQueue.Poll(event))
@@ -52,7 +65,7 @@ void Core::Run()
                     mUsers.erase(event.GetIdentifier());
                     continue;
                 }
-                processIRCMessage(event.GetIdentifier());
+                handleIRCMessage(event.GetIdentifier());
             }
             else if (event.IsWriteType())
             {
@@ -105,7 +118,7 @@ bool Core::Init()
         LOG(LogLevel::Error) << "Failed to add server socket READ event";
         return FAILURE;
     }
-    bRunning = true;
+    mbRunning = true;
     LOG(LogLevel::Notice) << "IRC Server is ready (Port = " << mPort << ")";
     return SUCCESS;
 }
@@ -186,7 +199,7 @@ void Core::handleMonitorCommand()
     {
         if (prompt == "/exit" || prompt == "/quit")
         {
-            bRunning = false;
+            mbRunning = false;
         }
         else if (mActivatedWindow == &mLogMonitor)
         {
@@ -276,7 +289,13 @@ void Core::setupNewClient()
     const int32 newClient = mNetwork.ConnectNewClient();
     if (newClient != ERROR)
     {
-        if (mKernelQueue.AddReadEvent(newClient))
+        if (mKernelQueue.AddReadEvent(newClient) == FAILURE
+            || mKernelQueue.AddWriteEvent(newClient) == FAILURE)
+        {
+            mNetwork.DisconnectClient(newClient);
+            return;
+        }
+        else
         {
             LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClient) << ") connected";
         }
@@ -285,13 +304,211 @@ void Core::setupNewClient()
     mUsers[newClient] = newUser;
 }
 
-void Core::processIRCMessage(const int32 IN socket)
+void Core::handleIRCMessage(const int32 IN socket)
 {
     std::string message;
-    while (mNetwork.PullFromRecvBuffer(socket, message, "\r\n") == true)
+    while (mNetwork.PullFromRecvBuffer(socket, message, "\r\n"))
     {
-        // TODO(all): message 유효성 검사 및 message에 알맞는 로직 수행.
+        if (message.size() > 510)
+        {
+            continue;
+        }
+        std::vector<std::string> tokens = split(message, ":");
+        std::vector<std::string> leading = split(tokens[0], " ");
+        std::string trailing;
+        if (tokens.size() >= 2)
+        {
+            trailing = tokens[1];
+        }
+
+        User& user = mUsers[socket];
+        std::string& command = leading[0];
+        if (command == mIRCCommand[kPass])
+        {
+            processPASSMessage(socket, leading, trailing);
+        }
+        else if (command == mIRCCommand[kNick] && user.IsAuthenticated())
+        {
+            processNICKMessage(socket, leading, trailing);
+        }
+        // else if (command == mIRCCommand[kUser] && user.IsAuthenticated())
+        // {
+        //     processUSERMessage(socket, leading, trailing);
+        // }
+        
+   }
+}
+
+void Core::processPASSMessage(const int32 IN socket,
+    const std::vector<std::string>& IN leading, const std::string& IN trailing)
+{
+    const size_t parameterSize = leading.size() - 1 + (trailing == "" ? 0 : 1);
+    const std::string& command = leading[0];
+    // ERR_NEEDMOREPARAMS
+    if (parameterSize  < 1)
+    {
+        mNetwork.FetchToSendBuffer(socket,
+            std::to_string(ERR_NEEDMOREPARAMS) + " " + command + " :Not enough parameters\r\n");
+        mNetwork.SendToClient(socket);
+        mNetwork.DisconnectClient(socket);
+        return;
     }
+    const std::string& password = leading[1];
+    User& user = mUsers[socket];
+    // ERR_ALREADYREGISTERED
+    if (user.IsAuthenticated())
+    {
+        mNetwork.FetchToSendBuffer(socket, 
+            std::to_string(ERR_ALREADYREGISTERED) + " :You may not reregister\r\n");
+        return;
+    }
+    // ERR_PASSWDMISMATCH
+    if (mPassword != password)
+    {
+        mNetwork.FetchToSendBuffer(socket,
+            std::to_string(ERR_PASSWDMISMATCH) + " :Password incorrect\r\n");
+        mNetwork.SendToClient(socket);
+        mNetwork.DisconnectClient(socket);
+        return;
+    }
+    user.SetAuthenticated();
+}
+
+void Core::processNICKMessage(const int32 IN socket,
+    const std::vector<std::string>& IN leading, const std::string& IN trailing)
+{
+    const size_t parameterSize = leading.size() - 1 + (trailing == "" ? 0 : 1);
+    // ERR_NONICKNAMEGIVEN
+    if (parameterSize < 1)
+    {
+        mNetwork.FetchToSendBuffer(socket,
+            std::to_string(ERR_NONICKNAMEGIVEN) + " :No nickname given\r\n");
+        return;
+    }
+    std::string nickname;
+    for (size_t i = 1; i < leading.size(); i++)
+    {
+        nickname += leading[i];
+        if (i < leading.size() - 1)
+        {
+            nickname += " ";
+        }
+    }
+    // ERR_ERRONEUSNICKNAME
+    if (nickname[0] == '$' || nickname[0] == ':' || nickname[0] == '&' || nickname[0] == '#'
+        || nickname.find(' ') != std::string::npos || nickname.find(',') != std::string::npos
+        || nickname.find('*') != std::string::npos || nickname.find('?') != std::string::npos
+        || nickname.find('!') != std::string::npos || nickname.find('@') != std::string::npos
+        || nickname.find('.') != std::string::npos || nickname.size() > 9)
+    {
+        mNetwork.FetchToSendBuffer(socket,
+            std::to_string(ERR_ERRONEUSNICKNAME) + " " + nickname + " :Erroneus nickname\r\n");
+        return;
+    }
+    // ERR_NICKNAMEINUSE
+    if (isNicknameInUse(nickname))
+    {
+        mNetwork.FetchToSendBuffer(socket,
+            std::to_string(ERR_NICKNAMEINUSE) + " " + nickname + " :Nickname is already in use\r\n");
+        return;
+    }
+    mUsers[socket].SetNickname(nickname);
+}
+
+void Core::processUSERMessage(const int32 IN socket,
+    const std::vector<std::string>& IN leading, const std::string& IN trailing)
+{
+    const size_t parameterSize = leading.size() - 1 + (trailing == "" ? 0 : 1);
+    const std::string& command = leading[0];
+    // ERR_NEEDMOREPARAMS
+    if (parameterSize < 4)
+    {
+        mNetwork.FetchToSendBuffer(socket,
+            std::to_string(ERR_NEEDMOREPARAMS) + " " + command + " :Not enough parameters\r\n");
+        return;
+    }
+    User& user = mUsers[socket];
+    // ERR_ALREADYREGISTERED
+    if (user.IsRegistered())
+    {
+        mNetwork.FetchToSendBuffer(socket, 
+            std::to_string(ERR_ALREADYREGISTERED) + " :You may not reregister\r\n");
+        return;
+    }
+    const std::string& username = leading[1];
+    const std::string& hostname = leading[2];
+    const std::string& servername = leading[3];
+    const std::string& realname = leading[4];
+    user.SetUsername(username);
+    user.SetHostname(hostname);
+    user.SetServername(servername);
+    user.SetRealname(realname);
+    user.SetRegistered();
+    // TODO(tnam) : RPL_WELCOME (001) 
+}
+
+// void Core::processQUITMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processJOINMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processPARTMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processMODEMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processTOPICMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processINVITEMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processKICKMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processPRIVMSGMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processPINGMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+
+// }
+
+// void Core::processPONGMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
+// {
+    
+// }
+
+bool Core::isNicknameInUse(const std::string& nickName)
+{
+    std::map<int, User>::iterator it = mUsers.begin();
+    while (it != mUsers.end())
+    {
+        if (it->second.GetNickname() == nickName)
+        {
+            return true;
+        }
+        it++;
+    }
+    return false;
 }
 
 }

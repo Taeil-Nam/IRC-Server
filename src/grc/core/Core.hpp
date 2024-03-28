@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 
 #include "common.hpp"
+#include "../irc/NumericReply.hpp"
 #include "../irc/User.hpp"
 
 using namespace gdf;
@@ -43,6 +44,23 @@ private:
         STDIN = STDIN_FILENO,
         STDOUT = STDOUT_FILENO
     };
+    enum eIRCCommand
+    {
+        kPass = 0,
+        kNick,
+        kUser,
+        kQuit,
+        kJoin,
+        kPart,
+        kMode,
+        kTopic,
+        kInvite,
+        kKick,
+        kPrivmsg,
+        kPing,
+        kPong,
+        kIRCCommandSize
+    };
 private:
     Core(); // = delete
     Core(const Core& core); // = delete
@@ -60,12 +78,40 @@ private:
     void setupNewClient();
 
     /* about IRC */
-    void processIRCMessage(const int32 IN socket);
+    void handleIRCMessage(const int32 IN socket);
+    void processPASSMessage(const int32 IN socket,
+        const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    void processNICKMessage(const int32 IN socket,
+        const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    void processUSERMessage(const int32 IN socket,
+        const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processQUITMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processJOINMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processPARTMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processMODEMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processTOPICMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processINVITEMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processKICKMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processPRIVMSGMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processPINGMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    // void processPONGMessage(const int32 IN socket,
+        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+
+    bool isNicknameInUse(const std::string& nickname);
 
 private:
     const int mPort;
     const std::string mPassword;
-    bool bRunning;
+    bool mbRunning;
     KernelQueue mKernelQueue;
     Network mNetwork;
     int32 mLogFileFD;
@@ -76,6 +122,7 @@ private:
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
     std::map<int, User> mUsers;
+    std::string mIRCCommand[kIRCCommandSize];
 };
 
 }
