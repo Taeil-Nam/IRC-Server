@@ -15,8 +15,10 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
+#include "BSD-GDF/Event/KernelEvent.hpp"
 #include "common.hpp"
 #include "../irc/NumericReply.hpp"
+#include "../irc/Channel.hpp"
 #include "../irc/User.hpp"
 
 using namespace gdf;
@@ -85,10 +87,9 @@ private:
         const std::vector<std::string>& IN leading, const std::string& IN trailing);
     void processUSERMessage(const int32 IN socket,
         const std::vector<std::string>& IN leading, const std::string& IN trailing);
-    // void processQUITMessage(const int32 IN socket,
-        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
-    // void processJOINMessage(const int32 IN socket,
-        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    void processQUITMessage(const int32 IN socket,
+        const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    void processJOINMessage(const int32 IN socket, const std::vector<std::string>& IN leading);
     // void processPARTMessage(const int32 IN socket,
         // const std::vector<std::string>& IN leading, const std::string& IN trailing);
     // void processMODEMessage(const int32 IN socket,
@@ -101,12 +102,11 @@ private:
         // const std::vector<std::string>& IN leading, const std::string& IN trailing);
     // void processPRIVMSGMessage(const int32 IN socket,
         // const std::vector<std::string>& IN leading, const std::string& IN trailing);
-    // void processPINGMessage(const int32 IN socket,
-        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
-    // void processPONGMessage(const int32 IN socket,
-        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    void processPINGMessage(const int32 IN socket, const std::vector<std::string>& IN leading);
+    void processPONGMessage(const int32 IN socket, const std::vector<std::string>& IN leading);
 
-    bool isNicknameInUse(const std::string& nickname);
+    bool isNicknameInUse(const std::string& IN nickname);
+    void checkUserConnection(const int32 IN socket);
 
 private:
     const int mPort;
@@ -121,6 +121,7 @@ private:
     DisplayConsole mLogMonitor;
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
+    std::map<std::string, Channel> mChannels;
     std::map<int, User> mUsers;
     std::string mIRCCommand[kIRCCommandSize];
 };

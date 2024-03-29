@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "common.hpp"
+#include "../../common.hpp"
 
 using namespace gdf;
 
@@ -22,7 +22,7 @@ class User
 {
 public:
     User();
-    const User& operator=(const User& User);
+    const User& operator=(const User& IN User);
     virtual ~User();
 
     bool IsAuthenticated() const;
@@ -32,17 +32,20 @@ public:
     const std::string& GetHostname() const;
     const std::string& GetServername() const;
     const std::string& GetRealname() const;
-    const std::string& GetCurrentChannel() const;
+    time_t GetLastPingTime() const;
+    time_t GetLastPongTime() const;
 
     void SetAuthenticated();
     void SetRegistered();
-    void SetNickname(const std::string& nickname);
-    void SetUsername(const std::string& username);
-    void SetHostname(const std::string& hostname);
-    void SetServername(const std::string& servername);
-    void SetRealname(const std::string& realname);
+    void SetNickname(const std::string& IN nickname);
+    void SetUsername(const std::string& IN username);
+    void SetHostname(const std::string& IN hostname);
+    void SetServername(const std::string& IN servername);
+    void SetRealname(const std::string& IN realname);
+    void SetLastPingTime(const time_t IN time);
+    void SetLastPongTime(const time_t IN time);
 private:
-    User(const User& User); // = delete
+    User(const User& IN User); // = delete
 
 private:
     bool mbIsAuthenticated;
@@ -52,6 +55,8 @@ private:
     std::string mHostname;
     std::string mServername;
     std::string mRealname;
+    time_t mLastPingTime;
+    time_t mLastPongTime;
 };
 
 }

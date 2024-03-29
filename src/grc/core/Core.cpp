@@ -1,6 +1,8 @@
 #include "Core.hpp"
+#include "BSD-GDF/Assert.hpp"
 #include "BSD-GDF/Logger/GlobalLogger.hpp"
 #include "common.hpp"
+#include <string>
 #include <sys/event.h>
 
 namespace grc
@@ -69,6 +71,7 @@ void Core::Run()
             }
             else if (event.IsWriteType())
             {
+                checkUserConnection(event.GetIdentifier());
                 if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
                 {
                     mUsers.erase(event.GetIdentifier());
@@ -207,7 +210,8 @@ void Core::handleMonitorCommand()
             {
                 mLogMonitor.PushContent("Server is running",
                                         DisplayBuffer::Green);
-                mLogMonitor.PushContent("IP:        127.0.0.1");
+                mLogMonitor.PushContent("IP:        "
+                    + mNetwork.GetIPString(mNetwork.GetServerSocket()));
                 std::stringstream sPort; sPort << mPort;
                 mLogMonitor.PushContent("port:      " + sPort.str());
                 std::stringstream sPassword; sPassword << mPassword;
@@ -306,6 +310,7 @@ void Core::setupNewClient()
 
 void Core::handleIRCMessage(const int32 IN socket)
 {
+    User& user = mUsers[socket];
     std::string message;
     while (mNetwork.PullFromRecvBuffer(socket, message, "\r\n"))
     {
@@ -321,21 +326,35 @@ void Core::handleIRCMessage(const int32 IN socket)
             trailing = tokens[1];
         }
 
-        User& user = mUsers[socket];
         std::string& command = leading[0];
-        if (command == mIRCCommand[kPass])
+        if (user.IsAuthenticated() == false)
         {
             processPASSMessage(socket, leading, trailing);
         }
-        else if (command == mIRCCommand[kNick] && user.IsAuthenticated())
+        else if (command == mIRCCommand[kNick])
         {
             processNICKMessage(socket, leading, trailing);
         }
-        // else if (command == mIRCCommand[kUser] && user.IsAuthenticated())
-        // {
-        //     processUSERMessage(socket, leading, trailing);
-        // }
-        
+        else if (command == mIRCCommand[kUser])
+        {
+            processUSERMessage(socket, leading, trailing);
+        }
+        else if (command == mIRCCommand[kQuit])
+        {
+            processQUITMessage(socket, leading, trailing);
+        }
+        else if (command == mIRCCommand[kJoin])
+        {
+            processJOINMessage(socket, leading);
+        }
+        else if (command == mIRCCommand[kPing])
+        {
+            processPINGMessage(socket, leading);
+        }
+        else if (command == mIRCCommand[kPong])
+        {
+            processPONGMessage(socket, leading);
+        }
    }
 }
 
@@ -344,11 +363,22 @@ void Core::processPASSMessage(const int32 IN socket,
 {
     const size_t parameterSize = leading.size() - 1 + (trailing == "" ? 0 : 1);
     const std::string& command = leading[0];
+    // Client didn't authenticated
+    if (command != "PASS")
+    {
+        LOG(LogLevel::Warning) << "Client(IP: " << mNetwork.GetIPString(socket)
+            << ") didn't authenticated" << "(PASS)";
+        mNetwork.ClearRecvBuffer(socket);
+        mNetwork.DisconnectClient(socket);
+        return;
+    }
     // ERR_NEEDMOREPARAMS
     if (parameterSize  < 1)
     {
+        LOG(LogLevel::Warning) << "Client(IP: " << mNetwork.GetIPString(socket)
+            << ") hasn't Password" << "(PASS)";
         mNetwork.FetchToSendBuffer(socket,
-            std::to_string(ERR_NEEDMOREPARAMS) + " " + command + " :Not enough parameters\r\n");
+            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters\r\n");
         mNetwork.SendToClient(socket);
         mNetwork.DisconnectClient(socket);
         return;
@@ -359,14 +389,16 @@ void Core::processPASSMessage(const int32 IN socket,
     if (user.IsAuthenticated())
     {
         mNetwork.FetchToSendBuffer(socket, 
-            std::to_string(ERR_ALREADYREGISTERED) + " :You may not reregister\r\n");
+            ERR_ALREADYREGISTERED + " :You may not reregister\r\n");
         return;
     }
     // ERR_PASSWDMISMATCH
     if (mPassword != password)
     {
+        LOG(LogLevel::Warning) << "Client(IP: " << mNetwork.GetIPString(socket)
+            << ") used incorrect password" << "(PASS)";
         mNetwork.FetchToSendBuffer(socket,
-            std::to_string(ERR_PASSWDMISMATCH) + " :Password incorrect\r\n");
+            ERR_PASSWDMISMATCH + " :Password incorrect\r\n");
         mNetwork.SendToClient(socket);
         mNetwork.DisconnectClient(socket);
         return;
@@ -382,7 +414,7 @@ void Core::processNICKMessage(const int32 IN socket,
     if (parameterSize < 1)
     {
         mNetwork.FetchToSendBuffer(socket,
-            std::to_string(ERR_NONICKNAMEGIVEN) + " :No nickname given\r\n");
+            ERR_NONICKNAMEGIVEN + " :No nickname given\r\n");
         return;
     }
     std::string nickname;
@@ -402,17 +434,18 @@ void Core::processNICKMessage(const int32 IN socket,
         || nickname.find('.') != std::string::npos || nickname.size() > 9)
     {
         mNetwork.FetchToSendBuffer(socket,
-            std::to_string(ERR_ERRONEUSNICKNAME) + " " + nickname + " :Erroneus nickname\r\n");
+            ERR_ERRONEUSNICKNAME + " " + nickname + " :Erroneus nickname\r\n");
         return;
     }
     // ERR_NICKNAMEINUSE
     if (isNicknameInUse(nickname))
     {
         mNetwork.FetchToSendBuffer(socket,
-            std::to_string(ERR_NICKNAMEINUSE) + " " + nickname + " :Nickname is already in use\r\n");
+            ERR_NICKNAMEINUSE + " " + nickname + " :" + nickname + "\r\n");
         return;
     }
-    mUsers[socket].SetNickname(nickname);
+    User& user = mUsers[socket];
+    user.SetNickname(nickname);
 }
 
 void Core::processUSERMessage(const int32 IN socket,
@@ -424,7 +457,7 @@ void Core::processUSERMessage(const int32 IN socket,
     if (parameterSize < 4)
     {
         mNetwork.FetchToSendBuffer(socket,
-            std::to_string(ERR_NEEDMOREPARAMS) + " " + command + " :Not enough parameters\r\n");
+            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters\r\n");
         return;
     }
     User& user = mUsers[socket];
@@ -432,72 +465,133 @@ void Core::processUSERMessage(const int32 IN socket,
     if (user.IsRegistered())
     {
         mNetwork.FetchToSendBuffer(socket, 
-            std::to_string(ERR_ALREADYREGISTERED) + " :You may not reregister\r\n");
+            ERR_ALREADYREGISTERED + " :You may not reregister\r\n");
         return;
     }
     const std::string& username = leading[1];
     const std::string& hostname = leading[2];
     const std::string& servername = leading[3];
-    const std::string& realname = leading[4];
+    const std::string& realname = trailing;
     user.SetUsername(username);
     user.SetHostname(hostname);
     user.SetServername(servername);
     user.SetRealname(realname);
     user.SetRegistered();
-    // TODO(tnam) : RPL_WELCOME (001) 
+    mNetwork.FetchToSendBuffer(socket, 
+            RPL_WELCOME + " " + user.GetNickname()
+            + " :Welcome to the GameRelayChat Network, " + user.GetNickname() + "!"
+            + user.GetUsername() + "@" + user.GetHostname() + "\r\n");
+    LOG(LogLevel::Informational) << "User [" << user.GetNickname() << "] Registered";
 }
 
-// void Core::processQUITMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
+void Core::processJOINMessage(const int32 IN socket, const std::vector<std::string>& IN leading)
+{
+    ///// Ex) JOIN #foo,#bar fubar,foobar /////
+    const size_t parameterSize = leading.size() - 1;
+    const std::string& command = leading[0];
+    // ERR_NEEDMOREPARAMS
+    if (parameterSize < 1)
+    {
+        mNetwork.FetchToSendBuffer(socket,
+            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters\r\n");
+        return;
+    }
+    const std::vector<std::string> channels = split(leading[1], ","); // #foo, #bar
+    std::vector<std::string> keys;
+    if (parameterSize >= 2)
+    {
+        keys = split(leading[2], ","); // fubar, foobar
+    }
 
-// }
+    const User& user = mUsers[socket];
+    for (std::size_t i = 0; i < channels.size(); i++)
+    {
+        const std::string& channelName = channels[i];
+        // ERR_NOSUCHCHANNEL
+        if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
+            || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos)
+        {
+            mNetwork.FetchToSendBuffer(socket,
+                ERR_NOSUCHCHANNEL + " " + channelName + " :No such channel\r\n");
+            break;
+        }
+        std::string key;
+        if (i < keys.size())
+        {
+            key = keys[i];
+        }
+        if (mChannels.count(channelName) == 0)
+        {
+            mChannels[channelName];
+            mChannels[channelName].SetName(channelName);
+            mChannels[channelName].AddUser(user.GetNickname());
+            mChannels[channelName].AddOperator(user.GetNickname());
+            mNetwork.FetchToSendBuffer(socket,
+                RPL_TOPIC + " " + channelName + " :" + mChannels[channelName].GetTopic() + "\r\n");
+            // TODO(tnam) : Client로 RPL_TOPIC을 안보내는 버그 수정해야함. 아래 내용 참고하면 될듯
+            // 처음 채널 생성시, RPL_TOPIC을 보내는건지, 이미 있는 채널에 입장했을 때 보내는건지 확인 필요.
+            // 1. A JOIN message with the client as the message <source>
+            // and the channel they have joined as the first parameter of the message.
+            // 2. The channel’s topic (with RPL_TOPIC (332) and optionally RPL_TOPICWHOTIME (333)),
+            // and no message if the channel does not have a topic.
+            // 3. A list of users currently joined to the channel (with one or more RPL_NAMREPLY (353)
+            // numerics followed by a single RPL_ENDOFNAMES (366) numeric).
+            // These RPL_NAMREPLY messages sent by the server MUST include
+            // the requesting client that has just joined the channel.
+            LOG(LogLevel::Alert) << mNetwork.GetSession(socket).sendBuffer;
+        }
+        else
+        {
+            Channel& channel = mChannels[channelName];
+            // TODO
+            // 1. 현재 채널이 초대 전용인 경우
+            //  - 초대 전용이면 ERR_INVITEONLYCHAN 응답 후 break;
+            // 2. 현재 채널에 key가 설정되어 있는 경우
+            //  - key가 다르면 ERR_BADCHANNELKEY 응답 후 break;
+            // 3. 채널의 유저 수가 Channel.GetMaxUserCount() 만큼 있다면, ERR_CHANNELISFULL 응답 후 break;
+            // 4. 채널 입장 및 RPL_TOPIC 응답
+            if (channel.IsInviteOnly())
+            {
+                mNetwork.FetchToSendBuffer(socket,
+                ERR_INVITEONLYCHAN + " " + channelName + " :" + mChannels[channelName].GetTopic() + "\r\n");
+            }
+        }
+    }
+}
 
-// void Core::processJOINMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
+void Core::processQUITMessage(const int32 IN socket,
+        const std::vector<std::string>& IN leading, const std::string& IN trailing)
+{
+    const std::string& command = leading[0];
+    const std::string& quitMessage = trailing;
+    const User& user = mUsers[socket];
+    LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
+        << " Quited : " << quitMessage << "(" << command << ")";
+    mNetwork.ClearRecvBuffer(socket);
+    mNetwork.DisconnectClient(socket);
+}
 
-// }
+void Core::processPINGMessage(const int32 IN socket, const std::vector<std::string>& IN leading)
+{
+    const std::string& pong = "PONG";
+    const std::string& token = leading[1];
+    const User& user = mUsers[socket];
+    mNetwork.FetchToSendBuffer(socket, 
+            pong + " " + mNetwork.GetIPString(mNetwork.GetServerSocket()) + token + "\r\n");
+    LOG(LogLevel::Informational) << "Reply PONG to " << "[" << user.GetNickname() << "]";
+}
 
-// void Core::processPARTMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
+void Core::processPONGMessage(const int32 IN socket, const std::vector<std::string>& IN leading)
+{
+    const std::string& token = leading[1];
+    User& user = mUsers[socket];
+    if (token == mNetwork.GetIPString(mNetwork.GetServerSocket()))
+    {
+        user.SetLastPongTime(time(NULL));
+    }
+}
 
-// }
-
-// void Core::processMODEMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
-
-// }
-
-// void Core::processTOPICMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
-
-// }
-
-// void Core::processINVITEMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
-
-// }
-
-// void Core::processKICKMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
-
-// }
-
-// void Core::processPRIVMSGMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
-
-// }
-
-// void Core::processPINGMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
-
-// }
-
-// void Core::processPONGMessage(const int32 IN socket, const std::vector<std::string>& IN tokens)
-// {
-    
-// }
-
-bool Core::isNicknameInUse(const std::string& nickName)
+bool Core::isNicknameInUse(const std::string& IN nickName)
 {
     std::map<int, User>::iterator it = mUsers.begin();
     while (it != mUsers.end())
@@ -509,6 +603,38 @@ bool Core::isNicknameInUse(const std::string& nickName)
         it++;
     }
     return false;
+}
+
+void Core::checkUserConnection(const int32 IN socket)
+{
+    User& user = mUsers[socket];
+    if (user.IsRegistered())
+    {
+        const int32 timeout = 60;
+        time_t currentTime = time(NULL);
+        double pongElapsedTime = difftime(currentTime, user.GetLastPongTime());
+        if (pongElapsedTime >= timeout)
+        {
+            LOG(LogLevel::Notice) << "Connection timeout" << "(" << timeout << ")"
+                << " " << "Client(IP: " << mNetwork.GetIPString(socket) << ")";
+            mNetwork.ClearSendBuffer(socket);
+            mNetwork.DisconnectClient(socket);
+        }
+        else
+        {
+            const int32 pingInterval = 30;
+            double pingElapsedTime = difftime(currentTime, user.GetLastPingTime());
+            if (pingElapsedTime >= pingInterval)
+            {
+                const std::string& ping = "PING";
+                mNetwork.FetchToSendBuffer(socket, ping + " "
+                + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " "
+                + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");
+                LOG(LogLevel::Informational) << "Sent PING to " << "[" << user.GetNickname() << "]";
+                user.SetLastPingTime(time(NULL));
+            }
+        }
+    }
 }
 
 }
