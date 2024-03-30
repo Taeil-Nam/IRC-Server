@@ -49,6 +49,18 @@ bool Channel::IsKeyRequired() const
     return mbIsKeyRequired;
 }
 
+bool Channel::IsChannelEmpty() const
+{
+    if (mUsers.size() == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 const std::string& Channel::GetTopic() const
 {
     return mTopic;

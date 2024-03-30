@@ -31,6 +31,7 @@ public:
     bool IsOperator(const std::string& IN nickname) const;
     bool IsInviteOnly() const;
     bool IsKeyRequired() const;
+    bool IsChannelEmpty() const;
 
     const std::string& GetName() const;
     const std::string& GetTopic() const;

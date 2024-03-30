@@ -41,6 +41,13 @@ const std::string ERR_ERRONEUSNICKNAME = "432";
 // "<nick> :Nickname is already in use"
 const std::string ERR_NICKNAMEINUSE = "433";
 
+// Returned by the server whenever a client tries to
+// perform a channel effecting command for which the
+// client isn't a member.
+// "<client> <channel> :You're not on that channel"
+const std::string ERR_NOTONCHANNEL  = "442"; 
+
+
 // Returned by the server by numerous commands to
 // indicate to the client that it didn't supply enough
 // parameters.

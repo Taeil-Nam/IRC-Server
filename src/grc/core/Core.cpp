@@ -348,6 +348,10 @@ void Core::handleIRCMessage(const int32 IN socket)
         {
             processJOINMessage(socket, leading);
         }
+        else if (command == mIRCCommand[kPart])
+        {
+            processPARTMessage(socket, leading);
+        }
         else if (command == mIRCCommand[kPing])
         {
             processPINGMessage(socket, leading);
@@ -379,7 +383,7 @@ void Core::processPASSMessage(const int32 IN socket,
         LOG(LogLevel::Warning) << "Client(IP: " << mNetwork.GetIPString(socket)
             << ") hasn't Password" << "(PASS)";
         mNetwork.FetchToSendBuffer(socket,
-            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters\r\n");
+            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters" + "\r\n");
         mNetwork.SendToClient(socket);
         mNetwork.DisconnectClient(socket);
         return;
@@ -390,7 +394,7 @@ void Core::processPASSMessage(const int32 IN socket,
     if (user.IsAuthenticated())
     {
         mNetwork.FetchToSendBuffer(socket, 
-            ERR_ALREADYREGISTERED + " :You may not reregister\r\n");
+            ERR_ALREADYREGISTERED + " :You may not reregister" + "\r\n");
         return;
     }
     // ERR_PASSWDMISMATCH
@@ -399,7 +403,7 @@ void Core::processPASSMessage(const int32 IN socket,
         LOG(LogLevel::Warning) << "Client(IP: " << mNetwork.GetIPString(socket)
             << ") used incorrect password" << "(PASS)";
         mNetwork.FetchToSendBuffer(socket,
-            ERR_PASSWDMISMATCH + " :Password incorrect\r\n");
+            ERR_PASSWDMISMATCH + " :Password incorrect" + "\r\n");
         mNetwork.SendToClient(socket);
         mNetwork.DisconnectClient(socket);
         return;
@@ -415,7 +419,7 @@ void Core::processNICKMessage(const int32 IN socket,
     if (parameterSize < 1)
     {
         mNetwork.FetchToSendBuffer(socket,
-            ERR_NONICKNAMEGIVEN + " :No nickname given\r\n");
+            ERR_NONICKNAMEGIVEN + " :No nickname given" + "\r\n");
         return;
     }
     std::string nickname;
@@ -435,7 +439,7 @@ void Core::processNICKMessage(const int32 IN socket,
         || nickname.find('.') != std::string::npos || nickname.size() > 9)
     {
         mNetwork.FetchToSendBuffer(socket,
-            ERR_ERRONEUSNICKNAME + " " + nickname + " :Erroneus nickname\r\n");
+            ERR_ERRONEUSNICKNAME + " " + nickname + " :Erroneus nickname" + "\r\n");
         return;
     }
     // ERR_NICKNAMEINUSE
@@ -458,7 +462,7 @@ void Core::processUSERMessage(const int32 IN socket,
     if (parameterSize < 4)
     {
         mNetwork.FetchToSendBuffer(socket,
-            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters\r\n");
+            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters" + "\r\n");
         return;
     }
     User& user = mUsers[socket];
@@ -466,7 +470,7 @@ void Core::processUSERMessage(const int32 IN socket,
     if (user.IsRegistered())
     {
         mNetwork.FetchToSendBuffer(socket, 
-            ERR_ALREADYREGISTERED + " :You may not reregister\r\n");
+            ERR_ALREADYREGISTERED + " :You may not reregister" + "\r\n");
         return;
     }
     const std::string& username = leading[1];
@@ -494,7 +498,7 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
     if (parameterSize < 1)
     {
         mNetwork.FetchToSendBuffer(socket,
-            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters\r\n");
+            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters" + "\r\n");
         return;
     }
     const std::vector<std::string> channels = split(leading[1], ","); // #foo, #bar
@@ -513,7 +517,7 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
             || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos)
         {
             mNetwork.FetchToSendBuffer(socket,
-                ERR_NOSUCHCHANNEL + " " + channelName + " :No such channel\r\n");
+                ERR_NOSUCHCHANNEL + " " + channelName + " :No such channel" + "\r\n");
             return;
         }
         std::string key;
@@ -576,6 +580,58 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
             mNetwork.FetchToSendBuffer(socket,
                 RPL_ENDOFNAMES + " " + user.GetNickname() + " " + channelName + " :End of /NAMES list" + "\r\n");
             channelUser++;
+        }
+    }
+}
+
+void Core::processPARTMessage(const int32 IN socket, const std::vector<std::string>& IN leading)
+{
+    const size_t parameterSize = leading.size() - 1;
+    const std::string& command = leading[0];
+    // ERR_NEEDMOREPARAMS
+    if (parameterSize < 1)
+    {
+        mNetwork.FetchToSendBuffer(socket,
+            ERR_NEEDMOREPARAMS + " " + command + " :Not enough parameters" + "\r\n");
+        return;
+    }
+    const std::vector<std::string> channels = split(leading[1], ",");
+    for (size_t i = 0; i < channels.size(); i++)
+    {
+        const std::string& channelName = channels[i];
+        // ERR_NOSUCHCHANNEL
+        if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
+            || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos
+            || mChannels.count(channelName) == 0)
+        {
+            mNetwork.FetchToSendBuffer(socket,
+                ERR_NOSUCHCHANNEL + " " + channelName + " :No such channel" + "\r\n");
+            continue;
+        }
+        // ERR_NOTONCHANNEL
+        User& user = mUsers[socket];
+        if (mChannels[channelName].IsUserExist(user.GetNickname()) == false)
+        {
+            mNetwork.FetchToSendBuffer(socket,
+                ERR_NOTONCHANNEL + " " + user.GetNickname() + " "
+                + channelName + " :You're not on that channel" + "\r\n");
+            continue;
+        }
+        std::map<std::string, User>::const_iterator channelUser = mChannels[channelName].GetUsers().begin();
+        while (channelUser != mChannels[channelName].GetUsers().end())
+        {
+            int32 socket = channelUser->second.GetSocket();
+            mNetwork.FetchToSendBuffer(socket,
+                ":"  + user.GetNickname() + "!" + user.GetUsername() + "@" + user.GetHostname()
+                + " " + "PART" + " " + channelName + "\r\n");
+            LOG(LogLevel::Alert) << "\n" << mNetwork.GetSession(socket).sendBuffer;
+            channelUser++;
+        }
+        mChannels[channelName].DeleteUser(user.GetNickname());
+        // TODO (bonus) : 채널에 유저가 없는 경우, 채널 삭제 (bonus : hello bot도 같이 없어져야함)
+        if (mChannels[channelName].IsChannelEmpty())
+        {
+            mChannels.erase(channelName);
         }
     }
 }
@@ -646,7 +702,7 @@ void Core::checkUserConnection(const int32 IN socket)
         double pingElapsedTime = difftime(currentTime, user.GetLastPingSendTime());
         if (pingElapsedTime >= pingInterval)
         {
-            const std::string& ping = "PING";
+            const std::string ping("PING");
             mNetwork.FetchToSendBuffer(socket, ping + " "
             + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " "
             + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");

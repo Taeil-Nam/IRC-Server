@@ -38,8 +38,8 @@ public:
 private:
     enum eEventType
     {
-        READ = EVFILT_READ,
-        WRITE = EVFILT_WRITE
+        kRead = EVFILT_READ,
+        kWrite = EVFILT_WRITE
     };
     enum eFD
     {
@@ -90,8 +90,7 @@ private:
     void processQUITMessage(const int32 IN socket,
         const std::vector<std::string>& IN leading, const std::string& IN trailing);
     void processJOINMessage(const int32 IN socket, const std::vector<std::string>& IN leading);
-    // void processPARTMessage(const int32 IN socket,
-        // const std::vector<std::string>& IN leading, const std::string& IN trailing);
+    void processPARTMessage(const int32 IN socket, const std::vector<std::string>& IN leading);
     // void processMODEMessage(const int32 IN socket,
         // const std::vector<std::string>& IN leading, const std::string& IN trailing);
     // void processTOPICMessage(const int32 IN socket,
