@@ -86,7 +86,7 @@ const std::string RPL_WELCOME = "001";
 // channel topic, one of two replies is sent. If
 // the topic is set, RPL_TOPIC is sent back else
 // RPL_NOTOPIC.
-// "<channel> :<topic>"
+// "<client nick> <channel> :<topic>"
 const std::string RPL_TOPIC = "332";
 
 // "<client nick> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"

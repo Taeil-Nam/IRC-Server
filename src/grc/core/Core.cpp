@@ -523,7 +523,6 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
         }
         if (mChannels.count(channelName) == 0)
         {
-            mChannels[channelName];
             mChannels[channelName].SetName(channelName);
             mChannels[channelName].AddUser(user.GetNickname(), user);
             mChannels[channelName].AddOperator(user.GetNickname(), user);
@@ -532,21 +531,34 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
             LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
                 << " Join to channel " << "[" << channelName << "]";
             LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
-                << " Now operator of channel " << "[" << channelName << "]";
+                << " is Now operator of channel " << "[" << channelName << "]";
         }
         else
         {
-            // TODO
-            // 1. 현재 채널이 초대 전용인 경우
-            //  - 초대 전용이면 ERR_INVITEONLYCHAN 응답 후 return;
-            // 2. 현재 채널에 key가 설정되어 있는 경우
-            //  - key가 다르면 ERR_BADCHANNELKEY 응답 후 return;
-            // 3. 채널의 유저 수가 Channel.GetMaxUserCount() 만큼 있다면, ERR_CHANNELISFULL 응답 후 return;
-            // 4. 채널 입장
+            // ERR_INVITEONLYCHAN
             if (mChannels[channelName].IsInviteOnly())
             {
                 mNetwork.FetchToSendBuffer(socket,
-                ERR_INVITEONLYCHAN + " " + channelName + " :" + mChannels[channelName].GetTopic() + "\r\n");
+                ERR_INVITEONLYCHAN + " " + channelName + " :Cannot join channel (+i)" + "\r\n");
+                return;
+            }
+            // ERR_BADCHANNELKEY
+            if (mChannels[channelName].IsKeyRequired())
+            {
+                if (key != mChannels[channelName].GetKey())
+                {
+                    mNetwork.FetchToSendBuffer(socket,
+                    ERR_BADCHANNELKEY + " " + channelName + " :Cannot join channel (+k)" + "\r\n");
+                    return;
+                }
+            }
+            // ERR_CHANNELISFULL
+            if (mChannels[channelName].GetMaxUserCount() != Channel::UNLIMIT
+                && mChannels[channelName].GetMaxUserCount() <= mChannels[channelName].GetCurrentUserCount())
+            {
+                mNetwork.FetchToSendBuffer(socket,
+                    ERR_CHANNELISFULL + " " + channelName + " :Cannot join channel (+l)" + "\r\n");
+                    return;
             }
         }
         std::map<std::string, User>::const_iterator channelUser = mChannels[channelName].GetUsers().begin();
@@ -556,13 +568,13 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
             mNetwork.FetchToSendBuffer(socket,
                 ":" + user.GetNickname() + " " + "JOIN" + " " + channelName + "\r\n");
             mNetwork.FetchToSendBuffer(socket,
-                RPL_TOPIC + " " + channelName + " :" + mChannels[channelName].GetTopic() + "\r\n");
+                RPL_TOPIC + " " + user.GetNickname() + " " + channelName
+                + " :" + mChannels[channelName].GetTopic() + "\r\n");
             mNetwork.FetchToSendBuffer(socket,
                 RPL_NAMREPLY + " " + user.GetNickname() + " " + "=" + " " + channelName + " :"
                 + mChannels[channelName].GetAllUsersNickname() + "\r\n");
             mNetwork.FetchToSendBuffer(socket,
                 RPL_ENDOFNAMES + " " + user.GetNickname() + " " + channelName + " :End of /NAMES list" + "\r\n");
-            LOG(LogLevel::Alert) << mNetwork.GetSession(socket).sendBuffer; // 
             channelUser++;
         }
     }
@@ -621,27 +633,25 @@ void Core::checkUserConnection(const int32 IN socket)
     {
         const int32 timeout = 60;
         time_t currentTime = time(NULL);
-        double pongElapsedTime = difftime(currentTime, user.GetLastPongTime());
+        double pongElapsedTime = difftime(currentTime, user.GetLastPongRecvTime());
         if (pongElapsedTime >= timeout)
         {
             LOG(LogLevel::Notice) << "Connection timeout" << "(" << timeout << ")"
                 << " " << "Client(IP: " << mNetwork.GetIPString(socket) << ")";
             mNetwork.ClearSendBuffer(socket);
             mNetwork.DisconnectClient(socket);
+            return;
         }
-        else
+        const int32 pingInterval = 30;
+        double pingElapsedTime = difftime(currentTime, user.GetLastPingSendTime());
+        if (pingElapsedTime >= pingInterval)
         {
-            const int32 pingInterval = 30;
-            double pingElapsedTime = difftime(currentTime, user.GetLastPingTime());
-            if (pingElapsedTime >= pingInterval)
-            {
-                const std::string& ping = "PING";
-                mNetwork.FetchToSendBuffer(socket, ping + " "
-                + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " "
-                + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");
-                LOG(LogLevel::Debug) << "Sent PING to " << "[" << user.GetNickname() << "]";
-                user.SetLastPingTime(time(NULL));
-            }
+            const std::string& ping = "PING";
+            mNetwork.FetchToSendBuffer(socket, ping + " "
+            + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " "
+            + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");
+            LOG(LogLevel::Debug) << "Sent PING to " << "[" << user.GetNickname() << "]";
+            user.SetLastPingTime(time(NULL));
         }
     }
 }

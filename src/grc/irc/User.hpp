@@ -27,14 +27,15 @@ public:
 
     bool IsAuthenticated() const;
     bool IsRegistered() const;
+
     int32 GetSocket() const;
     const std::string& GetNickname() const;
     const std::string& GetUsername() const;
     const std::string& GetHostname() const;
     const std::string& GetServername() const;
     const std::string& GetRealname() const;
-    time_t GetLastPingTime() const;
-    time_t GetLastPongTime() const;
+    time_t GetLastPingSendTime() const;
+    time_t GetLastPongRecvTime() const;
 
     void SetSocket(const int32 IN socket);
     void SetAuthenticated();
@@ -58,8 +59,8 @@ private:
     std::string mHostname;
     std::string mServername;
     std::string mRealname;
-    time_t mLastPingTime;
-    time_t mLastPongTime;
+    time_t mLastPingSendTime;
+    time_t mLastPongRecvTime;
 };
 
 }

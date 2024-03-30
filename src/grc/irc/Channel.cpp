@@ -8,21 +8,11 @@ Channel::Channel()
 : mName("")
 , mTopic("Game Development")
 , mKey("")
-, mMaxUserCount(NONE)
+, mMaxUserCount(UNLIMIT)
 , mbIsInviteOnly(false)
-, mbCanOperatorSetTopic(false)
+, mbIsKeyRequired(false)
 {
 
-}
-
-const Channel& Channel::operator=(const Channel& IN channel)
-{
-    mTopic = channel.mTopic;
-    mKey = channel.mKey;
-    mMaxUserCount = channel.mMaxUserCount;
-    mbIsInviteOnly = channel.mbIsInviteOnly;
-    mbCanOperatorSetTopic = channel.mbCanOperatorSetTopic;
-    return *this;
 }
 
 bool Channel::IsUserExist(const std::string& IN nickname) const
@@ -54,6 +44,11 @@ bool Channel::IsInviteOnly() const
     return mbIsInviteOnly;
 }
 
+bool Channel::IsKeyRequired() const
+{
+    return mbIsKeyRequired;
+}
+
 const std::string& Channel::GetTopic() const
 {
     return mTopic;
@@ -63,9 +58,19 @@ const std::string& Channel::GetName() const
     return mName;
 }
 
+const std::string& Channel::GetKey() const
+{
+    return mKey;
+}
+
 int32 Channel::GetCurrentUserCount() const
 {
     return mUsers.size();
+}
+
+int32 Channel::GetMaxUserCount() const
+{
+    return mMaxUserCount;
 }
 
 const std::map<std::string, User>& Channel::GetUsers() const
@@ -88,7 +93,6 @@ std::string Channel::GetAllUsersNickname() const
         it++;
     }
     AllUsersNicknames.pop_back();
-    LOG(LogLevel::Alert) << "All user in channel : " << AllUsersNicknames;
     return AllUsersNicknames;
 }
 
@@ -96,6 +100,16 @@ void Channel::SetName(const std::string& IN channelName)
 {
     ASSERT(mName == "") << "Old name must empty string(\"\")";
     mName = channelName;
+}
+
+void Channel::SetInviteOnly()
+{
+    mbIsInviteOnly = true;
+}
+
+void Channel::SetKeyRequired()
+{
+    mbIsKeyRequired = true;
 }
 
 void Channel::AddUser(const std::string& IN nickname, const User& IN user)
@@ -106,7 +120,7 @@ void Channel::AddUser(const std::string& IN nickname, const User& IN user)
     }
 }
 
-void Channel::AddOperator(const std::string& IN nickname, const User& user)
+void Channel::AddOperator(const std::string& IN nickname, const User& IN user)
 {
     if (IsUserExist(nickname) && IsOperator(nickname) == false)
     {
