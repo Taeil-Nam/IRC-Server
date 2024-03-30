@@ -19,6 +19,7 @@ User::User()
 
 const User& User::operator=(const User& user)
 {
+    mSocket = user.mSocket;
     mbIsRegistered = user.mbIsRegistered;
     mNickname = user.mNickname;
     mUsername = user.mUsername;
@@ -43,6 +44,11 @@ bool User::IsAuthenticated() const
 bool User::IsRegistered() const
 {
     return mbIsRegistered;
+}
+
+int32 User::GetSocket() const
+{
+    return mSocket;
 }
 
 const std::string& User::GetNickname() const
@@ -78,6 +84,11 @@ time_t User::GetLastPingTime() const
 time_t User::GetLastPongTime() const
 {
     return mLastPongTime;
+}
+
+void User::SetSocket(const int32 IN socket)
+{
+    mSocket = socket;
 }
 
 void User::SetAuthenticated()

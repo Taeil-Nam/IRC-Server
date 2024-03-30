@@ -89,4 +89,19 @@ const std::string RPL_WELCOME = "001";
 // "<channel> :<topic>"
 const std::string RPL_TOPIC = "332";
 
+// "<client nick> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+const std::string RPL_NAMREPLY = "353";
+
+// To reply to a NAMES message, a reply pair consisting
+// of RPL_NAMREPLY and RPL_ENDOFNAMES is sent by the
+// server back to the client.  If there is no channel
+// found as in the query, then only RPL_ENDOFNAMES is
+// returned.  The exception to this is when a NAMES
+// message is sent with no parameters and all visible
+// channels and contents are sent back in a series of
+// RPL_NAMEREPLY messages with a RPL_ENDOFNAMES to mark
+// the end.
+// "<client nick> <channel> :End of /NAMES list"
+const std::string RPL_ENDOFNAMES = "366";
+
 }

@@ -290,22 +290,23 @@ void Core::handleLogBuffer()
 
 void Core::setupNewClient()
 {
-    const int32 newClient = mNetwork.ConnectNewClient();
-    if (newClient != ERROR)
+    const int32 newClientSocket = mNetwork.ConnectNewClient();
+    if (newClientSocket != ERROR)
     {
-        if (mKernelQueue.AddReadEvent(newClient) == FAILURE
-            || mKernelQueue.AddWriteEvent(newClient) == FAILURE)
+        if (mKernelQueue.AddReadEvent(newClientSocket) == FAILURE
+            || mKernelQueue.AddWriteEvent(newClientSocket) == FAILURE)
         {
-            mNetwork.DisconnectClient(newClient);
+            mNetwork.DisconnectClient(newClientSocket);
             return;
         }
         else
         {
-            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClient) << ") connected";
+            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClientSocket) << ") connected";
         }
     }
     User newUser;
-    mUsers[newClient] = newUser;
+    newUser.SetSocket(newClientSocket);
+    mUsers[newClientSocket] = newUser;
 }
 
 void Core::handleIRCMessage(const int32 IN socket)
@@ -513,7 +514,7 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
         {
             mNetwork.FetchToSendBuffer(socket,
                 ERR_NOSUCHCHANNEL + " " + channelName + " :No such channel\r\n");
-            break;
+            return;
         }
         std::string key;
         if (i < keys.size())
@@ -524,37 +525,45 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
         {
             mChannels[channelName];
             mChannels[channelName].SetName(channelName);
-            mChannels[channelName].AddUser(user.GetNickname());
-            mChannels[channelName].AddOperator(user.GetNickname());
-            mNetwork.FetchToSendBuffer(socket,
-                RPL_TOPIC + " " + channelName + " :" + mChannels[channelName].GetTopic() + "\r\n");
-            // TODO(tnam) : Client로 RPL_TOPIC을 안보내는 버그 수정해야함. 아래 내용 참고하면 될듯
-            // 처음 채널 생성시, RPL_TOPIC을 보내는건지, 이미 있는 채널에 입장했을 때 보내는건지 확인 필요.
-            // 1. A JOIN message with the client as the message <source>
-            // and the channel they have joined as the first parameter of the message.
-            // 2. The channel’s topic (with RPL_TOPIC (332) and optionally RPL_TOPICWHOTIME (333)),
-            // and no message if the channel does not have a topic.
-            // 3. A list of users currently joined to the channel (with one or more RPL_NAMREPLY (353)
-            // numerics followed by a single RPL_ENDOFNAMES (366) numeric).
-            // These RPL_NAMREPLY messages sent by the server MUST include
-            // the requesting client that has just joined the channel.
-            LOG(LogLevel::Alert) << mNetwork.GetSession(socket).sendBuffer;
+            mChannels[channelName].AddUser(user.GetNickname(), user);
+            mChannels[channelName].AddOperator(user.GetNickname(), user);
+            // TODO : hello bot(client)를 해당 채널에 추가(bonus)
+            LOG(LogLevel::Informational) << "Create new channel " << "[" << channelName << "]";
+            LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
+                << " Join to channel " << "[" << channelName << "]";
+            LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
+                << " Now operator of channel " << "[" << channelName << "]";
         }
         else
         {
-            Channel& channel = mChannels[channelName];
             // TODO
             // 1. 현재 채널이 초대 전용인 경우
-            //  - 초대 전용이면 ERR_INVITEONLYCHAN 응답 후 break;
+            //  - 초대 전용이면 ERR_INVITEONLYCHAN 응답 후 return;
             // 2. 현재 채널에 key가 설정되어 있는 경우
-            //  - key가 다르면 ERR_BADCHANNELKEY 응답 후 break;
-            // 3. 채널의 유저 수가 Channel.GetMaxUserCount() 만큼 있다면, ERR_CHANNELISFULL 응답 후 break;
-            // 4. 채널 입장 및 RPL_TOPIC 응답
-            if (channel.IsInviteOnly())
+            //  - key가 다르면 ERR_BADCHANNELKEY 응답 후 return;
+            // 3. 채널의 유저 수가 Channel.GetMaxUserCount() 만큼 있다면, ERR_CHANNELISFULL 응답 후 return;
+            // 4. 채널 입장
+            if (mChannels[channelName].IsInviteOnly())
             {
                 mNetwork.FetchToSendBuffer(socket,
                 ERR_INVITEONLYCHAN + " " + channelName + " :" + mChannels[channelName].GetTopic() + "\r\n");
             }
+        }
+        std::map<std::string, User>::const_iterator channelUser = mChannels[channelName].GetUsers().begin();
+        while (channelUser != mChannels[channelName].GetUsers().end())
+        {
+            int32 socket = channelUser->second.GetSocket();
+            mNetwork.FetchToSendBuffer(socket,
+                ":" + user.GetNickname() + " " + "JOIN" + " " + channelName + "\r\n");
+            mNetwork.FetchToSendBuffer(socket,
+                RPL_TOPIC + " " + channelName + " :" + mChannels[channelName].GetTopic() + "\r\n");
+            mNetwork.FetchToSendBuffer(socket,
+                RPL_NAMREPLY + " " + user.GetNickname() + " " + "=" + " " + channelName + " :"
+                + mChannels[channelName].GetAllUsersNickname() + "\r\n");
+            mNetwork.FetchToSendBuffer(socket,
+                RPL_ENDOFNAMES + " " + user.GetNickname() + " " + channelName + " :End of /NAMES list" + "\r\n");
+            LOG(LogLevel::Alert) << mNetwork.GetSession(socket).sendBuffer; // 
+            channelUser++;
         }
     }
 }
@@ -578,7 +587,7 @@ void Core::processPINGMessage(const int32 IN socket, const std::vector<std::stri
     const User& user = mUsers[socket];
     mNetwork.FetchToSendBuffer(socket, 
             pong + " " + mNetwork.GetIPString(mNetwork.GetServerSocket()) + token + "\r\n");
-    LOG(LogLevel::Informational) << "Reply PONG to " << "[" << user.GetNickname() << "]";
+    LOG(LogLevel::Debug) << "Reply PONG to " << "[" << user.GetNickname() << "]";
 }
 
 void Core::processPONGMessage(const int32 IN socket, const std::vector<std::string>& IN leading)
@@ -593,7 +602,7 @@ void Core::processPONGMessage(const int32 IN socket, const std::vector<std::stri
 
 bool Core::isNicknameInUse(const std::string& IN nickName)
 {
-    std::map<int, User>::iterator it = mUsers.begin();
+    std::map<int32, User>::const_iterator it = mUsers.begin();
     while (it != mUsers.end())
     {
         if (it->second.GetNickname() == nickName)
@@ -630,7 +639,7 @@ void Core::checkUserConnection(const int32 IN socket)
                 mNetwork.FetchToSendBuffer(socket, ping + " "
                 + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " "
                 + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");
-                LOG(LogLevel::Informational) << "Sent PING to " << "[" << user.GetNickname() << "]";
+                LOG(LogLevel::Debug) << "Sent PING to " << "[" << user.GetNickname() << "]";
                 user.SetLastPingTime(time(NULL));
             }
         }

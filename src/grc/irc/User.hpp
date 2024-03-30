@@ -27,6 +27,7 @@ public:
 
     bool IsAuthenticated() const;
     bool IsRegistered() const;
+    int32 GetSocket() const;
     const std::string& GetNickname() const;
     const std::string& GetUsername() const;
     const std::string& GetHostname() const;
@@ -35,6 +36,7 @@ public:
     time_t GetLastPingTime() const;
     time_t GetLastPongTime() const;
 
+    void SetSocket(const int32 IN socket);
     void SetAuthenticated();
     void SetRegistered();
     void SetNickname(const std::string& IN nickname);
@@ -48,6 +50,7 @@ private:
     User(const User& IN User); // = delete
 
 private:
+    int32 mSocket;
     bool mbIsAuthenticated;
     bool mbIsRegistered;
     std::string mNickname;

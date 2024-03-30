@@ -17,7 +17,7 @@
 #include <iostream>
 #include <string>
 #include <ctime>
-#include <set>
+#include <map>
 
 // BSD-GDF 라이브러리
 #include <BSD-GDF/Assert.hpp>

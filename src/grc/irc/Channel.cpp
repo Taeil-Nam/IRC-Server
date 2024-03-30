@@ -1,4 +1,5 @@
 #include "Channel.hpp"
+#include "BSD-GDF/Logger/GlobalLogger.hpp"
 
 namespace grc
 {
@@ -24,7 +25,7 @@ const Channel& Channel::operator=(const Channel& IN channel)
     return *this;
 }
 
-bool Channel::IsUserExist(const std::string& nickname) const
+bool Channel::IsUserExist(const std::string& IN nickname) const
 {
     if (mUsers.count(nickname) > 0)
     {
@@ -36,7 +37,7 @@ bool Channel::IsUserExist(const std::string& nickname) const
     }
 }
 
-bool Channel::IsOperator(const std::string& nickname) const
+bool Channel::IsOperator(const std::string& IN nickname) const
 {
     if (mOperators.count(nickname) > 0)
     {
@@ -57,40 +58,73 @@ const std::string& Channel::GetTopic() const
 {
     return mTopic;
 }
+const std::string& Channel::GetName() const
+{
+    return mName;
+}
 
-void Channel::SetName(const std::string& name)
+int32 Channel::GetCurrentUserCount() const
+{
+    return mUsers.size();
+}
+
+const std::map<std::string, User>& Channel::GetUsers() const
+{
+    return mUsers;
+}
+
+const std::map<std::string, User>& Channel::GetOperators() const
+{
+    return mOperators;
+}
+
+std::string Channel::GetAllUsersNickname() const
+{
+    std::string AllUsersNicknames;
+    std::map<std::string, User>::const_iterator it = mUsers.begin();
+    while (it != mUsers.end())
+    {
+        AllUsersNicknames += it->second.GetNickname() + " ";
+        it++;
+    }
+    AllUsersNicknames.pop_back();
+    LOG(LogLevel::Alert) << "All user in channel : " << AllUsersNicknames;
+    return AllUsersNicknames;
+}
+
+void Channel::SetName(const std::string& IN channelName)
 {
     ASSERT(mName == "") << "Old name must empty string(\"\")";
-    mName = name;
+    mName = channelName;
 }
 
-void Channel::AddUser(const std::string& nickname)
+void Channel::AddUser(const std::string& IN nickname, const User& IN user)
 {
-    if (mUsers.count(nickname) == 0)
+    if (IsUserExist(nickname) == false)
     {
-        mUsers.insert(nickname);
+        mUsers[nickname] = user;
     }
 }
 
-void Channel::AddOperator(const std::string& nickname)
+void Channel::AddOperator(const std::string& IN nickname, const User& user)
 {
-    if (IsUserExist(nickname) && mOperators.count(nickname) == 0)
+    if (IsUserExist(nickname) && IsOperator(nickname) == false)
     {
-        mOperators.insert(nickname);
+        mOperators[nickname] = user;
     }
 }
 
-void Channel::DeleteUser(const std::string& nickname)
+void Channel::DeleteUser(const std::string& IN nickname)
 {
-    if (mUsers.count(nickname) > 0)
+    if (IsUserExist(nickname))
     {
         mUsers.erase(nickname);
     }
 }
 
-void Channel::DeleteOperator(const std::string& nickname)
+void Channel::DeleteOperator(const std::string& IN nickname)
 {
-    if (mOperators.count(nickname) > 0)
+    if (IsOperator(nickname))
     {
         mOperators.erase(nickname);
     }

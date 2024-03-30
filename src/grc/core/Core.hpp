@@ -109,7 +109,7 @@ private:
     void checkUserConnection(const int32 IN socket);
 
 private:
-    const int mPort;
+    const int32 mPort;
     const std::string mPassword;
     bool mbRunning;
     KernelQueue mKernelQueue;
@@ -122,7 +122,7 @@ private:
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
     std::map<std::string, Channel> mChannels;
-    std::map<int, User> mUsers;
+    std::map<int32, User> mUsers;
     std::string mIRCCommand[kIRCCommandSize];
 };
 

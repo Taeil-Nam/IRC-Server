@@ -26,18 +26,22 @@ public:
     const Channel& operator=(const Channel& IN channel);
     virtual ~Channel();
 
-    bool IsUserExist(const std::string& nickname) const;
-    bool IsOperator(const std::string& nickname) const;
+    bool IsUserExist(const std::string& IN nickname) const;
+    bool IsOperator(const std::string& IN nickname) const;
     bool IsInviteOnly() const;
     const std::string& GetName() const;
     const std::string& GetTopic() const;
-    
-    void SetName(const std::string& name);
+    int32 GetCurrentUserCount() const;
+    const std::map<std::string, User>& GetUsers() const;
+    const std::map<std::string, User>& GetOperators() const;
+    std::string GetAllUsersNickname() const;
 
-    void AddUser(const std::string& nickname);
-    void AddOperator(const std::string& nickname);
-    void DeleteUser(const std::string& nickname);
-    void DeleteOperator(const std::string& nickname);
+    void SetName(const std::string& IN channelName);
+
+    void AddUser(const std::string& IN nickname, const User& user);
+    void AddOperator(const std::string& IN nickname, const User& user);
+    void DeleteUser(const std::string& IN nickname);
+    void DeleteOperator(const std::string& IN nickname);
 private:
     Channel(const Channel& IN channel); // = delete
 
@@ -46,8 +50,8 @@ private:
     std::string mTopic;
     std::string mKey;
     int32 mMaxUserCount;
-    std::set<std::string> mUsers;
-    std::set<std::string> mOperators;
+    std::map<std::string, User> mUsers;
+    std::map<std::string, User> mOperators;
     bool mbIsInviteOnly;
     bool mbCanOperatorSetTopic;
 };
