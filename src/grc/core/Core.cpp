@@ -529,9 +529,9 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
             // TODO : hello bot(client)를 해당 채널에 추가(bonus)
             LOG(LogLevel::Informational) << "Create new channel " << "[" << channelName << "]";
             LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
-                << " Join to channel " << "[" << channelName << "]";
+                << " join to channel " << "[" << channelName << "]";
             LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
-                << " is Now operator of channel " << "[" << channelName << "]";
+                << " is now operator of channel " << "[" << channelName << "]";
         }
         else
         {
