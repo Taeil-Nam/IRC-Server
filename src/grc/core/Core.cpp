@@ -564,6 +564,7 @@ void Core::processJOINMessage(const int32 IN socket, const std::vector<std::stri
                     ERR_CHANNELISFULL + " " + channelName + " :Cannot join channel (+l)" + "\r\n");
                     return;
             }
+            mChannels[channelName].AddUser(user.GetNickname(), user);
         }
         std::map<std::string, User>::const_iterator channelUser = mChannels[channelName].GetUsers().begin();
         while (channelUser != mChannels[channelName].GetUsers().end())
