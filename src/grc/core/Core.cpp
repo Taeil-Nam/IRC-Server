@@ -705,6 +705,7 @@ void Core::checkUserConnection(const int32 IN socket)
         {
             const std::string ping("PING");
             mNetwork.FetchToSendBuffer(socket, ping + " "
+                + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " "
                 + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");
             LOG(LogLevel::Debug) << "Sent PING to " << "[" << user.GetNickname() << "]";
             user.SetLastPingTime(time(NULL));
