@@ -650,11 +650,11 @@ void Core::processQUITMessage(const int32 IN socket,
 
 void Core::processPINGMessage(const int32 IN socket, const std::vector<std::string>& IN leading)
 {
-    const std::string& pong = "PONG";
+    const std::string& pong("PONG");
     const std::string& token = leading[1];
     const User& user = mUsers[socket];
     mNetwork.FetchToSendBuffer(socket, 
-            pong + " " + mNetwork.GetIPString(mNetwork.GetServerSocket()) + token + "\r\n");
+            pong + " " + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " :" + token + "\r\n");
     LOG(LogLevel::Debug) << "Reply PONG to " << "[" << user.GetNickname() << "]";
 }
 
@@ -704,8 +704,7 @@ void Core::checkUserConnection(const int32 IN socket)
         {
             const std::string ping("PING");
             mNetwork.FetchToSendBuffer(socket, ping + " "
-            + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " "
-            + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");
+                + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");
             LOG(LogLevel::Debug) << "Sent PING to " << "[" << user.GetNickname() << "]";
             user.SetLastPingTime(time(NULL));
         }
