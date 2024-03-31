@@ -38,7 +38,7 @@ public:
     };
 
 public:
-	static void PASS(const int32 IN socket, const std::string& message);
+	static void PASS(const int32 IN socket, const std::string& IN message);
     // static void NICK(const int32 IN socket,
     //     const std::vector<std::string>& IN leading, const std::string& IN trailing);
     // static void USER(const int32 IN socket,
@@ -62,6 +62,22 @@ public:
 
 private:
 	IRCMessage(); // = delete
+
+	/**
+	 * @brief message 매개 변수를 파싱 후, command, parameters, trailing에 알맞은 값 저장.
+	 * 
+	 * @param message[IN]: Message to parse.
+	 * @param command[OUT]: Command of message.
+	 * @param parameters[OUT]: Parameters of command.
+	 * @param trailing[OUT]: Last string of message that start with ':'.
+	 */
+	static void parseMessage
+	(
+		const std::string& IN message,
+		std::string& OUT command,
+		std::vector<std::string>& OUT parameters,
+		std::string OUT trailing
+	);
 
 private:
 	const static std::string mCommands[kIRCCommandSize];

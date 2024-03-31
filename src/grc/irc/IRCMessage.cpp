@@ -21,13 +21,27 @@ const std::string IRCMessage::mCommands[kIRCCommandSize]
 	"PONG"
 };
 
-void IRCMessage::PASS(const int32 IN socket, const std::string& message)
+void IRCMessage::PASS(const int32 IN socket, const std::string& IN message)
 {
-	[Input message format]
-	command | parameters | [trailing]
-	TODO(tnam) : Message Parsing 
+	std::string command("");
+	std::vector<std::string> parameters;
+	std::string trailing("");
+	parseMessage(message, command, parameters, trailing);
+	// TODO(tnam) : PASS 로직 추가
 }
 
+void IRCMessage::parseMessage
+(
+	const std::string& IN message,
+	std::string& OUT command,
+	std::vector<std::string>& OUT parameters,
+	std::string OUT trailing
+)
+{
+	// [Input message format]
+	// command | parameters | [trailing]
+	// TODO(tnam) : message 파싱 및 OUT 매개변수들에 알맞은 값 저장
+}
 
 // void Core::processPASSMessage(const int32 IN socket,
 //     const std::vector<std::string>& IN leading, const std::string& IN trailing)
