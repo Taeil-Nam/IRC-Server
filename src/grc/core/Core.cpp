@@ -156,8 +156,8 @@ bool Core::initLog()
 void Core::initConsoleWindow()
 {
     mLogMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Log monitor");
-    mLogMonitor.SetHeaderColor(DisplayBuffer::WhiteCharBlueBG);
-    mLogMonitor.SetFooterColor(DisplayBuffer::WhiteCharBlueBG);
+    mLogMonitor.SetHeaderColor(DisplayBuffer::WriteCharGrayBG);
+    mLogMonitor.SetFooterColor(DisplayBuffer::WriteCharGrayBG);
     mLogMonitor.SetTimestamp(true);
     mServerMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Server monitor");
     mServerMonitor.SetHeaderColor(DisplayBuffer::WhiteCharRedBG);
@@ -622,10 +622,10 @@ void Core::processPARTMessage(const int32 IN socket, const std::vector<std::stri
         while (channelUser != mChannels[channelName].GetUsers().end())
         {
             int32 socket = channelUser->second.GetSocket();
-            mNetwork.FetchToSendBuffer(socket,
-                ":"  + user.GetNickname() + "!" + user.GetUsername() + "@" + user.GetHostname()
-                + " " + "PART" + " " + channelName + "\r\n");
-            LOG(LogLevel::Alert) << "\n" << mNetwork.GetSession(socket).sendBuffer;
+            // TODO: PART가 아닌, PRIVMSG로 응답해줘야함
+            // mNetwork.FetchToSendBuffer(socket,
+            //     ":"  + user.GetNickname() + "!" + user.GetUsername() + "@" + user.GetHostname()
+            //     + " " + "PART" + " " + channelName + "\r\n");
             channelUser++;
         }
         mChannels[channelName].DeleteUser(user.GetNickname());
