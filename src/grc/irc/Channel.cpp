@@ -101,10 +101,20 @@ std::string Channel::GetAllUsersNickname() const
     std::map<std::string, User>::const_iterator it = mUsers.begin();
     while (it != mUsers.end())
     {
-        AllUsersNicknames += it->second.GetNickname() + " ";
+        std::string userNickname;
+        if (IsOperator(it->first))
+        {
+            userNickname = "@" + it->second.GetNickname();
+        }
+        else
+        {
+            it->second.GetNickname();
+        }
+        AllUsersNicknames += userNickname + " ";
         it++;
     }
     AllUsersNicknames.pop_back();
+    LOG(LogLevel::Alert) << AllUsersNicknames;
     return AllUsersNicknames;
 }
 

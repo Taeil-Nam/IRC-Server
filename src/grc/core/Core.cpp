@@ -621,8 +621,8 @@ void Core::processPARTMessage(const int32 IN socket, const std::vector<std::stri
         std::map<std::string, User>::const_iterator channelUser = mChannels[channelName].GetUsers().begin();
         while (channelUser != mChannels[channelName].GetUsers().end())
         {
-            int32 socket = channelUser->second.GetSocket();
             // TODO: PART가 아닌, PRIVMSG로 응답해줘야함
+            // int32 socket = channelUser->second.GetSocket();
             // mNetwork.FetchToSendBuffer(socket,
             //     ":"  + user.GetNickname() + "!" + user.GetUsername() + "@" + user.GetHostname()
             //     + " " + "PART" + " " + channelName + "\r\n");
