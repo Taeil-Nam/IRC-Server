@@ -114,7 +114,6 @@ std::string Channel::GetAllUsersNickname() const
         it++;
     }
     AllUsersNicknames.pop_back();
-    LOG(LogLevel::Alert) << AllUsersNicknames;
     return AllUsersNicknames;
 }
 

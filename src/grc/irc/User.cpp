@@ -1,4 +1,5 @@
 #include "User.hpp"
+#include "BSD-GDF/Logger/GlobalLogger.hpp"
 
 namespace grc
 {
@@ -94,11 +95,13 @@ void User::SetSocket(const int32 IN socket)
 void User::SetAuthenticated()
 {
     mbIsAuthenticated = true;
+    LOG(LogLevel::Informational) << "User [" << mNickname << "] Authenticated";
 }
 
 void User::SetRegistered()
 {
     mbIsRegistered = true;
+    LOG(LogLevel::Informational) << "User [" << mNickname << "] Registered";
 }
 
 void User::SetNickname(const std::string& nickname)

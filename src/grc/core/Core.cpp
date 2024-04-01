@@ -24,52 +24,6 @@ Core::~Core()
     LOG_SET_LEVEL(LogLevel::Informational);
 }
 
-void Core::Run()
-{
-    while (mbRunning)
-    {
-        KernelEvent event;
-        while (mKernelQueue.Poll(event))
-        {
-            if (event.IdentifyFD(STDIN) && event.IsReadType())
-            {
-                handleMonitorInput();
-                handleMonitorCommand();
-            }
-            else if (event.IdentifyFD(STDOUT) && event.IsWriteType())
-            {
-                mActivatedWindow->Refresh();
-            }
-            else if (event.IdentifyFD(mLogFileFD) && event.IsWriteType())
-            {
-                handleLogBuffer();
-            }
-            else if (event.IdentifySocket(mNetwork.GetServerSocket()) && event.IsReadType())
-            {
-                setupNewClient();
-            }
-            else if (event.IsReadType())
-            {
-                if (mNetwork.RecvFromClient(event.GetIdentifier()) == FAILURE)
-                {
-                    mUsers.erase(event.GetIdentifier());
-                    continue;
-                }
-                handleIRCMessage(event.GetIdentifier());
-            }
-            else if (event.IsWriteType())
-            {
-                checkUserConnection(event.GetIdentifier());
-                if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
-                {
-                    mUsers.erase(event.GetIdentifier());
-                    continue;
-                }
-            }
-        }
-    }
-}
-
 bool Core::Init()
 {
     if (initLog() == FAILURE)
@@ -112,6 +66,52 @@ bool Core::Init()
     mbRunning = true;
     LOG(LogLevel::Notice) << "IRC Server is ready (Port = " << mPort << ")";
     return SUCCESS;
+}
+
+void Core::Run()
+{
+    while (mbRunning)
+    {
+        KernelEvent event;
+        while (mKernelQueue.Poll(event))
+        {
+            if (event.IdentifyFD(STDIN) && event.IsReadType())
+            {
+                handleMonitorInput();
+                handleMonitorCommand();
+            }
+            else if (event.IdentifyFD(STDOUT) && event.IsWriteType())
+            {
+                mActivatedWindow->Refresh();
+            }
+            else if (event.IdentifyFD(mLogFileFD) && event.IsWriteType())
+            {
+                handleLogBuffer();
+            }
+            else if (event.IdentifySocket(mNetwork.GetServerSocket()) && event.IsReadType())
+            {
+                setupNewClient();
+            }
+            else if (event.IsReadType())
+            {
+                if (mNetwork.RecvFromClient(event.GetIdentifier()) == FAILURE)
+                {
+                    IRC::DeleteUser(event.GetIdentifier());
+                    continue;
+                }
+                IRC::HandleMessage(event.GetIdentifier(), mNetwork, mPassword);
+            }
+            else if (event.IsWriteType())
+            {
+                IRC::CheckUserConnection(event.GetIdentifier(), mNetwork);
+                if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
+                {
+                    IRC::DeleteUser(event.GetIdentifier());
+                    continue;
+                }
+            }
+        }
+    }
 }
 
 bool Core::initLog()
@@ -294,98 +294,9 @@ void Core::setupNewClient()
     }
     User newUser;
     newUser.SetSocket(newClientSocket);
-    mUsers[newClientSocket] = newUser;
+    IRC::AddUser(newClientSocket, newUser);
 }
 
-void Core::handleIRCMessage(const int32 IN socket)
-{
-    User& user = mUsers[socket];
-    std::string message;
-    while (mNetwork.PullFromRecvBuffer(socket, message, "\r\n"))
-    {
-        if (message.size() > 510)
-        {
-            continue;
-        }
-        std::vector<std::string> tokens = split(message, " ");
-        const std::string& command = tokens[0];
-        if (user.IsAuthenticated() == false)
-        {
-            IRCMessage::PASS(socket, message);
-        }
-        // else if (command == mIRCCommand[kNick])
-        // {
-        //     processNICKMessage(socket, leading, trailing);
-        // }
-        // else if (command == mIRCCommand[kUser])
-        // {
-        //     processUSERMessage(socket, leading, trailing);
-        // }
-        // else if (command == mIRCCommand[kQuit])
-        // {
-        //     processQUITMessage(socket, leading, trailing);
-        // }
-        // else if (command == mIRCCommand[kJoin])
-        // {
-        //     processJOINMessage(socket, leading);
-        // }
-        // else if (command == mIRCCommand[kPart])
-        // {
-        //     processPARTMessage(socket, leading);
-        // }
-        // else if (command == mIRCCommand[kPing])
-        // {
-        //     processPINGMessage(socket, leading);
-        // }
-        // else if (command == mIRCCommand[kPong])
-        // {
-        //     processPONGMessage(socket, leading);
-        // }
-   }
-}
 
-bool Core::isNicknameInUse(const std::string& IN nickName)
-{
-    std::map<int32, User>::const_iterator it = mUsers.begin();
-    while (it != mUsers.end())
-    {
-        if (it->second.GetNickname() == nickName)
-        {
-            return true;
-        }
-        it++;
-    }
-    return false;
-}
-
-void Core::checkUserConnection(const int32 IN socket)
-{
-    User& user = mUsers[socket];
-    if (user.IsRegistered())
-    {
-        const int32 timeout = 60;
-        time_t currentTime = time(NULL);
-        double pongElapsedTime = difftime(currentTime, user.GetLastPongRecvTime());
-        if (pongElapsedTime >= timeout)
-        {
-            LOG(LogLevel::Notice) << "Connection timeout" << "(" << timeout << ")"
-                << " " << "Client(IP: " << mNetwork.GetIPString(socket) << ")";
-            mNetwork.ClearSendBuffer(socket);
-            mNetwork.DisconnectClient(socket);
-            return;
-        }
-        const int32 pingInterval = 30;
-        double pingElapsedTime = difftime(currentTime, user.GetLastPingSendTime());
-        if (pingElapsedTime >= pingInterval)
-        {
-            const std::string ping("PING");
-            mNetwork.FetchToSendBuffer(socket, ping + " "
-                + mNetwork.GetIPString(mNetwork.GetServerSocket()) + " "
-                + mNetwork.GetIPString(mNetwork.GetServerSocket()) + "\r\n");
-            LOG(LogLevel::Debug) << "Sent PING to " << "[" << user.GetNickname() << "]";
-            user.SetLastPingTime(time(NULL));
-        }
-    }
-}
 
 }

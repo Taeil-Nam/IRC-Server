@@ -17,10 +17,7 @@
 
 #include "BSD-GDF/Event/KernelEvent.hpp"
 #include "common.hpp"
-#include "../irc/IRCMessage.hpp"
-#include "../irc/NumericReply.hpp"
-#include "../irc/Channel.hpp"
-#include "../irc/User.hpp"
+#include "../irc/IRC.hpp"
 
 using namespace gdf;
 
@@ -64,11 +61,6 @@ private:
     /* about network connection */
     void setupNewClient();
 
-    /* about IRC */
-    void handleIRCMessage(const int32 IN socket);
-    bool isNicknameInUse(const std::string& IN nickname);
-    void checkUserConnection(const int32 IN socket);
-
 private:
     const int32 mPort;
     const std::string mPassword;
@@ -82,8 +74,6 @@ private:
     DisplayConsole mLogMonitor;
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
-    std::map<std::string, Channel> mChannels;
-    std::map<int32, User> mUsers;
 };
 
 }
