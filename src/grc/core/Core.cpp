@@ -96,7 +96,7 @@ void Core::Run()
             {
                 if (mNetwork.RecvFromClient(event.GetIdentifier()) == FAILURE)
                 {
-                    IRC::DeleteUser(event.GetIdentifier());
+                    UserManager::DeleteUser(event.GetIdentifier());
                     continue;
                 }
                 IRC::HandleMessage(event.GetIdentifier(), mNetwork, mPassword);
@@ -106,7 +106,7 @@ void Core::Run()
                 IRC::CheckUserConnection(event.GetIdentifier(), mNetwork);
                 if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
                 {
-                    IRC::DeleteUser(event.GetIdentifier());
+                    UserManager::DeleteUser(event.GetIdentifier());
                     continue;
                 }
             }
@@ -292,9 +292,7 @@ void Core::setupNewClient()
             LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClientSocket) << ") connected";
         }
     }
-    User newUser;
-    newUser.SetSocket(newClientSocket);
-    IRC::AddUser(newClientSocket, newUser);
+    UserManager::AddUser(newClientSocket);
 }
 
 

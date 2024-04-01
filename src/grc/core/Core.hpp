@@ -18,6 +18,7 @@
 #include "BSD-GDF/Event/KernelEvent.hpp"
 #include "common.hpp"
 #include "../irc/IRC.hpp"
+#include "../irc/UserManager.hpp"
 
 using namespace gdf;
 
