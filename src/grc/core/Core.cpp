@@ -103,7 +103,6 @@ void Core::Run()
             }
             else if (event.IsWriteType())
             {
-                IRC::CheckUserConnection(event.GetIdentifier(), mNetwork);
                 if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
                 {
                     UserManager::DeleteUser(event.GetIdentifier());

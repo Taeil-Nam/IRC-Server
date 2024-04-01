@@ -34,8 +34,6 @@ public:
     const std::string& GetHostname() const;
     const std::string& GetServername() const;
     const std::string& GetRealname() const;
-    time_t GetLastPingSendTime() const;
-    time_t GetLastPongRecvTime() const;
 
     void SetSocket(const int32 IN socket);
     void SetAuthenticated();
@@ -45,8 +43,6 @@ public:
     void SetHostname(const std::string& IN hostname);
     void SetServername(const std::string& IN servername);
     void SetRealname(const std::string& IN realname);
-    void SetLastPingTime(const time_t IN time);
-    void SetLastPongTime(const time_t IN time);
 private:
     User(const User& IN User); // = delete
 
@@ -59,8 +55,6 @@ private:
     std::string mHostname;
     std::string mServername;
     std::string mRealname;
-    time_t mLastPingSendTime;
-    time_t mLastPongRecvTime;
 };
 
 }

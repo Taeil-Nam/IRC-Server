@@ -23,40 +23,6 @@ const std::string IRC::mCommands[kIRCCommandSize]
     "PONG"
 };
 
-void IRC::CheckUserConnection(const int32 IN socket, Network& IN network)
-{
-    User& user = UserManager::GetUser(socket);
-    if (user.IsRegistered())
-    {
-        const int32 timeout = 60;
-        time_t currentTime = time(NULL);
-        double pongElapsedTime = difftime(currentTime, user.GetLastPongRecvTime());
-        if (pongElapsedTime >= timeout)
-        {
-            LOG(LogLevel::Notice) << "Connection timeout" << "(" << timeout << ")"
-                << " " << "Client(IP: " << network.GetIPString(socket) << ")";
-            network.ClearSendBuffer(socket);
-            network.DisconnectClient(socket);
-            return;
-        }
-        const int32 pingInterval = 30;
-        double pingElapsedTime = difftime(currentTime, user.GetLastPingSendTime());
-        if (pingElapsedTime >= pingInterval)
-        {
-            const std::string token = network.GetIPString(network.GetServerSocket());
-            std::string messageToReply("");
-            messageToReply.append("PING");
-            messageToReply.append(" ");
-            messageToReply.append(network.GetIPString(network.GetServerSocket()));
-            messageToReply.append(" ");
-            messageToReply.append(token);
-            messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
-            user.SetLastPingTime(time(NULL));
-        }
-    }
-}
-
 void IRC::HandleMessage(const int32 IN socket, Network& IN network, const std::string& IN password)
 {
     const User& user = UserManager::GetUser(socket);
@@ -305,7 +271,6 @@ void IRC::USER(const int32 IN socket,
     user.SetHostname(hostname);
     user.SetServername(servername);
     user.SetRealname(realname);
-    user.SetRegistered();
     messageToReply.append(RPL_WELCOME);
     messageToReply.append(" ");
     messageToReply.append(user.GetNickname());
@@ -317,6 +282,12 @@ void IRC::USER(const int32 IN socket,
     messageToReply.append(username);
     messageToReply.append("@");
     messageToReply.append(hostname);
+    messageToReply.append(CRLF);
+    messageToReply.append("PING");
+    messageToReply.append(" ");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(" ");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
     messageToReply.append(CRLF);
     network.FetchToSendBuffer(socket, messageToReply);
 }
@@ -565,19 +536,20 @@ void IRC::PART(const int32 IN socket,
         std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
         while (userInChannel != channel.GetUsers().end())
         {
-            // [Problem] : 응답 메시지 형식이 뭔지 모르겠음
             // TODO : 응답 메시지 형식 알아낸 후 보내기
+            // :taeil!~taeil@localhost PART :#gdf
             const std::string& reason = trailing;
-            messageToReply.append("PRIVMSG");
-            messageToReply.append(" ");
+            messageToReply.append(":");
             messageToReply.append(user.GetNickname());
+            messageToReply.append("!~");
+            messageToReply.append(user.GetUsername());
+            messageToReply.append("@");
+            messageToReply.append("127.0.0.1");
+            messageToReply.append(" ");
+            messageToReply.append(command);
             messageToReply.append(" ");
             messageToReply.append(":");
-            messageToReply.append("User");
-            messageToReply.append(" ");
-            messageToReply.append(user.GetNickname());
-            messageToReply.append(" ");
-            messageToReply.append("left the channel");
+            messageToReply.append(channelName);
             if (reason != "")
             {
                 messageToReply.append("-");
@@ -632,7 +604,7 @@ void IRC::PONG(const int32 IN socket,
     User& user = UserManager::GetUser(socket);
     if (token == network.GetIPString(network.GetServerSocket()))
     {
-        user.SetLastPongTime(time(NULL));
+        user.SetRegistered();
     }
 }
 

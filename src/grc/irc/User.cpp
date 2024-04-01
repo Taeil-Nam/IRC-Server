@@ -12,8 +12,6 @@ User::User()
 , mHostname("")
 , mServername("")
 , mRealname("")
-, mLastPingSendTime(0)
-, mLastPongRecvTime(time(NULL))
 {
 
 }
@@ -27,8 +25,6 @@ const User& User::operator=(const User& user)
     mHostname = user.mHostname;
     mServername = user.mServername;
     mRealname = user.mRealname;
-    mLastPingSendTime = user.mLastPingSendTime;
-    mLastPongRecvTime = user.mLastPongRecvTime;
     return *this;
 }
 
@@ -77,16 +73,6 @@ const std::string& User::GetRealname() const
     return mRealname;
 }
 
-time_t User::GetLastPingSendTime() const
-{
-    return mLastPingSendTime;
-}
-
-time_t User::GetLastPongRecvTime() const
-{
-    return mLastPongRecvTime;
-}
-
 void User::SetSocket(const int32 IN socket)
 {
     mSocket = socket;
@@ -129,18 +115,5 @@ void User::SetRealname(const std::string& realname)
     mRealname = realname;
 }
 
-void User::SetLastPingTime(const time_t time)
-{
-    ASSERT(time >= mLastPingSendTime)
-        << "New time must greater or equal than old time";
-    mLastPingSendTime = time;
-}
-
-void User::SetLastPongTime(const time_t time)
-{
-    ASSERT(time >= mLastPongRecvTime)
-        << "New time must greater or equal than old time";
-    mLastPongRecvTime = time;
-}
 
 }
