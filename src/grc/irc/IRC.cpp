@@ -152,7 +152,7 @@ void IRC::parseMessage(const std::string& IN message,
     }
 }
 
-void IRC::PASS(const int32 IN socket, 
+void IRC::PASS(const int32 IN socket,
                const std::string& IN command,
                const std::vector<std::string>& IN parameters,
                const std::string& IN trailing,
@@ -210,7 +210,7 @@ void IRC::PASS(const int32 IN socket,
     user.SetAuthenticated();
 }
 
-void IRC::NICK(const int32 IN socket, 
+void IRC::NICK(const int32 IN socket,
                const std::string& IN command,
                const std::vector<std::string>& IN parameters,
                const std::string& IN trailing,
@@ -265,7 +265,7 @@ void IRC::NICK(const int32 IN socket,
     user.SetNickname(nickname);
 }
 
-void IRC::USER(const int32 IN socket, 
+void IRC::USER(const int32 IN socket,
                const std::string& IN command,
                const std::vector<std::string>& IN parameters,
                const std::string& IN trailing,
@@ -321,7 +321,7 @@ void IRC::USER(const int32 IN socket,
     network.FetchToSendBuffer(socket, messageToReply);
 }
 
-void IRC::QUIT(const int32 IN socket, 
+void IRC::QUIT(const int32 IN socket,
                const std::string& IN command,
                const std::vector<std::string>& IN parameters,
                const std::string& IN trailing,
@@ -338,7 +338,7 @@ void IRC::QUIT(const int32 IN socket,
     network.DisconnectClient(socket);
 }
 
-void IRC::JOIN(const int32 IN socket, 
+void IRC::JOIN(const int32 IN socket,
                const std::string& IN command,
                const std::vector<std::string>& IN parameters,
                const std::string& IN trailing,
@@ -506,7 +506,7 @@ void IRC::JOIN(const int32 IN socket,
     }
 }
 
-void IRC::PART(const int32 IN socket, 
+void IRC::PART(const int32 IN socket,
                const std::string& IN command,
                const std::vector<std::string>& IN parameters,
                const std::string& IN trailing,
@@ -596,7 +596,7 @@ void IRC::PART(const int32 IN socket,
     }
 }
 
-void IRC::PING(const int32 IN socket, 
+void IRC::PING(const int32 IN socket,
                const std::string& IN command,
                const std::vector<std::string>& IN parameters,
                const std::string& IN trailing,
@@ -618,7 +618,7 @@ void IRC::PING(const int32 IN socket,
     network.FetchToSendBuffer(socket, messageToReply);
 }
 
-void IRC::PONG(const int32 IN socket, 
+void IRC::PONG(const int32 IN socket,
                const std::string& IN command,
                const std::vector<std::string>& IN parameters,
                const std::string& IN trailing,
