@@ -63,26 +63,26 @@ void IRC::HandleMessage(const int32 IN socket, Network& IN network, const std::s
         {
             PART(socket, command, parameters, trailing, password, network);
         }
-        // else if (command == mStaticCommands[kMode])
+        // else if (command == sStaticCommands[kMode])
         // {
         //     MODE(socket, command, parameters, trailing, password, network);
         // }
-        // else if (command == mStaticCommands[kTopic])
+        // else if (command == sStaticCommands[kTopic])
         // {
         //     TOPIC(socket, command, parameters, trailing, password, network);
         // }
-        // else if (command == mStaticCommands[kInvite])
+        // else if (command == sStaticCommands[kInvite])
         // {
         //     INVITE(socket, command, parameters, trailing, password, network);
         // }
-        // else if (command == mStaticCommands[kKick])
+        // else if (command == sStaticCommands[kKick])
         // {
         //     KICK(socket, command, parameters, trailing, password, network);
         // }
-        // else if (command == mStaticCommands[kPrivmsg])
-        // {
-        //     PRIVMSG(socket, command, parameters, trailing, password, network);
-        // }
+        else if (command == sStaticCommands[kPrivmsg])
+        {
+            PRIVMSG(socket, command, parameters, trailing, password, network);
+        }
         else if (command == sStaticCommands[kPing])
         {
             PING(socket, command, parameters, trailing, password, network);
@@ -97,7 +97,7 @@ void IRC::HandleMessage(const int32 IN socket, Network& IN network, const std::s
 void IRC::parseMessage(const std::string& IN message,
                        std::string& OUT command,
                        std::vector<std::string>& OUT parameters,
-                       std::string OUT trailing)
+                       std::string& OUT trailing)
 {
     // [Input message format]
     // <command> <parameters> <trailing>
@@ -415,57 +415,65 @@ void IRC::JOIN(const int32 IN socket,
             // 채널에 유저 입장
             channel.AddUser(user.GetNickname(), user);
         }
-        // 채널의 모든 유저에게 새로운 유저 입장 알림
         Channel& channel = ChannelManager::GetChannel(channelName);
+        // Notice
+        messageToReply.append(":");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append("JOIN");
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(CRLF);
+        // RPL_TOPIC
+        messageToReply.append(RPL_TOPIC);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":");
+        messageToReply.append(channel.GetTopic());
+        messageToReply.append(CRLF);
+        // RPL_NAMREPLY
+        messageToReply.append(RPL_NAMREPLY);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append("=");
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":");
+        messageToReply.append(channel.GetAllUsersNickname());
+        messageToReply.append(CRLF);
+        // RPL_ENDOFNAMES
+        messageToReply.append(RPL_ENDOFNAMES);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":End of /NAMES list");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        messageToReply.clear();
+        // 채널의 모든 유저에게 새로운 유저 입장 알림 (JOIN)
+        messageToReply.append(":");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append("JOIN");
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(CRLF);
         std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
         while (userInChannel != channel.GetUsers().end())
         {
-            int32 socket = userInChannel->second.GetSocket();
-            messageToReply.append(":");
-            messageToReply.append(user.GetNickname());
-            messageToReply.append(" ");
-            messageToReply.append("JOIN");
-            messageToReply.append(" ");
-            messageToReply.append(channelName);
-            messageToReply.append(CRLF);
-            network.PushToSendBuffer(socket, messageToReply);
-            messageToReply.clear();
-
-            messageToReply.append(RPL_TOPIC);
-            messageToReply.append(" ");
-            messageToReply.append(user.GetNickname());
-            messageToReply.append(" ");
-            messageToReply.append(channelName);
-            messageToReply.append(" ");
-            messageToReply.append(":");
-            messageToReply.append(channel.GetTopic());
-            messageToReply.append(CRLF);
-            network.PushToSendBuffer(socket, messageToReply);
-            messageToReply.clear();
-
-            messageToReply.append(RPL_NAMREPLY);
-            messageToReply.append(" ");
-            messageToReply.append(user.GetNickname());
-            messageToReply.append(" ");
-            messageToReply.append("=");
-            messageToReply.append(" ");
-            messageToReply.append(channelName);
-            messageToReply.append(" ");
-            messageToReply.append(":");
-            messageToReply.append(channel.GetAllUsersNickname());
-            messageToReply.append(CRLF);
-            network.PushToSendBuffer(socket, messageToReply);
-            messageToReply.clear();
-
-            messageToReply.append(RPL_ENDOFNAMES);
-            messageToReply.append(" ");
-            messageToReply.append(user.GetNickname());
-            messageToReply.append(" ");
-            messageToReply.append(channelName);
-            messageToReply.append(" ");
-            messageToReply.append(":End of /NAMES list");
-            messageToReply.append(CRLF);
-            network.PushToSendBuffer(socket, messageToReply);
+            if (userInChannel->second.GetNickname() == user.GetNickname())
+            {
+                userInChannel++;
+                continue;
+            }
+            network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
             userInChannel++;
         }
     }
@@ -527,38 +535,152 @@ void IRC::PART(const int32 IN socket,
             continue;
         }
         // 채널의 모든 유저들한테 해당 유저 나감을 알림
+        const std::string& reason = trailing;
+        messageToReply.append(":");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append("!");
+        messageToReply.append(user.GetUsername());
+        messageToReply.append("@");
+        messageToReply.append(user.GetHostname());
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        //messageToReply.append(":");
+        messageToReply.append(channelName);
+        if (reason != "")
+        {
+            messageToReply.append("-");
+            messageToReply.append(reason);
+        }
+        messageToReply.append(CRLF);
         std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
         while (userInChannel != channel.GetUsers().end())
         {
-            // TODO : 응답 메시지 형식 알아낸 후 보내기
-            // :taeil!~taeil@localhost PART :#gdf
-            const std::string& reason = trailing;
-            messageToReply.append(":");
-            messageToReply.append(user.GetNickname());
-            messageToReply.append("!~");
-            messageToReply.append(user.GetUsername());
-            messageToReply.append("@");
-            messageToReply.append("127.0.0.1");
-            messageToReply.append(" ");
-            messageToReply.append(command);
-            messageToReply.append(" ");
-            messageToReply.append(":");
-            messageToReply.append(channelName);
-            if (reason != "")
-            {
-                messageToReply.append("-");
-                messageToReply.append(reason);
-            }
-            messageToReply.append(CRLF);
-            network.PushToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
             userInChannel++;
         }
+        messageToReply.clear();
         channel.DeleteUser(user.GetNickname());
         // TODO (bonus) : 채널에 유저가 없는 경우, 채널 삭제 (bonus : hello bot도 같이 없어져야함)
         if (channel.IsChannelEmpty())
         {
             ChannelManager::DeleteChannel(channelName);
         }
+    }
+}
+
+void IRC::PRIVMSG(const int32 IN socket, 
+                  const std::string& IN command,
+                  const std::vector<std::string>& IN parameters,
+                  const std::string& IN trailing,
+                  const std::string& IN password,
+                  Network& IN OUT network)
+{
+    static_cast<void>(password);
+    const User& user = UserManager::GetUser(socket);
+    std::string messageToReply("");
+    const std::string& target = parameters[0];
+    bool IsChannel = false;
+    if (target[0] == '&' || target[0] == '#')
+    {
+        IsChannel = true;
+    }
+    // ERR_NORECIPIENT
+    if (parameters.size() < 1)
+    {
+        messageToReply.append(ERR_NORECIPIENT);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(":No recipient given");
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_NOTEXTTOSEND
+    if (trailing.empty())
+    {
+        messageToReply.append(ERR_NOTEXTTOSEND);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(":No text to send");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_CANNOTSENDTOCHAN
+    if (IsChannel
+        && ChannelManager::GetChannel(target).IsUserExist(user.GetNickname()) == false)
+    {
+        messageToReply.append(ERR_CANNOTSENDTOCHAN);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(ChannelManager::GetChannel(target).GetName());
+        messageToReply.append(" ");
+        messageToReply.append(":Cannot send to channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_NOSUCHNICK
+    if (IsChannel == false && UserManager::IsUserExist(target) == false)
+    {
+        messageToReply.append(ERR_NOSUCHNICK);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(target);
+        messageToReply.append(" ");
+        messageToReply.append(":No such nick/channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // target이 채널인 경우
+    if (IsChannel)
+    {
+        const Channel& channel = ChannelManager::GetChannel(target);
+        const std::map<std::string, User>& usersInChannel = channel.GetUsers();
+        std::map<std::string, User>::const_iterator userInChannel = usersInChannel.begin();
+        while (userInChannel != usersInChannel.end())
+        {
+            if (userInChannel->second.GetNickname() == user.GetNickname())
+            {
+                userInChannel++;
+                continue;
+            }
+            messageToReply.append(":");
+            messageToReply.append(user.GetNickname());
+            messageToReply.append(" ");
+            messageToReply.append(command);
+            messageToReply.append(" ");
+            messageToReply.append(target);
+            messageToReply.append(" :");
+            messageToReply.append(trailing);
+            messageToReply.append(CRLF);
+            network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
+            messageToReply.clear();
+            userInChannel++;
+        }
+    }
+    // target이 유저인 경우
+    else
+    {
+        const User& targetUser = UserManager::GetUser(target);
+        messageToReply.append(":");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        messageToReply.append(target);
+        messageToReply.append(" :");
+        messageToReply.append(trailing);
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(targetUser.GetSocket(), messageToReply);
     }
 }
 

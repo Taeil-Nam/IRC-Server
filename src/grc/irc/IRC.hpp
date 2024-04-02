@@ -26,9 +26,33 @@ using namespace gdf;
 // Error Replies
 ////////////////////////////////////////////////////////////
 
+// Indicates that no client can be found for the supplied nickname.
+// The text used in the last param of this message may vary.
+// "<client> <nickname> :No such nick/channel"
+#define ERR_NOSUCHNICK "401"
+
 // Used to indicate the given channel name is invalid.
 // "<channel name> :No such channel"
 #define ERR_NOSUCHCHANNEL "403"
+
+// Returned by the PRIVMSG command to indicate the message
+// wasn’t delivered because there was no recipient given.
+// "<client> :No recipient given (<command>)"
+#define ERR_NORECIPIENT "411"
+
+// Returned by the PRIVMSG command to indicate the message
+// wasn’t delivered because there was no text to send.
+// "<client> :No text to send"
+#define ERR_NOTEXTTOSEND "412"
+
+// Indicates that the PRIVMSG / NOTICE could not be delivered to <channel>.
+// The text used in the last param of this message may vary.
+// This is generally sent in response to channel modes,
+// such as a channel being moderated and the client
+// not having permission to speak on the channel,
+// or not being joined to a channel with the no external messages mode set.
+// "<client> <channel> :Cannot send to channel"
+#define ERR_CANNOTSENDTOCHAN "404"
 
 // Indicates that the Message of the Day file does not exist
 // or could not be found.
@@ -179,80 +203,80 @@ private:
     static void parseMessage(const std::string& IN message,
                              std::string& OUT command,
                              std::vector<std::string>& OUT parameters,
-                             std::string OUT trailing);
-    static void PASS(const int32 IN socket, 
+                             std::string& OUT trailing);
+    static void PASS(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    static void NICK(const int32 IN socket, 
+    static void NICK(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    static void USER(const int32 IN socket, 
+    static void USER(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    static void QUIT(const int32 IN socket, 
+    static void QUIT(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    static void JOIN(const int32 IN socket, 
+    static void JOIN(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    static void PART(const int32 IN socket, 
+    static void PART(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    // static void MODE(const int32 IN socket, 
+    // static void MODE(const int32 IN socket,
     //                  const std::string& IN command,
     //                  const std::vector<std::string>& IN parameters,
     //                  const std::string& IN trailing,
     //                  const std::string& IN password,
     //                  Network& IN OUT network);
-    // static void TOPIC(const int32 IN socket, 
+    // static void TOPIC(const int32 IN socket,
     //                  const std::string& IN command,
     //                  const std::vector<std::string>& IN parameters,
     //                  const std::string& IN trailing,
     //                  const std::string& IN password,
     //                  Network& IN OUT network);
-    // static void INVITE(const int32 IN socket, 
+    // static void INVITE(const int32 IN socket,
     //                  const std::string& IN command,
     //                  const std::vector<std::string>& IN parameters,
     //                  const std::string& IN trailing,
     //                  const std::string& IN password,
     //                  Network& IN OUT network);
-    // static void KICK(const int32 IN socket, 
+    // static void KICK(const int32 IN socket,
     //                  const std::string& IN command,
     //                  const std::vector<std::string>& IN parameters,
     //                  const std::string& IN trailing,
     //                  const std::string& IN password,
     //                  Network& IN OUT network);
-    // static void PRIVMSG(const int32 IN socket, 
-    //                  const std::string& IN command,
-    //                  const std::vector<std::string>& IN parameters,
-    //                  const std::string& IN trailing,
-    //                  const std::string& IN password,
-    //                  Network& IN OUT network);
-    static void PING(const int32 IN socket, 
+    static void PRIVMSG(const int32 IN socket,
+                        const std::string& IN command,
+                        const std::vector<std::string>& IN parameters,
+                        const std::string& IN trailing,
+                        const std::string& IN password,
+                     Network& IN OUT network);
+    static void PING(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    static void PONG(const int32 IN socket, 
+    static void PONG(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
                      const std::string& IN trailing,
