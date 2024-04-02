@@ -419,6 +419,10 @@ void IRC::JOIN(const int32 IN socket,
         // Notice
         messageToReply.append(":");
         messageToReply.append(user.GetNickname());
+        messageToReply.append("!");
+        messageToReply.append(user.GetUsername());
+        messageToReply.append("@");
+        messageToReply.append(user.GetHostname());
         messageToReply.append(" ");
         messageToReply.append("JOIN");
         messageToReply.append(" ");
@@ -545,11 +549,16 @@ void IRC::PART(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(command);
         messageToReply.append(" ");
-        //messageToReply.append(":");
-        messageToReply.append(channelName);
-        if (reason != "")
+        if (reason.empty())
         {
-            messageToReply.append("-");
+            messageToReply.append(":");
+            messageToReply.append(channelName);
+        }
+        else
+        {
+            messageToReply.append(channelName);
+            messageToReply.append(" ");
+            messageToReply.append(":");
             messageToReply.append(reason);
         }
         messageToReply.append(CRLF);
