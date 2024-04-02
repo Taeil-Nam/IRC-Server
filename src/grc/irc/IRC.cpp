@@ -416,6 +416,7 @@ void IRC::JOIN(const int32 IN socket,
             channel.AddUser(user.GetNickname(), user);
         }
         Channel& channel = ChannelManager::GetChannel(channelName);
+        channel.AddUser(user.GetNickname(), user);
         // Notice
         messageToReply.append(":");
         messageToReply.append(user.GetNickname());
@@ -464,6 +465,10 @@ void IRC::JOIN(const int32 IN socket,
         // 채널의 모든 유저에게 새로운 유저 입장 알림 (JOIN)
         messageToReply.append(":");
         messageToReply.append(user.GetNickname());
+        messageToReply.append("!");
+        messageToReply.append(user.GetUsername());
+        messageToReply.append("@");
+        messageToReply.append(user.GetHostname());
         messageToReply.append(" ");
         messageToReply.append("JOIN");
         messageToReply.append(" ");
@@ -574,6 +579,7 @@ void IRC::PART(const int32 IN socket,
         if (channel.IsChannelEmpty())
         {
             ChannelManager::DeleteChannel(channelName);
+            LOG(LogLevel::Informational) << "Delete channel " << "[" << channelName << "]";
         }
     }
 }
