@@ -19,6 +19,7 @@
 
 using namespace gdf;
 
+#define IRC_VERSION "v0.1"
 #define CRLF "\r\n"
 
 ////////////////////////////////////////////////////////////
@@ -28,6 +29,12 @@ using namespace gdf;
 // Used to indicate the given channel name is invalid.
 // "<channel name> :No such channel"
 #define ERR_NOSUCHCHANNEL "403"
+
+// Indicates that the Message of the Day file does not exist
+// or could not be found.
+// The text used in the last param of this message may vary.
+// "<client> :MOTD File is missing"
+#define ERR_NOMOTD "422"
 
 // Returned when a nickname parameter expected for a
 // command and isn't found.
@@ -91,6 +98,29 @@ using namespace gdf;
 // The text used in the last param of this message varies wildly.
 // "<nick> :Welcome to the <networkname> Network, <nick>[!<user>@<host>]"
 #define RPL_WELCOME "001"
+
+// Part of the post-registration greeting, this numeric returns
+// the name and software/version of the server
+// the client is currently connected to.
+// The text used in the last param of this message varies wildly.
+// "<client> :Your host is <servername>, running version <version>"
+#define RPL_YOURHOST "002"
+
+// Part of the post-registration greeting, this numeric returns
+// a human-readable date/time that the server was started or created.
+// The text used in the last param of this message varies wildly.
+// "<client> :This server was created <datetime>"
+#define RPL_CREATED "003"
+
+// Part of the post-registration greeting.
+// Clients SHOULD discover available features using RPL_ISUPPORT tokens
+// rather than the mode letters listed in this reply.
+// <client> <servername> <version> <available user modes> 
+// <available channel modes> [<channel modes with a parameter>]
+#define RPL_MYINFO "004"
+
+// <client> <1-13 tokens> :are supported by this server
+#define RPL_ISUPPORT "005"
 
 // Sent to a client when joining the <channel> to
 // inform them of the current topic of the channel.
@@ -229,10 +259,10 @@ private:
                      const std::string& IN password,
                      Network& IN OUT network);
 
+    static void SendWelcomeMessage(const int32 IN socket, Network& IN OUT network);
     static bool isNicknameInUse(const std::string& IN nickname);
-
 private:
-    const static std::string mCommands[kIRCCommandSize];
+    const static std::string sStaticCommands[kIRCCommandSize];
 };
 
 }

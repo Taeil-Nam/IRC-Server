@@ -16,7 +16,6 @@
 // standard (표준 헤더)
 #include <iostream>
 #include <string>
-#include <ctime>
 #include <map>
 
 // BSD-GDF 라이브러리

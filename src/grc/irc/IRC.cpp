@@ -1,11 +1,13 @@
 #include "IRC.hpp"
 #include "BSD-GDF/Logger/GlobalLogger.hpp"
 #include "grc/irc/Channel.hpp"
+#include "grc/irc/ChannelManager.hpp"
 
 namespace grc
 {
 
-const std::string IRC::mCommands[kIRCCommandSize]
+// mCommands
+const std::string IRC::sStaticCommands[kIRCCommandSize]
 =
 {
     "PASS",
@@ -41,51 +43,51 @@ void IRC::HandleMessage(const int32 IN socket, Network& IN network, const std::s
         {
             PASS(socket, command, parameters, trailing, password, network);
         }
-        else if (command == mCommands[kNick])
+        else if (command == sStaticCommands[kNick])
         {
             NICK(socket, command, parameters, trailing, password, network);
         }
-        else if (command == mCommands[kUser])
+        else if (command == sStaticCommands[kUser])
         {
             USER(socket, command, parameters, trailing, password, network);
         }
-        else if (command == mCommands[kQuit])
+        else if (command == sStaticCommands[kQuit])
         {
             QUIT(socket, command, parameters, trailing, password, network);
         }
-        else if (command == mCommands[kJoin])
+        else if (command == sStaticCommands[kJoin])
         {
             JOIN(socket, command, parameters, trailing, password, network);
         }
-        else if (command == mCommands[kPart])
+        else if (command == sStaticCommands[kPart])
         {
             PART(socket, command, parameters, trailing, password, network);
         }
-        // else if (command == mCommands[kMode])
+        // else if (command == mStaticCommands[kMode])
         // {
         //     MODE(socket, command, parameters, trailing, password, network);
         // }
-        // else if (command == mCommands[kTopic])
+        // else if (command == mStaticCommands[kTopic])
         // {
         //     TOPIC(socket, command, parameters, trailing, password, network);
         // }
-        // else if (command == mCommands[kInvite])
+        // else if (command == mStaticCommands[kInvite])
         // {
         //     INVITE(socket, command, parameters, trailing, password, network);
         // }
-        // else if (command == mCommands[kKick])
+        // else if (command == mStaticCommands[kKick])
         // {
         //     KICK(socket, command, parameters, trailing, password, network);
         // }
-        // else if (command == mCommands[kPrivmsg])
+        // else if (command == mStaticCommands[kPrivmsg])
         // {
         //     PRIVMSG(socket, command, parameters, trailing, password, network);
         // }
-        else if (command == mCommands[kPing])
+        else if (command == sStaticCommands[kPing])
         {
             PING(socket, command, parameters, trailing, password, network);
         }
-        else if (command == mCommands[kPong])
+        else if (command == sStaticCommands[kPong])
         {
             PONG(socket, command, parameters, trailing, password, network);
         }
@@ -142,10 +144,11 @@ void IRC::PASS(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":Not enough parameters");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         // 즉시 메시지 전송 후, client 연결 해제
         network.SendToClient(socket);
         network.DisconnectClient(socket);
+        UserManager::DeleteUser(socket);
         return;
     }
     const std::string& passwordInMessage = parameters[0];
@@ -157,7 +160,7 @@ void IRC::PASS(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":You may not reregister");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         return;
     }
     // ERR_PASSWDMISMATCH
@@ -167,10 +170,11 @@ void IRC::PASS(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":Password incorrect");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         // 즉시 메시지 전송 후, client 연결 해제
         network.SendToClient(socket);
         network.DisconnectClient(socket);
+        UserManager::DeleteUser(socket);
         return;
     }
     user.SetAuthenticated();
@@ -194,7 +198,7 @@ void IRC::NICK(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":No nickname given");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         return;
     }
     const std::string& nickname = parameters[0];
@@ -211,7 +215,7 @@ void IRC::NICK(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":Erroneus nickname");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         return;
     }
     // ERR_NICKNAMEINUSE
@@ -224,7 +228,7 @@ void IRC::NICK(const int32 IN socket,
         messageToReply.append(":");
         messageToReply.append(nickname);
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         return;
     }
     User& user = UserManager::GetUser(socket);
@@ -249,7 +253,7 @@ void IRC::USER(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":Not enough parameters");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         return;
     }
     User& user = UserManager::GetUser(socket);
@@ -260,7 +264,7 @@ void IRC::USER(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":You may not reregister");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         return;
     }
     const std::string& username = parameters[0];
@@ -271,25 +275,13 @@ void IRC::USER(const int32 IN socket,
     user.SetHostname(hostname);
     user.SetServername(servername);
     user.SetRealname(realname);
-    messageToReply.append(RPL_WELCOME);
-    messageToReply.append(" ");
-    messageToReply.append(user.GetNickname());
-    messageToReply.append(" ");
-    messageToReply.append(":Welcome to the GameRelayChat Network,");
-    messageToReply.append(" ");
-    messageToReply.append(user.GetNickname());
-    messageToReply.append("!");
-    messageToReply.append(username);
-    messageToReply.append("@");
-    messageToReply.append(hostname);
-    messageToReply.append(CRLF);
     messageToReply.append("PING");
     messageToReply.append(" ");
     messageToReply.append(network.GetIPString(network.GetServerSocket()));
     messageToReply.append(" ");
     messageToReply.append(network.GetIPString(network.GetServerSocket()));
     messageToReply.append(CRLF);
-    network.FetchToSendBuffer(socket, messageToReply);
+    network.PushToSendBuffer(socket, messageToReply);
 }
 
 void IRC::QUIT(const int32 IN socket,
@@ -303,10 +295,12 @@ void IRC::QUIT(const int32 IN socket,
     (void)password;
     const std::string& quitMessage = trailing;
     const User& user = UserManager::GetUser(socket);
-    LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
-        << " Quited : " << quitMessage << "(" << command << ")";
+    UserManager::DeleteUser(socket);
+    ChannelManager::DeleteUserFromAllChannels(user);
     network.ClearRecvBuffer(socket);
     network.DisconnectClient(socket);
+    LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
+        << " Quited : " << quitMessage << "(" << command << ")";
 }
 
 void IRC::JOIN(const int32 IN socket,
@@ -328,7 +322,7 @@ void IRC::JOIN(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":Not enough parameters");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         return;
     }
     const std::vector<std::string> channels = split(parameters[0], ",");
@@ -352,7 +346,7 @@ void IRC::JOIN(const int32 IN socket,
             messageToReply.append(" ");
             messageToReply.append(":No such channel");
             messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(socket, messageToReply);
             return;
         }
         std::string key;
@@ -387,7 +381,7 @@ void IRC::JOIN(const int32 IN socket,
                 messageToReply.append(" ");
                 messageToReply.append(":Cannot join channel (+i)");
                 messageToReply.append(CRLF);
-                network.FetchToSendBuffer(socket, messageToReply);
+                network.PushToSendBuffer(socket, messageToReply);
                 return;
             }
             // ERR_BADCHANNELKEY
@@ -401,7 +395,7 @@ void IRC::JOIN(const int32 IN socket,
                     messageToReply.append(" ");
                     messageToReply.append(":Cannot join channel (+k)");
                     messageToReply.append(CRLF);
-                    network.FetchToSendBuffer(socket, messageToReply);
+                    network.PushToSendBuffer(socket, messageToReply);
                     return;
                 }
             }
@@ -415,7 +409,7 @@ void IRC::JOIN(const int32 IN socket,
                 messageToReply.append(" ");
                 messageToReply.append(":Cannot join channel (+l)");
                 messageToReply.append(CRLF);
-                network.FetchToSendBuffer(socket, messageToReply);
+                network.PushToSendBuffer(socket, messageToReply);
                 return;
             }
             // 채널에 유저 입장
@@ -434,7 +428,7 @@ void IRC::JOIN(const int32 IN socket,
             messageToReply.append(" ");
             messageToReply.append(channelName);
             messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(socket, messageToReply);
             messageToReply.clear();
 
             messageToReply.append(RPL_TOPIC);
@@ -446,7 +440,7 @@ void IRC::JOIN(const int32 IN socket,
             messageToReply.append(":");
             messageToReply.append(channel.GetTopic());
             messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(socket, messageToReply);
             messageToReply.clear();
 
             messageToReply.append(RPL_NAMREPLY);
@@ -460,7 +454,7 @@ void IRC::JOIN(const int32 IN socket,
             messageToReply.append(":");
             messageToReply.append(channel.GetAllUsersNickname());
             messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(socket, messageToReply);
             messageToReply.clear();
 
             messageToReply.append(RPL_ENDOFNAMES);
@@ -471,7 +465,7 @@ void IRC::JOIN(const int32 IN socket,
             messageToReply.append(" ");
             messageToReply.append(":End of /NAMES list");
             messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(socket, messageToReply);
             userInChannel++;
         }
     }
@@ -495,7 +489,7 @@ void IRC::PART(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(":Not enough parameters");
         messageToReply.append(CRLF);
-        network.FetchToSendBuffer(socket, messageToReply);
+        network.PushToSendBuffer(socket, messageToReply);
         return;
     }
     const std::vector<std::string> channels = split(parameters[0], ",");
@@ -514,7 +508,7 @@ void IRC::PART(const int32 IN socket,
             messageToReply.append(" ");
             messageToReply.append(":No such channel");
             messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(socket, messageToReply);
             continue;
         }
         // ERR_NOTONCHANNEL
@@ -529,7 +523,7 @@ void IRC::PART(const int32 IN socket,
             messageToReply.append(channelName);
             messageToReply.append(":You're not on that channel");
             messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(socket, messageToReply);
             continue;
         }
         // 채널의 모든 유저들한테 해당 유저 나감을 알림
@@ -556,7 +550,7 @@ void IRC::PART(const int32 IN socket,
                 messageToReply.append(reason);
             }
             messageToReply.append(CRLF);
-            network.FetchToSendBuffer(socket, messageToReply);
+            network.PushToSendBuffer(socket, messageToReply);
             userInChannel++;
         }
         channel.DeleteUser(user.GetNickname());
@@ -587,7 +581,7 @@ void IRC::PING(const int32 IN socket,
     messageToReply.append(":");
     messageToReply.append(token);
     messageToReply.append(CRLF);
-    network.FetchToSendBuffer(socket, messageToReply);
+    network.PushToSendBuffer(socket, messageToReply);
 }
 
 void IRC::PONG(const int32 IN socket,
@@ -602,10 +596,96 @@ void IRC::PONG(const int32 IN socket,
     (void)password;
     const std::string& token = parameters[0];
     User& user = UserManager::GetUser(socket);
-    if (token == network.GetIPString(network.GetServerSocket()))
+    if (user.IsRegistered() == false && token == network.GetIPString(network.GetServerSocket()))
     {
         user.SetRegistered();
     }
+    SendWelcomeMessage(socket, network);
+}
+
+void IRC::SendWelcomeMessage(const int32 IN socket, Network& IN OUT network)
+{
+    const User& user = UserManager::GetUser(socket);
+    std::string messageToReply("");
+    // RPL_WELCOME
+    messageToReply.append(":");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(" ");
+    messageToReply.append(RPL_WELCOME);
+    messageToReply.append(" ");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append(" ");
+    messageToReply.append(":Welcome to the GameRelayChat Network,");
+    messageToReply.append(" ");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append("!");
+    messageToReply.append(user.GetUsername());
+    messageToReply.append("@");
+    messageToReply.append(user.GetHostname());
+    messageToReply.append(CRLF);
+    // RPL_YOURHOST
+    messageToReply.append(":");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(" ");
+    messageToReply.append(RPL_YOURHOST);
+    messageToReply.append(" ");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append(" ");
+    messageToReply.append(":Your host is");
+    messageToReply.append(" ");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(", running version ");
+    messageToReply.append(IRC_VERSION);
+    messageToReply.append(CRLF);
+    // RPL_CREATED
+    messageToReply.append(":");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(" ");
+    messageToReply.append(RPL_CREATED);
+    messageToReply.append(" ");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append(" ");
+    messageToReply.append(":GameRC was created 2024");
+    messageToReply.append(" ");
+    messageToReply.append(CRLF);
+    // RPL_MYINFO
+    messageToReply.append(":");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(" ");
+    messageToReply.append(RPL_MYINFO);
+    messageToReply.append(" ");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append(" ");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(" ");
+    messageToReply.append(IRC_VERSION);
+    messageToReply.append(" ");
+    messageToReply.append(CRLF);
+    // RPL_ISUPPORT
+    messageToReply.append(":");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(" ");
+    messageToReply.append(RPL_ISUPPORT);
+    messageToReply.append(" ");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append(" ");
+    messageToReply.append("MAXNICKLEN=9");
+    messageToReply.append(" ");
+    messageToReply.append("MAXCHANNELLEN=200");
+    messageToReply.append(" ");
+    messageToReply.append(":are supported by this server");
+    messageToReply.append(CRLF);
+    // ERR_NOMOTD
+    messageToReply.append(":");
+    messageToReply.append(network.GetIPString(network.GetServerSocket()));
+    messageToReply.append(" ");
+    messageToReply.append(ERR_NOMOTD);
+    messageToReply.append(" ");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append(" ");
+    messageToReply.append(":MOTD File is missing");
+    messageToReply.append(CRLF);
+    network.PushToSendBuffer(socket, messageToReply);
 }
 
 bool IRC::isNicknameInUse(const std::string& IN nickName)

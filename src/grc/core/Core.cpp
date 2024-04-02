@@ -8,6 +8,7 @@
 namespace grc
 {
 
+
 Core::Core(const int IN port, const std::string& IN password)
 : mPort(port)
 , mPassword(password)
@@ -97,6 +98,7 @@ void Core::Run()
                 if (mNetwork.RecvFromClient(event.GetIdentifier()) == FAILURE)
                 {
                     UserManager::DeleteUser(event.GetIdentifier());
+                    ChannelManager::DeleteUserFromAllChannels(UserManager::GetUser(event.GetIdentifier()));
                     continue;
                 }
                 IRC::HandleMessage(event.GetIdentifier(), mNetwork, mPassword);
@@ -106,6 +108,7 @@ void Core::Run()
                 if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
                 {
                     UserManager::DeleteUser(event.GetIdentifier());
+                    ChannelManager::DeleteUserFromAllChannels(UserManager::GetUser(event.GetIdentifier()));
                     continue;
                 }
             }

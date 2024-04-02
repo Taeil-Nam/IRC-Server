@@ -20,18 +20,20 @@ namespace grc
 class ChannelManager
 {
 public:
-    static void AddChannel(const std::string& IN channelName);
-    static void DeleteChannel(const std::string& IN channelName);
-
     static bool IsChannelExist(const std::string& IN channelName);
 
     static Channel& GetChannel(const std::string IN channelName);
     static const std::map<std::string, Channel>& GetChannels();
+
+    static void AddChannel(const std::string& IN channelName);
+    static void DeleteChannel(const std::string& IN channelName);
+    static void DeleteUserFromChannel(const User& IN user, const std::string& channelName);
+    static void DeleteUserFromAllChannels(const User& IN user);
 private:
     ChannelManager(); // = delete
 
 private:
-    static std::map<std::string, Channel> mChannels;
+    static std::map<std::string, Channel> sStaticChannels;
 };
 
 }

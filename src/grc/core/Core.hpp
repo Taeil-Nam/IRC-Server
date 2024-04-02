@@ -14,6 +14,7 @@
 #include <fstream>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 #include "BSD-GDF/Event/KernelEvent.hpp"
 #include "common.hpp"

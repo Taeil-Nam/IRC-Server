@@ -20,16 +20,16 @@ namespace grc
 class UserManager
 {
 public:
-    static void AddUser(const int32 IN socket);
-    static void DeleteUser(const int32 IN socket);
-
     static User& GetUser(const int32 IN socket);
     static const std::map<int32, User>& GetUsers();
+
+    static void AddUser(const int32 IN socket);
+    static void DeleteUser(const int32 IN socket);
 private:
     UserManager(); // = delete
 
 private:
-    static std::map<int32, User> mUsers;
+    static std::map<int32, User> sStaticUsers;
 };
 
 }

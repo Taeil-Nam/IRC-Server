@@ -4,35 +4,35 @@
 namespace grc
 {
 
-std::map<int32, User> UserManager::mUsers;
+std::map<int32, User> UserManager::sStaticUsers;
+
+User& UserManager::GetUser(const int32 IN socket)
+{
+    ASSERT(sStaticUsers.count(socket) > 0)
+        << "User must exist";
+    return sStaticUsers[socket];
+}
+
+const std::map<int32, User>& UserManager::GetUsers()
+{
+    return sStaticUsers;
+}
 
 void UserManager::AddUser(const int32 IN socket)
 {
-    if (mUsers.count(socket) == 0)
+    if (sStaticUsers.count(socket) == 0)
     {
-        mUsers[socket];
-        mUsers[socket].SetSocket(socket);
+        sStaticUsers[socket];
+        sStaticUsers[socket].SetSocket(socket);
     }
 }
 
 void UserManager::DeleteUser(const int32 socket)
 {
-    if (mUsers.count(socket) > 0)
+    if (sStaticUsers.count(socket) > 0)
     {
-        mUsers.erase(socket);
+        sStaticUsers.erase(socket);
     }
-}
-
-User& UserManager::GetUser(const int32 IN socket)
-{
-    ASSERT(mUsers.count(socket) > 0)
-        << "User must exist";
-    return mUsers[socket];
-}
-
-const std::map<int32, User>& UserManager::GetUsers()
-{
-    return mUsers;
 }
 
 }
