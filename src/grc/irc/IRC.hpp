@@ -11,9 +11,7 @@
 
 #pragma once
 
-#include "BSD-GDF/Network/Network.hpp"
 #include "common.hpp"
-#include "../core/Core.hpp"
 #include "UserManager.hpp"
 #include "ChannelManager.hpp"
 
@@ -176,30 +174,17 @@ namespace grc
 class IRC
 {
 public:
-    enum eIRCCommand
-    {
-        kPass = 0,
-        kNick,
-        kUser,
-        kQuit,
-        kJoin,
-        kPart,
-        kMode,
-        kTopic,
-        kInvite,
-        kKick,
-        kPrivmsg,
-        kPing,
-        kPong,
-        kIRCCommandSize
-    };
-
-public:
     static void CheckUserConnection(const int32 IN socket, Network& IN network);
     static void HandleMessage(const int32 IN socket, Network& IN network, const std::string& IN password);
 private:
     IRC(); // = delete
-
+    typedef void (*TcommandFunctionPTR)(const int32,
+                                        const std::string&,
+                                        const std::vector<std::string>&,
+                                        const std::string&,
+                                        const std::string&,
+                                        Network&);
+    static void initializeCommandFunctionMap();
     static void parseMessage(const std::string& IN message,
                              std::string& OUT command,
                              std::vector<std::string>& OUT parameters,
@@ -283,10 +268,10 @@ private:
                      const std::string& IN password,
                      Network& IN OUT network);
 
-    static void SendWelcomeMessage(const int32 IN socket, Network& IN OUT network);
+    static void sendWelcomeMessage(const int32 IN socket, Network& IN OUT network);
     static bool isNicknameInUse(const std::string& IN nickname);
 private:
-    const static std::string sStaticCommands[kIRCCommandSize];
+    static std::map<std::string, TcommandFunctionPTR> sStaticCommandFunctionMap;
 };
 
 }

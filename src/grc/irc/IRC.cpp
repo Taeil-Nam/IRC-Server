@@ -1,32 +1,14 @@
 #include "IRC.hpp"
-#include "BSD-GDF/Logger/GlobalLogger.hpp"
-#include "grc/irc/Channel.hpp"
-#include "grc/irc/ChannelManager.hpp"
 
 namespace grc
 {
 
-// mCommands
-const std::string IRC::sStaticCommands[kIRCCommandSize]
-=
-{
-    "PASS",
-    "NICK",
-    "USER",
-    "QUIT",
-    "JOIN",
-    "PART",
-    "MODE",
-    "TOPIC",
-    "INVITE",
-    "KICK",
-    "PRIVMSG",
-    "PING",
-    "PONG"
-};
+std::map<std::string, IRC::TcommandFunctionPTR> IRC::sStaticCommandFunctionMap;
 
 void IRC::HandleMessage(const int32 IN socket, Network& IN network, const std::string& IN password)
 {
+    if (sStaticCommandFunctionMap.empty())
+        initializeCommandFunctionMap();
     const User& user = UserManager::GetUser(socket);
     std::string message;
     while (network.PullFromRecvBuffer(socket, message, CRLF))
@@ -43,55 +25,35 @@ void IRC::HandleMessage(const int32 IN socket, Network& IN network, const std::s
         {
             PASS(socket, command, parameters, trailing, password, network);
         }
-        else if (command == sStaticCommands[kNick])
+        else
         {
-            NICK(socket, command, parameters, trailing, password, network);
-        }
-        else if (command == sStaticCommands[kUser])
-        {
-            USER(socket, command, parameters, trailing, password, network);
-        }
-        else if (command == sStaticCommands[kQuit])
-        {
-            QUIT(socket, command, parameters, trailing, password, network);
-        }
-        else if (command == sStaticCommands[kJoin])
-        {
-            JOIN(socket, command, parameters, trailing, password, network);
-        }
-        else if (command == sStaticCommands[kPart])
-        {
-            PART(socket, command, parameters, trailing, password, network);
-        }
-        // else if (command == sStaticCommands[kMode])
-        // {
-        //     MODE(socket, command, parameters, trailing, password, network);
-        // }
-        // else if (command == sStaticCommands[kTopic])
-        // {
-        //     TOPIC(socket, command, parameters, trailing, password, network);
-        // }
-        // else if (command == sStaticCommands[kInvite])
-        // {
-        //     INVITE(socket, command, parameters, trailing, password, network);
-        // }
-        // else if (command == sStaticCommands[kKick])
-        // {
-        //     KICK(socket, command, parameters, trailing, password, network);
-        // }
-        else if (command == sStaticCommands[kPrivmsg])
-        {
-            PRIVMSG(socket, command, parameters, trailing, password, network);
-        }
-        else if (command == sStaticCommands[kPing])
-        {
-            PING(socket, command, parameters, trailing, password, network);
-        }
-        else if (command == sStaticCommands[kPong])
-        {
-            PONG(socket, command, parameters, trailing, password, network);
+            sStaticCommandFunctionMap[command](
+                socket,
+                command,
+                parameters,
+                trailing,
+                password,
+                network
+            );
         }
    }
+}
+
+void IRC::initializeCommandFunctionMap()
+{
+    sStaticCommandFunctionMap["PASS"] = &PASS;
+    sStaticCommandFunctionMap["NICK"] = &NICK;
+    sStaticCommandFunctionMap["USER"] = &USER;
+    sStaticCommandFunctionMap["QUIT"] = &QUIT;
+    sStaticCommandFunctionMap["JOIN"] = &JOIN;
+    sStaticCommandFunctionMap["PART"] = &PART;
+    // sStaticCommandFunctionMap["MODE"] = &MODE;
+    // sStaticCommandFunctionMap["TOPIC"] = &TOPIC;
+    // sStaticCommandFunctionMap["INVITE"] = &INVITE;
+    // sStaticCommandFunctionMap["KICK"] = &KICK;
+    sStaticCommandFunctionMap["PRIVMSG"] = &PRIVMSG;
+    sStaticCommandFunctionMap["PINK"] = &PING;
+    sStaticCommandFunctionMap["PONG"] = &PONG;
 }
 
 void IRC::parseMessage(const std::string& IN message,
@@ -127,7 +89,7 @@ void IRC::PASS(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
-    (void)trailing;
+    static_cast<void>(trailing);
     std::string messageToReply("");
     if (command != "PASS")
     {
@@ -187,9 +149,9 @@ void IRC::NICK(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
-    (void)command;
-    (void)trailing;
-    (void)password;
+    static_cast<void>(command);
+    static_cast<void>(trailing);
+    static_cast<void>(password);
     std::string messageToReply("");
     // ERR_NONICKNAMEGIVEN
     if (parameters.size() < 1)
@@ -242,7 +204,7 @@ void IRC::USER(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
-    (void)password;
+    static_cast<void>(password);
     std::string messageToReply("");
     // ERR_NEEDMOREPARAMS
     if (parameters.size() < 4)
@@ -291,8 +253,8 @@ void IRC::QUIT(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
-    (void)parameters;
-    (void)password;
+    static_cast<void>(parameters);
+    static_cast<void>(password);
     const std::string& quitMessage = trailing;
     const User& user = UserManager::GetUser(socket);
     UserManager::DeleteUser(socket);
@@ -310,8 +272,8 @@ void IRC::JOIN(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
-    (void)trailing;
-    (void)password;
+    static_cast<void>(trailing);
+    static_cast<void>(password);
     std::string messageToReply("");
     // ERR_NEEDMOREPARAMS
     if (parameters.size() < 1)
@@ -495,7 +457,7 @@ void IRC::PART(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
-    (void)password;
+    static_cast<void>(password);
     std::string messageToReply("");
     // ERR_NEEDMOREPARAMS
     if (parameters.size() < 1)
@@ -706,9 +668,9 @@ void IRC::PING(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
-    (void)command;
-    (void)trailing;
-    (void)password;
+    static_cast<void>(command);
+    static_cast<void>(trailing);
+    static_cast<void>(password);
     const std::string& token = parameters[0];
     std::string messageToReply("");
     messageToReply.append("PONG");
@@ -728,19 +690,19 @@ void IRC::PONG(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
-    (void)command;
-    (void)trailing;
-    (void)password;
+    static_cast<void>(command);
+    static_cast<void>(trailing);
+    static_cast<void>(password);
     const std::string& token = parameters[0];
     User& user = UserManager::GetUser(socket);
     if (user.IsRegistered() == false && token == network.GetIPString(network.GetServerSocket()))
     {
         user.SetRegistered();
     }
-    SendWelcomeMessage(socket, network);
+    sendWelcomeMessage(socket, network);
 }
 
-void IRC::SendWelcomeMessage(const int32 IN socket, Network& IN OUT network)
+void IRC::sendWelcomeMessage(const int32 IN socket, Network& IN OUT network)
 {
     const User& user = UserManager::GetUser(socket);
     std::string messageToReply("");
