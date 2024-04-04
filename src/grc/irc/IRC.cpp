@@ -27,14 +27,17 @@ void IRC::HandleMessage(const int32 IN socket, Network& IN network, const std::s
         }
         else
         {
-            sStaticCommandFunctionMap[command](
-                socket,
-                command,
-                parameters,
-                trailing,
-                password,
-                network
-            );
+            std::map<std::string, TcommandFunctionPTR>::const_iterator it;
+            it = sStaticCommandFunctionMap.find(command);
+            if (it != sStaticCommandFunctionMap.end())
+            {
+                it->second(socket,
+                           command,
+                           parameters,
+                           trailing,
+                           password,
+                           network);
+            }
         }
    }
 }
@@ -52,7 +55,7 @@ void IRC::initializeCommandFunctionMap()
     // sStaticCommandFunctionMap["INVITE"] = &INVITE;
     // sStaticCommandFunctionMap["KICK"] = &KICK;
     sStaticCommandFunctionMap["PRIVMSG"] = &PRIVMSG;
-    sStaticCommandFunctionMap["PINK"] = &PING;
+    sStaticCommandFunctionMap["PING"] = &PING;
     sStaticCommandFunctionMap["PONG"] = &PONG;
 }
 
