@@ -1,4 +1,5 @@
 #include "IRC.hpp"
+#include "BSD-GDF/Logger/GlobalLogger.hpp"
 
 namespace grc
 {
@@ -196,8 +197,7 @@ void IRC::NICK(const int32 IN socket,
         network.PushToSendBuffer(socket, messageToReply);
         return;
     }
-    User& user = UserManager::GetUser(socket);
-    user.SetNickname(nickname);
+    UserManager::GetUser(socket).SetNickname(nickname);
 }
 
 void IRC::USER(const int32 IN socket,
@@ -256,6 +256,10 @@ void IRC::QUIT(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
+    if (UserManager::GetUser(socket).IsRegistered() == false)
+    {
+        return;
+    }
     static_cast<void>(parameters);
     static_cast<void>(password);
     const std::string& quitMessage = trailing;
@@ -275,6 +279,10 @@ void IRC::JOIN(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
+    if (UserManager::GetUser(socket).IsRegistered() == false)
+    {
+        return;
+    }
     static_cast<void>(trailing);
     static_cast<void>(password);
     std::string messageToReply("");
@@ -297,7 +305,6 @@ void IRC::JOIN(const int32 IN socket,
         keys = split(parameters[1], ",");
     }
 
-    const User& user = UserManager::GetUser(socket);
     for (std::size_t i = 0; i < channels.size(); i++)
     {
         const std::string& channelName = channels[i];
@@ -320,6 +327,7 @@ void IRC::JOIN(const int32 IN socket,
             key = keys[i];
         }
         // 채널이 새로 생성된 경우
+        const User& user = UserManager::GetUser(socket);
         if (ChannelManager::IsChannelExist(channelName) == 0)
         {
             ChannelManager::AddChannel(channelName);
@@ -460,6 +468,10 @@ void IRC::PART(const int32 IN socket,
                const std::string& IN password,
                Network& IN OUT network)
 {
+    if (UserManager::GetUser(socket).IsRegistered() == false)
+    {
+        return;
+    }
     static_cast<void>(password);
     std::string messageToReply("");
     // ERR_NEEDMOREPARAMS
@@ -477,7 +489,6 @@ void IRC::PART(const int32 IN socket,
     const std::vector<std::string> channels = split(parameters[0], ",");
     for (std::size_t i = 0; i < channels.size(); i++)
     {
-        messageToReply.clear();
         const std::string& channelName = channels[i];
         // ERR_NOSUCHCHANNEL
         if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
@@ -491,6 +502,7 @@ void IRC::PART(const int32 IN socket,
             messageToReply.append(":No such channel");
             messageToReply.append(CRLF);
             network.PushToSendBuffer(socket, messageToReply);
+            messageToReply.clear();
             continue;
         }
         // ERR_NOTONCHANNEL
@@ -506,6 +518,7 @@ void IRC::PART(const int32 IN socket,
             messageToReply.append(":You're not on that channel");
             messageToReply.append(CRLF);
             network.PushToSendBuffer(socket, messageToReply);
+            messageToReply.clear();
             continue;
         }
         // 채널의 모든 유저들한테 해당 유저 나감을 알림
@@ -539,8 +552,8 @@ void IRC::PART(const int32 IN socket,
             userInChannel++;
         }
         messageToReply.clear();
-        channel.DeleteUser(user.GetNickname());
         // TODO (bonus) : 채널에 유저가 없는 경우, 채널 삭제 (bonus : hello bot도 같이 없어져야함)
+        channel.DeleteUser(user.GetNickname());
         if (channel.IsChannelEmpty())
         {
             ChannelManager::DeleteChannel(channelName);
@@ -556,17 +569,15 @@ void IRC::PRIVMSG(const int32 IN socket,
                   const std::string& IN password,
                   Network& IN OUT network)
 {
+    if (UserManager::GetUser(socket).IsRegistered() == false)
+    {
+        return;
+    }
     static_cast<void>(password);
     const User& user = UserManager::GetUser(socket);
     std::string messageToReply("");
-    const std::string& target = parameters[0];
-    bool IsChannel = false;
-    if (target[0] == '&' || target[0] == '#')
-    {
-        IsChannel = true;
-    }
     // ERR_NORECIPIENT
-    if (parameters.size() < 1)
+    if (parameters.size() == 0)
     {
         messageToReply.append(ERR_NORECIPIENT);
         messageToReply.append(" ");
@@ -592,6 +603,12 @@ void IRC::PRIVMSG(const int32 IN socket,
         return;
     }
     // ERR_CANNOTSENDTOCHAN
+    const std::string& target = parameters[0];
+    bool IsChannel = false;
+    if (target[0] == '&' || target[0] == '#')
+    {
+        IsChannel = true;
+    }
     if (IsChannel
         && ChannelManager::GetChannel(target).IsUserExist(user.GetNickname()) == false)
     {
@@ -626,6 +643,15 @@ void IRC::PRIVMSG(const int32 IN socket,
         const Channel& channel = ChannelManager::GetChannel(target);
         const std::map<std::string, User>& usersInChannel = channel.GetUsers();
         std::map<std::string, User>::const_iterator userInChannel = usersInChannel.begin();
+        messageToReply.append(":");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        messageToReply.append(target);
+        messageToReply.append(" :");
+        messageToReply.append(trailing);
+        messageToReply.append(CRLF);
         while (userInChannel != usersInChannel.end())
         {
             if (userInChannel->second.GetNickname() == user.GetNickname())
@@ -633,19 +659,10 @@ void IRC::PRIVMSG(const int32 IN socket,
                 userInChannel++;
                 continue;
             }
-            messageToReply.append(":");
-            messageToReply.append(user.GetNickname());
-            messageToReply.append(" ");
-            messageToReply.append(command);
-            messageToReply.append(" ");
-            messageToReply.append(target);
-            messageToReply.append(" :");
-            messageToReply.append(trailing);
-            messageToReply.append(CRLF);
             network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
-            messageToReply.clear();
             userInChannel++;
         }
+        messageToReply.clear();
     }
     // target이 유저인 경우
     else
@@ -661,6 +678,7 @@ void IRC::PRIVMSG(const int32 IN socket,
         messageToReply.append(trailing);
         messageToReply.append(CRLF);
         network.PushToSendBuffer(targetUser.GetSocket(), messageToReply);
+        messageToReply.clear();
     }
 }
 
@@ -803,5 +821,6 @@ bool IRC::isNicknameInUse(const std::string& IN nickName)
     }
     return false;
 }
+
 
 }

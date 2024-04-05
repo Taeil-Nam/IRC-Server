@@ -37,6 +37,7 @@ User& UserManager::GetUser(const int32 IN socket)
         {
             break;
         }
+        it++;
     }
     return it->second;
 }

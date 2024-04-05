@@ -174,7 +174,6 @@ namespace grc
 class IRC
 {
 public:
-    static void CheckUserConnection(const int32 IN socket, Network& IN network);
     static void HandleMessage(const int32 IN socket, Network& IN network, const std::string& IN password);
 private:
     IRC(); // = delete

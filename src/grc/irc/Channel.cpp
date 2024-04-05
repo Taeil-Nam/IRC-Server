@@ -104,11 +104,11 @@ std::string Channel::GetAllUsersNickname() const
         std::string userNickname;
         if (IsOperator(it->first))
         {
-            userNickname = "@" + it->second.GetNickname();
+            userNickname = "@" + it->first;
         }
         else
         {
-            it->second.GetNickname();
+            userNickname = it->first;
         }
         AllUsersNicknames += userNickname + " ";
         it++;
