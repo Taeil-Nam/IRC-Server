@@ -54,7 +54,7 @@ void IRC::initializeCommandFunctionMap()
     // sStaticCommandFunctionMap["MODE"] = &MODE;
     // sStaticCommandFunctionMap["TOPIC"] = &TOPIC;
     // sStaticCommandFunctionMap["INVITE"] = &INVITE;
-    // sStaticCommandFunctionMap["KICK"] = &KICK;
+    sStaticCommandFunctionMap["KICK"] = &KICK;
     sStaticCommandFunctionMap["PRIVMSG"] = &PRIVMSG;
     sStaticCommandFunctionMap["PING"] = &PING;
     sStaticCommandFunctionMap["PONG"] = &PONG;
@@ -443,7 +443,7 @@ void IRC::JOIN(const int32 IN socket,
         messageToReply.append("@");
         messageToReply.append(user.GetHostname());
         messageToReply.append(" ");
-        messageToReply.append("JOIN");
+        messageToReply.append(command);
         messageToReply.append(" ");
         messageToReply.append(channelName);
         messageToReply.append(CRLF);
@@ -562,7 +562,126 @@ void IRC::PART(const int32 IN socket,
     }
 }
 
-void IRC::PRIVMSG(const int32 IN socket, 
+void IRC::KICK(const int32 IN socket,
+                  const std::string& IN command,
+                  const std::vector<std::string>& IN parameters,
+                  const std::string& IN trailing,
+                  const std::string& IN password,
+                  Network& IN OUT network)
+{
+    if (UserManager::GetUser(socket).IsRegistered() == false)
+    {
+        return;
+    }
+    static_cast<void>(password);
+    std::string messageToReply("");
+    // ERR_NEEDMOREPARAMS
+    if (parameters.size() < 2)
+    {
+        messageToReply.append(ERR_NEEDMOREPARAMS);
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        messageToReply.append(":Not enough parameters");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    const std::string& channelName = parameters[0];
+    // ERR_NOSUCHCHANNEL
+    if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
+        || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos)
+    {
+        messageToReply.append(ERR_NOSUCHCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":No such channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_CHANOPRIVSNEEDED
+    const User& user = UserManager::GetUser(socket);
+    if (ChannelManager::GetChannel(channelName).IsOperator(user.GetNickname()) == false)
+    {
+        messageToReply.append(ERR_CHANOPRIVSNEEDED);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":You're not channel operator");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_USERNOTINCHANNEL
+    Channel& channel = ChannelManager::GetChannel(channelName);
+    const std::string& targetUser = parameters[1];
+    if (channel.IsUserExist(targetUser) == false)
+    {
+        messageToReply.append(ERR_USERNOTINCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(targetUser);
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":They aren't on that channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_NOTONCHANNEL
+    if (channel.IsUserExist(user.GetNickname()) == false)
+    {
+        messageToReply.append(ERR_NOTONCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(":You're not on that channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // 채널의 모든 유저에게 전송 및 채널에서 유저 삭제
+    messageToReply.append(":");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append("!");
+    messageToReply.append(user.GetUsername());
+    messageToReply.append("@");
+    messageToReply.append(user.GetHostname());
+    messageToReply.append(" ");
+    messageToReply.append(command);
+    messageToReply.append(" ");
+    messageToReply.append(channelName);
+    messageToReply.append(" ");
+    messageToReply.append(targetUser);
+    messageToReply.append(" ");
+    if (trailing.empty() == false)
+    {
+        messageToReply.append(":");
+        messageToReply.append(trailing);
+    }
+    messageToReply.append(CRLF);
+    std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
+    while (userInChannel != channel.GetUsers().end())
+    {
+        network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
+        userInChannel++;
+    }
+    channel.DeleteUser(targetUser);
+    if (channel.IsChannelEmpty())
+    {
+        ChannelManager::DeleteChannel(channelName);
+        LOG(LogLevel::Informational) << "Delete channel " << "[" << channelName << "]";
+    }
+}
+
+void IRC::PRIVMSG(const int32 IN socket,
                   const std::string& IN command,
                   const std::vector<std::string>& IN parameters,
                   const std::string& IN trailing,

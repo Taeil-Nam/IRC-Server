@@ -75,12 +75,16 @@ using namespace gdf;
 // "<nick> :Nickname is already in use"
 #define ERR_NICKNAMEINUSE "433"
 
+// Returned when a client tries to perform a channel+nick affecting command,
+// when the nick isn’t joined to the channel (for example, MODE #channel +o nick).
+// "<client> <nick> <channel> :They aren't on that channel"
+#define ERR_USERNOTINCHANNEL "441"
+
 // Returned by the server whenever a client tries to
 // perform a channel effecting command for which the
 // client isn't a member.
 // "<client> <channel> :You're not on that channel"
 #define ERR_NOTONCHANNEL  "442"
-
 
 // Returned by the server by numerous commands to
 // indicate to the client that it didn't supply enough
@@ -109,6 +113,12 @@ using namespace gdf;
 // "<channel> :Cannot join channel (+k)"
 #define ERR_BADCHANNELKEY "475"
 
+// Indicates that a command failed because the client does not have
+// the appropriate channel privileges. This numeric can apply for 
+// different prefixes such as halfop, operator, etc. 
+// The text used in the last param of this message may vary.
+// "<client> <channel> :You're not channel operator"
+#define ERR_CHANOPRIVSNEEDED "482"
 
 
 ////////////////////////////////////////////////////////////
@@ -242,12 +252,12 @@ private:
     //                  const std::string& IN trailing,
     //                  const std::string& IN password,
     //                  Network& IN OUT network);
-    // static void KICK(const int32 IN socket,
-    //                  const std::string& IN command,
-    //                  const std::vector<std::string>& IN parameters,
-    //                  const std::string& IN trailing,
-    //                  const std::string& IN password,
-    //                  Network& IN OUT network);
+    static void KICK(const int32 IN socket,
+                     const std::string& IN command,
+                     const std::vector<std::string>& IN parameters,
+                     const std::string& IN trailing,
+                     const std::string& IN password,
+                     Network& IN OUT network);
     static void PRIVMSG(const int32 IN socket,
                         const std::string& IN command,
                         const std::vector<std::string>& IN parameters,
