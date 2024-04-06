@@ -52,7 +52,7 @@ void IRC::initializeCommandFunctionMap()
     sStaticCommandFunctionMap["JOIN"] = &JOIN;
     sStaticCommandFunctionMap["PART"] = &PART;
     // sStaticCommandFunctionMap["MODE"] = &MODE;
-    // sStaticCommandFunctionMap["TOPIC"] = &TOPIC;
+    sStaticCommandFunctionMap["TOPIC"] = &TOPIC;
     // sStaticCommandFunctionMap["INVITE"] = &INVITE;
     sStaticCommandFunctionMap["KICK"] = &KICK;
     sStaticCommandFunctionMap["PRIVMSG"] = &PRIVMSG;
@@ -83,6 +83,12 @@ void IRC::parseMessage(const std::string& IN message,
             continue;
         }
         parameters.push_back(leading[i]);
+    }
+    // TOPIC 전용 로직 (TOPIC은 trailing이 빈 문자열인지 구분하는게 필요함)
+    if (command == "TOPIC" && trailing.empty()
+        && message.find(":") != std::string::npos)
+    {
+        trailing = ":";
     }
 }
 
@@ -398,7 +404,7 @@ void IRC::JOIN(const int32 IN socket,
         messageToReply.append("@");
         messageToReply.append(user.GetHostname());
         messageToReply.append(" ");
-        messageToReply.append("JOIN");
+        messageToReply.append(command);
         messageToReply.append(" ");
         messageToReply.append(channelName);
         messageToReply.append(CRLF);
@@ -562,6 +568,145 @@ void IRC::PART(const int32 IN socket,
     }
 }
 
+void IRC::TOPIC(const int32 IN socket,
+                  const std::string& IN command,
+                  const std::vector<std::string>& IN parameters,
+                  const std::string& IN trailing,
+                  const std::string& IN password,
+                  Network& IN OUT network)
+{
+    if (UserManager::GetUser(socket).IsRegistered() == false)
+    {
+        return;
+    }
+    static_cast<void>(password);
+    std::string messageToReply("");
+    // ERR_NEEDMOREPARAMS
+    if (parameters.size() < 1)
+    {
+        messageToReply.append(ERR_NEEDMOREPARAMS);
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        messageToReply.append(":Not enough parameters");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_NOSUCHCHANNEL
+    const std::string& channelName = parameters[0];
+    if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
+        || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos
+        || ChannelManager::IsChannelExist(channelName) == false)
+    {
+        messageToReply.append(ERR_NOSUCHCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":No such channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_NOTONCHANNEL
+    Channel& channel = ChannelManager::GetChannel(channelName);
+    const User& user = UserManager::GetUser(socket);
+    if (channel.IsUserExist(user.GetNickname()) == false)
+    {
+        messageToReply.append(ERR_NOTONCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(":You're not on that channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_CHANOPRIVSNEEDED
+    // TODO(MODE) : MODE 메시지 추가시, mode + t 인 경우인지 확인하는 조건 추가 필요.
+    if (ChannelManager::GetChannel(channelName).IsOperator(user.GetNickname()) == false)
+    {
+        messageToReply.append(ERR_CHANOPRIVSNEEDED);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":You're not channel operator");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // 채널의 토픽을 설정하려는 경우
+    if (trailing.empty() == false)
+    {
+        // 토픽 삭제하기
+        if (trailing == ":")
+        {
+            channel.DeleteTopic();
+        }
+        // 토픽 변경하기
+        else
+        {
+            channel.SetTopic(trailing);
+        }
+        // 채널의 모든 유저에게 알림
+        messageToReply.append(":");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append("!");
+        messageToReply.append(user.GetUsername());
+        messageToReply.append("@");
+        messageToReply.append(user.GetHostname());
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":");
+        messageToReply.append(channel.GetTopic());
+        messageToReply.append(CRLF);
+        std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
+        while (userInChannel != channel.GetUsers().end())
+        {
+            network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
+            userInChannel++;
+        }
+    }
+    // 채널의 토픽을 확인하려는 경우
+    else
+    {
+        // 채널에 토픽이 설정되어 있는 경우
+        if (channel.GetTopic().empty() == false)
+        {
+            // RPL_TOPIC
+            messageToReply.append(RPL_TOPIC);
+            messageToReply.append(" ");
+            messageToReply.append(user.GetNickname());
+            messageToReply.append(" ");
+            messageToReply.append(channelName);
+            messageToReply.append(" ");
+            messageToReply.append(":");
+            messageToReply.append(channel.GetTopic());
+            messageToReply.append(CRLF);
+        }
+        // 채널에 토픽이 설정되어 있지 않은 경우
+        else
+        {
+            // RPL_NOTOPIC
+            messageToReply.append(RPL_NOTOPIC);
+            messageToReply.append(" ");
+            messageToReply.append(user.GetNickname());
+            messageToReply.append(" ");
+            messageToReply.append(channelName);
+            messageToReply.append(" ");
+            messageToReply.append(":No topic is set");
+            messageToReply.append(CRLF);
+        }
+        network.PushToSendBuffer(socket, messageToReply);
+    }
+}
+
 void IRC::KICK(const int32 IN socket,
                   const std::string& IN command,
                   const std::vector<std::string>& IN parameters,
@@ -590,7 +735,8 @@ void IRC::KICK(const int32 IN socket,
     const std::string& channelName = parameters[0];
     // ERR_NOSUCHCHANNEL
     if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
-        || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos)
+        || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos
+        || ChannelManager::IsChannelExist(channelName) == false)
     {
         messageToReply.append(ERR_NOSUCHCHANNEL);
         messageToReply.append(" ");

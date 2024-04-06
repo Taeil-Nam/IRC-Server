@@ -81,7 +81,6 @@ void User::SetSocket(const int32 IN socket)
 void User::SetAuthenticated()
 {
     mbIsAuthenticated = true;
-    LOG(LogLevel::Informational) << "User [" << mNickname << "] Authenticated";
 }
 
 void User::SetRegistered()

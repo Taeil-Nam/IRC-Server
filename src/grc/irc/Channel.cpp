@@ -123,6 +123,13 @@ void Channel::SetName(const std::string& IN channelName)
     mName = channelName;
 }
 
+void Channel::SetTopic(const std::string& IN topic)
+{
+    mTopic = topic;
+    LOG(LogLevel::Informational) << "Set topic of Channel " << "[" << mName << "]"
+        << " To " << "[" << mTopic << "]" ;
+}
+
 void Channel::SetInviteOnly()
 {
     mbIsInviteOnly = true;
@@ -147,6 +154,11 @@ void Channel::AddOperator(const std::string& IN nickname, const User& IN user)
     {
         mOperators[nickname] = user;
     }
+}
+void Channel::DeleteTopic()
+{
+    mTopic.clear();
+    LOG(LogLevel::Informational) << "Detele topic of Channel " << "[" << mName << "]";
 }
 
 void Channel::DeleteUser(const std::string& IN nickname)

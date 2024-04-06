@@ -154,6 +154,11 @@ using namespace gdf;
 // <client> <1-13 tokens> :are supported by this server
 #define RPL_ISUPPORT "005"
 
+// Sent to a client when joining a channel to inform them that
+// the channel with the name <channel> does not have any topic set.
+// "<client> <channel> :No topic is set"
+#define RPL_NOTOPIC "331"
+
 // Sent to a client when joining the <channel> to
 // inform them of the current topic of the channel.
 // When sending a TOPIC message to determine the
@@ -240,12 +245,12 @@ private:
     //                  const std::string& IN trailing,
     //                  const std::string& IN password,
     //                  Network& IN OUT network);
-    // static void TOPIC(const int32 IN socket,
-    //                  const std::string& IN command,
-    //                  const std::vector<std::string>& IN parameters,
-    //                  const std::string& IN trailing,
-    //                  const std::string& IN password,
-    //                  Network& IN OUT network);
+    static void TOPIC(const int32 IN socket,
+                     const std::string& IN command,
+                     const std::vector<std::string>& IN parameters,
+                     const std::string& IN trailing,
+                     const std::string& IN password,
+                     Network& IN OUT network);
     // static void INVITE(const int32 IN socket,
     //                  const std::string& IN command,
     //                  const std::vector<std::string>& IN parameters,

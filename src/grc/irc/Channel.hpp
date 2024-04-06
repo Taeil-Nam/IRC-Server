@@ -43,11 +43,13 @@ public:
     std::string GetAllUsersNickname() const;
 
     void SetName(const std::string& IN channelName);
+    void SetTopic(const std::string& IN topic);
     void SetInviteOnly();
     void SetKeyRequired();
 
     void AddUser(const std::string& IN nickname, const User& IN user);
     void AddOperator(const std::string& IN nickname, const User& IN user);
+    void DeleteTopic();
     void DeleteUser(const std::string& IN nickname);
     void DeleteOperator(const std::string& IN nickname);
 private:
