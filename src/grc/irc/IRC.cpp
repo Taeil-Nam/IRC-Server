@@ -271,6 +271,41 @@ void IRC::QUIT(const int32 IN socket,
     static_cast<void>(password);
     const std::string& quitMessage = trailing;
     const User& user = UserManager::GetUser(socket);
+    // TODO : 유저가 속한 채널에 해당 유저 나감을 알림
+    std::string messageToReply("");
+    messageToReply.append(":");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append("!");
+    messageToReply.append(user.GetUsername());
+    messageToReply.append("@");
+    messageToReply.append(user.GetHostname());
+    messageToReply.append(" ");
+    messageToReply.append(command);
+    messageToReply.append(" ");
+    messageToReply.append(":");
+    messageToReply.append(command);
+    messageToReply.append(":");
+    messageToReply.append(" ");
+    messageToReply.append(quitMessage);
+    messageToReply.append(CRLF);
+    const std::map<std::string, Channel>& channels = ChannelManager::GetChannels();
+    std::map<std::string, Channel>::const_iterator channel = channels.begin();
+    while (channel != channels.end())
+    {
+        if (channel->second.IsUserExist(user.GetNickname()) == false)
+        {
+            channel++;
+            continue;
+        }
+        const std::map<std::string, User>& users = channel->second.GetUsers();
+        std::map<std::string, User>::const_iterator user = users.begin();
+        while (user != users.end())
+        {
+            network.PushToSendBuffer(user->second.GetSocket(), messageToReply);
+            user++;
+        }
+        channel++;
+    }
     UserManager::DeleteUser(socket);
     ChannelManager::DeleteUserFromAllChannels(user);
     network.ClearRecvBuffer(socket);
