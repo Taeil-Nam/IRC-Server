@@ -29,23 +29,36 @@ public:
 
     bool IsUserExist(const std::string& IN nickname) const;
     bool IsOperator(const std::string& IN nickname) const;
+    bool IsProtectedTopic() const;
     bool IsInviteOnly() const;
     bool IsKeyRequired() const;
+    bool IsLimitedMaxUserCount() const;
     bool IsChannelEmpty() const;
 
     const std::string& GetName() const;
     const std::string& GetTopic() const;
+    uint32 GetMaxUserCount() const;
     const std::string& GetKey() const;
-    int32 GetCurrentUserCount() const;
-    int32 GetMaxUserCount() const;
+    uint32 GetCurrentUserCount() const;
     const std::map<std::string, User>& GetUsers() const;
     const std::map<std::string, User>& GetOperators() const;
     std::string GetAllUsersNickname() const;
+    std::string GetModeString() const;
+    std::string GetModeArgument() const;
 
     void SetName(const std::string& IN channelName);
     void SetTopic(const std::string& IN topic);
+    void SetMaxUserCount(uint32 IN maxUserCount);
+    void SetKey(const std::string& IN key);
+    void SetProtectedTopic();
     void SetInviteOnly();
+    void SetLimitedMaxUserCount();
     void SetKeyRequired();
+
+    void UnsetProtectedTopic();
+    void UnsetInviteOnly();
+    void UnsetLimitedMaxUserCount();
+    void UnsetKeyRequired();
 
     void AddUser(const std::string& IN nickname, const User& IN user);
     void AddOperator(const std::string& IN nickname, const User& IN user);
@@ -59,11 +72,13 @@ private:
 private:
     std::string mName;
     std::string mTopic;
+    uint32 mMaxUserCount;
     std::string mKey;
-    int32 mMaxUserCount;
     std::map<std::string, User> mUsers;
     std::map<std::string, User> mOperators;
+    bool mbIsProtectedTopic;
     bool mbIsInviteOnly;
+    bool mbIsLimitedMaxUserCount;
     bool mbIsKeyRequired;
 };
 

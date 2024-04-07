@@ -7,9 +7,11 @@ namespace grc
 Channel::Channel()
 : mName("")
 , mTopic("Game Development")
-, mKey("")
 , mMaxUserCount(UNLIMIT)
+, mKey("")
+, mbIsProtectedTopic(false)
 , mbIsInviteOnly(false)
+, mbIsLimitedMaxUserCount(false)
 , mbIsKeyRequired(false)
 {
 
@@ -39,6 +41,11 @@ bool Channel::IsOperator(const std::string& IN nickname) const
     }
 }
 
+bool Channel::IsProtectedTopic() const
+{
+    return mbIsProtectedTopic;
+}
+
 bool Channel::IsInviteOnly() const
 {
     return mbIsInviteOnly;
@@ -47,6 +54,11 @@ bool Channel::IsInviteOnly() const
 bool Channel::IsKeyRequired() const
 {
     return mbIsKeyRequired;
+}
+
+bool Channel::IsLimitedMaxUserCount() const
+{
+    return mbIsLimitedMaxUserCount;
 }
 
 bool Channel::IsChannelEmpty() const
@@ -75,12 +87,12 @@ const std::string& Channel::GetKey() const
     return mKey;
 }
 
-int32 Channel::GetCurrentUserCount() const
+uint32 Channel::GetCurrentUserCount() const
 {
     return mUsers.size();
 }
 
-int32 Channel::GetMaxUserCount() const
+uint32 Channel::GetMaxUserCount() const
 {
     return mMaxUserCount;
 }
@@ -117,6 +129,44 @@ std::string Channel::GetAllUsersNickname() const
     return AllUsersNicknames;
 }
 
+std::string Channel::GetModeString() const
+{
+    // 아무 mode도 설정되어 있지 않은 경우, '+'만 추가되어있음.
+    std::string modeString("+");
+    if (mbIsProtectedTopic)
+    {
+        modeString.append("t");
+    }
+    if (mbIsInviteOnly)
+    {
+        modeString.append("i");
+    }
+    if (mbIsLimitedMaxUserCount)
+    {
+        modeString.append("l");
+    }
+    if (mbIsKeyRequired)
+    {
+        modeString.append("k");
+    }
+    return modeString;
+}
+
+std::string Channel::GetModeArgument() const
+{
+    std::string modeArgument("");
+    if (mbIsLimitedMaxUserCount)
+    {
+        modeArgument.append(std::to_string(mMaxUserCount));
+        modeArgument.append(" ");
+    }
+    if (mbIsKeyRequired)
+    {
+        modeArgument.append(mKey);
+    }
+    return modeArgument;
+}
+
 void Channel::SetName(const std::string& IN channelName)
 {
     ASSERT(mName == "") << "Old name must empty string(\"\")";
@@ -130,14 +180,54 @@ void Channel::SetTopic(const std::string& IN topic)
         << " To " << "[" << mTopic << "]" ;
 }
 
+void Channel::SetMaxUserCount(uint32 IN maxUserCount)
+{
+    mMaxUserCount = maxUserCount;
+}
+
+void Channel::SetKey(const std::string& IN key)
+{
+    mKey = key;
+}
+
+void Channel::SetProtectedTopic()
+{
+    mbIsProtectedTopic = true;
+}
+
 void Channel::SetInviteOnly()
 {
     mbIsInviteOnly = true;
 }
 
+void Channel::SetLimitedMaxUserCount()
+{
+    mbIsLimitedMaxUserCount = true;
+}
+
 void Channel::SetKeyRequired()
 {
     mbIsKeyRequired = true;
+}
+
+void Channel::UnsetProtectedTopic()
+{
+    mbIsProtectedTopic = false;
+}
+
+void Channel::UnsetInviteOnly()
+{
+    mbIsInviteOnly = false;
+}
+
+void Channel::UnsetLimitedMaxUserCount()
+{
+    mbIsLimitedMaxUserCount = false;
+}
+
+void Channel::UnsetKeyRequired()
+{
+    mbIsKeyRequired = false;
 }
 
 void Channel::AddUser(const std::string& IN nickname, const User& IN user)

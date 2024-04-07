@@ -1,4 +1,5 @@
 #include "IRC.hpp"
+#include "BSD-GDF/Assert.hpp"
 #include "BSD-GDF/Logger/GlobalLogger.hpp"
 
 namespace grc
@@ -51,7 +52,7 @@ void IRC::initializeCommandFunctionMap()
     sStaticCommandFunctionMap["QUIT"] = &QUIT;
     sStaticCommandFunctionMap["JOIN"] = &JOIN;
     sStaticCommandFunctionMap["PART"] = &PART;
-    // sStaticCommandFunctionMap["MODE"] = &MODE;
+    sStaticCommandFunctionMap["MODE"] = &MODE;
     sStaticCommandFunctionMap["TOPIC"] = &TOPIC;
     // sStaticCommandFunctionMap["INVITE"] = &INVITE;
     sStaticCommandFunctionMap["KICK"] = &KICK;
@@ -334,7 +335,7 @@ void IRC::JOIN(const int32 IN socket,
         }
         // 채널이 새로 생성된 경우
         const User& user = UserManager::GetUser(socket);
-        if (ChannelManager::IsChannelExist(channelName) == 0)
+        if (ChannelManager::IsChannelExist(channelName) == false)
         {
             ChannelManager::AddChannel(channelName);
             Channel& channel = ChannelManager::GetChannel(channelName);
@@ -356,6 +357,8 @@ void IRC::JOIN(const int32 IN socket,
             {
                 messageToReply.append(ERR_INVITEONLYCHAN);
                 messageToReply.append(" ");
+                messageToReply.append(user.GetNickname());
+                messageToReply.append(" ");
                 messageToReply.append(channelName);
                 messageToReply.append(" ");
                 messageToReply.append(":Cannot join channel (+i)");
@@ -370,6 +373,8 @@ void IRC::JOIN(const int32 IN socket,
                 {
                     messageToReply.append(ERR_BADCHANNELKEY);
                     messageToReply.append(" ");
+                    messageToReply.append(user.GetNickname());
+                    messageToReply.append(" ");
                     messageToReply.append(channelName);
                     messageToReply.append(" ");
                     messageToReply.append(":Cannot join channel (+k)");
@@ -383,6 +388,8 @@ void IRC::JOIN(const int32 IN socket,
                 && channel.GetCurrentUserCount() >= channel.GetMaxUserCount())
             {
                 messageToReply.append(ERR_CHANNELISFULL);
+                messageToReply.append(" ");
+                messageToReply.append(user.GetNickname());
                 messageToReply.append(" ");
                 messageToReply.append(channelName);
                 messageToReply.append(" ");
@@ -499,7 +506,7 @@ void IRC::PART(const int32 IN socket,
         // ERR_NOSUCHCHANNEL
         if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
             || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos
-            || ChannelManager::IsChannelExist(channelName) == 0)
+            || ChannelManager::IsChannelExist(channelName) == false)
         {
             messageToReply.append(ERR_NOSUCHCHANNEL);
             messageToReply.append(" ");
@@ -568,6 +575,232 @@ void IRC::PART(const int32 IN socket,
     }
 }
 
+void IRC::MODE(const int32 IN socket,
+               const std::string& IN command,
+               const std::vector<std::string>& IN parameters,
+               const std::string& IN trailing,
+               const std::string& IN password,
+               Network& IN OUT network)
+{
+    if (UserManager::GetUser(socket).IsRegistered() == false)
+    {
+        return;
+    }
+    static_cast<void>(trailing);
+    static_cast<void>(password);
+
+    // mode message format
+    // MODE     <channel>    <modestring>    <mode argument>
+    // command | param[0]     param[1]         param[2]
+    std::string messageToReply("");
+    // ERR_NEEDMOREPARAMS
+    if (parameters.size() < 1)
+    {
+        messageToReply.append(ERR_NEEDMOREPARAMS);
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        messageToReply.append(":Not enough parameters");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    const std::string channelName = parameters[0];
+    // 유저 대상인 경우 생략
+    if ((channelName[0] != '#' && channelName[0] != '&'))
+    {
+        return;
+    }
+    // ERR_NOSUCHCHANNEL
+    if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
+            || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos
+            || ChannelManager::IsChannelExist(channelName) == false)
+    {
+        messageToReply.append(ERR_NOSUCHCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":No such channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // modestring이 없는 경우, 해당 채널의 모드 확인만 함.
+    // RPL_CHANNELMODEIS
+    Channel& channel = ChannelManager::GetChannel(channelName);
+    const User& user = UserManager::GetUser(socket);
+    if (parameters.size() < 2)
+    {
+        // RPL_CHANNELMODEIS
+        messageToReply.append(RPL_CHANNELMODEIS);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(channel.GetModeString());
+        messageToReply.append(" ");
+        messageToReply.append(channel.GetModeArgument());
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // modestring이 있는데 채널의 오퍼레이터가 아닌 경우, ERR_CHANOPRIVSNEEDED 응답
+    // ERR_CHANOPRIVSNEEDED
+    if (ChannelManager::GetChannel(channelName).IsOperator(user.GetNickname()) == false)
+    {
+        messageToReply.append(ERR_CHANOPRIVSNEEDED);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":You're not channel operator");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // MODE 설정 또는 해제
+    const std::string& modeString = parameters[1];
+    std::vector<std::string> modeArgument;
+    if (parameters.size() >= 3)
+    {
+        modeArgument = split(parameters[2], " ");
+    }
+    std::string resultModeString("");
+    std::size_t modeStringIndex = 0;
+    std::size_t modeArgumentIndex = 0;
+    bool isAddType = false;
+    while (modeStringIndex < modeString.size())
+    {
+        switch (modeString[modeStringIndex])
+        {
+        case '+':
+            isAddType = true;
+            resultModeString.append("+");
+            break;
+        case '-':
+            isAddType = false;
+            resultModeString.append("-");
+            break;
+        // argument의 닉네임에게 operator 권한 주기.
+        case 'o':
+            if (isAddType)
+            {
+                if (modeArgumentIndex >= modeArgument.size())
+                {
+                    break;
+                }
+                channel.AddOperator(modeArgument[modeArgumentIndex],
+                               UserManager::GetUser(modeArgument[modeArgumentIndex]));
+            }
+            else
+            {
+                if (modeArgumentIndex >= modeArgument.size())
+                {
+                    break;
+                }
+                channel.DeleteOperator(modeArgument[modeArgumentIndex]);
+            }
+            modeArgumentIndex++;
+            resultModeString.append("o");
+            break;
+        // 토픽을 오퍼레이터만 변경할 수 있도록 함.
+        case 't':
+            if (isAddType)
+            {
+                channel.SetProtectedTopic();
+            }
+            else
+            {
+                channel.UnsetProtectedTopic();
+            }
+            resultModeString.append("t");
+            break;
+        // 채널을 초대 전용으로 설정.
+        case 'i':
+            if (isAddType)
+            {
+                channel.SetInviteOnly();
+            }
+            else
+            {
+                channel.UnsetInviteOnly();
+            }
+            resultModeString.append("i");
+            break;
+        // 채널의 최대 유저 수를 설정.
+        case 'l':
+            if (isAddType)
+            {
+                if (modeArgumentIndex >= modeArgument.size())
+                {
+                    break;
+                }
+                channel.SetLimitedMaxUserCount();
+                channel.SetMaxUserCount(std::atoi(modeArgument[modeArgumentIndex].c_str()));
+                modeArgumentIndex++;
+            }
+            else
+            {
+                channel.UnsetLimitedMaxUserCount();
+                channel.SetMaxUserCount(Channel::UNLIMIT);
+            }
+            resultModeString.append("l");
+            break;
+        // 채널의 key를 설정.
+        case 'k':
+            if (isAddType)
+            {
+                if (modeArgumentIndex >= modeArgument.size())
+                {
+                    break;
+                }
+                channel.SetKeyRequired();
+                channel.SetKey(modeArgument[modeArgumentIndex]);
+                modeArgumentIndex++;
+            }
+            else
+            {
+                channel.UnsetKeyRequired();
+                channel.SetKey("");
+            }
+            resultModeString.append("k");
+            break;
+        default:
+            break;
+        }
+        modeStringIndex++;
+    }
+    // 채널의 모든 유저에게 알림
+    messageToReply.append(":");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append("!");
+    messageToReply.append(user.GetUsername());
+    messageToReply.append("@");
+    messageToReply.append(user.GetHostname());
+    messageToReply.append(" ");
+    messageToReply.append(command);
+    messageToReply.append(" ");
+    messageToReply.append(channelName);
+    messageToReply.append(" ");
+    messageToReply.append(resultModeString);
+    messageToReply.append(" ");
+    for (std::size_t i = 0; i < modeArgument.size(); i++)
+    {
+        messageToReply.append(modeArgument[i]);
+        messageToReply.append(" ");
+    }
+    messageToReply.pop_back(); // 맨 끝의 공백 문자 제거
+    messageToReply.append(CRLF);
+    std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
+    while (userInChannel != channel.GetUsers().end())
+    {
+        network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
+        userInChannel++;
+    }
+}
+
 void IRC::TOPIC(const int32 IN socket,
                   const std::string& IN command,
                   const std::vector<std::string>& IN parameters,
@@ -624,8 +857,8 @@ void IRC::TOPIC(const int32 IN socket,
         return;
     }
     // ERR_CHANOPRIVSNEEDED
-    // TODO(MODE) : MODE 메시지 추가시, mode + t 인 경우인지 확인하는 조건 추가 필요.
-    if (ChannelManager::GetChannel(channelName).IsOperator(user.GetNickname()) == false)
+    if (ChannelManager::GetChannel(channelName).IsProtectedTopic()
+        && ChannelManager::GetChannel(channelName).IsOperator(user.GetNickname()) == false)
     {
         messageToReply.append(ERR_CHANOPRIVSNEEDED);
         messageToReply.append(" ");

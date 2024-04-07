@@ -154,6 +154,14 @@ using namespace gdf;
 // <client> <1-13 tokens> :are supported by this server
 #define RPL_ISUPPORT "005"
 
+// Sent to a client to inform them of the currently-set modes of a channel.
+// <channel> is the name of the channel.
+// <modestring> and <mode arguments> are a mode string
+// and the mode arguments (delimited as separate parameters)
+// as defined in the MODE message description.
+// "<client> <channel> <modestring> <mode arguments>..."
+#define RPL_CHANNELMODEIS "324"
+
 // Sent to a client when joining a channel to inform them that
 // the channel with the name <channel> does not have any topic set.
 // "<client> <channel> :No topic is set"
@@ -165,10 +173,10 @@ using namespace gdf;
 // channel topic, one of two replies is sent. If
 // the topic is set, RPL_TOPIC is sent back else
 // RPL_NOTOPIC.
-// "<client nick> <channel> :<topic>"
+// "<client> <channel> :<topic>"
 #define RPL_TOPIC "332"
 
-// "<client nick> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+// "<client> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
 #define RPL_NAMREPLY "353"
 
 // To reply to a NAMES message, a reply pair consisting
@@ -180,7 +188,7 @@ using namespace gdf;
 // channels and contents are sent back in a series of
 // RPL_NAMEREPLY messages with a RPL_ENDOFNAMES to mark
 // the end.
-// "<client nick> <channel> :End of /NAMES list"
+// "<client> <channel> :End of /NAMES list"
 #define RPL_ENDOFNAMES "366"
 
 namespace grc
@@ -239,12 +247,12 @@ private:
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    // static void MODE(const int32 IN socket,
-    //                  const std::string& IN command,
-    //                  const std::vector<std::string>& IN parameters,
-    //                  const std::string& IN trailing,
-    //                  const std::string& IN password,
-    //                  Network& IN OUT network);
+    static void MODE(const int32 IN socket,
+                     const std::string& IN command,
+                     const std::vector<std::string>& IN parameters,
+                     const std::string& IN trailing,
+                     const std::string& IN password,
+                     Network& IN OUT network);
     static void TOPIC(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,
