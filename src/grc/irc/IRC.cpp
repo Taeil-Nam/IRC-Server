@@ -306,12 +306,12 @@ void IRC::QUIT(const int32 IN socket,
         }
         channel++;
     }
+    LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
+        << " Quited : " << quitMessage << "(" << command << ")";
     UserManager::DeleteUser(socket);
     ChannelManager::DeleteUserFromAllChannels(user);
     network.ClearRecvBuffer(socket);
     network.DisconnectClient(socket);
-    LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
-        << " Quited : " << quitMessage << "(" << command << ")";
 }
 
 void IRC::JOIN(const int32 IN socket,
