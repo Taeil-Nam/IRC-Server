@@ -314,7 +314,11 @@ void IRC::JOIN(const int32 IN socket,
 
     for (std::size_t i = 0; i < channels.size(); i++)
     {
-        const std::string& channelName = channels[i];
+        std::string channelName = channels[i];
+        for (std::size_t j = 1; j < channelName.size(); j++)
+        {
+            channelName[j] = std::tolower(channelName[j]);
+        }
         // ERR_NOSUCHCHANNEL
         if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
             || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos)
