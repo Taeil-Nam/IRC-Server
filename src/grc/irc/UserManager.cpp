@@ -6,6 +6,18 @@ namespace grc
 
 std::map<int32, User> UserManager::sStaticUsers;
 
+bool UserManager::IsUserExist(int32 IN socket)
+{
+    if (sStaticUsers.count(socket) > 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool UserManager::IsUserExist(const std::string& IN nickname)
 {
     std::map<int32, User>::const_iterator it = sStaticUsers.begin();

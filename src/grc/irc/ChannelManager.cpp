@@ -25,7 +25,7 @@ Channel& ChannelManager::GetChannel(const std::string IN channelName)
     return sStaticChannels[channelName];
 }
 
-const std::map<std::string, Channel>& ChannelManager::GetChannels()
+std::map<std::string, Channel>& ChannelManager::GetChannels()
 {
     return sStaticChannels;
 }

@@ -23,7 +23,7 @@ public:
     static bool IsChannelExist(const std::string& IN channelName);
 
     static Channel& GetChannel(const std::string IN channelName);
-    static const std::map<std::string, Channel>& GetChannels();
+    static std::map<std::string, Channel>& GetChannels();
 
     static void AddChannel(const std::string& IN channelName);
     static void DeleteChannel(const std::string& IN channelName);

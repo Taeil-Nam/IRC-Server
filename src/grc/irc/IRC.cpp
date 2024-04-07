@@ -204,7 +204,55 @@ void IRC::NICK(const int32 IN socket,
         network.PushToSendBuffer(socket, messageToReply);
         return;
     }
-    UserManager::GetUser(socket).SetNickname(nickname);
+    // 유저가 존재하는 경우 닉네임 변경 및 채널에 알림
+    if (UserManager::IsUserExist(socket))
+    {
+        const std::string oldNickname = UserManager::GetUser(socket).GetNickname();
+        UserManager::GetUser(socket).SetNickname(nickname);
+        messageToReply.append(":");
+        messageToReply.append(oldNickname);
+        messageToReply.append("!");
+        messageToReply.append(UserManager::GetUser(socket).GetUsername());
+        messageToReply.append("@");
+        messageToReply.append(UserManager::GetUser(socket).GetHostname());
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        messageToReply.append(nickname);
+        messageToReply.append(CRLF);
+        std::map<std::string, Channel>& channels = ChannelManager::GetChannels();
+        std::map<std::string, Channel>::iterator channel = channels.begin();
+        while (channel != channels.end())
+        {
+            if (channel->second.IsUserExist(oldNickname) == false)
+            {
+                channel++;
+                continue;
+            }
+            const std::map<std::string, User>& usersInChannel = channel->second.GetUsers();
+            std::map<std::string, User>::const_iterator userInChannel = usersInChannel.begin();
+            while (userInChannel != usersInChannel.end())
+            {
+                if (oldNickname == userInChannel->second.GetNickname())
+                {
+                    userInChannel++;
+                    continue;
+                }
+                network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
+                userInChannel++;
+            }
+            channel->second.AddUser(nickname, UserManager::GetUser(socket));
+            channel->second.DeleteUser(oldNickname);
+            channel++;
+        }
+        network.PushToSendBuffer(socket, messageToReply);
+        LOG(LogLevel::Informational) << "User " << "[" << oldNickname << "]"
+            << " change nickname to " << "[" << UserManager::GetUser(socket).GetNickname() << "]" << "(" << command << ")";
+    }
+    else
+    {
+        UserManager::GetUser(socket).SetNickname(nickname);
+    }
 }
 
 void IRC::USER(const int32 IN socket,
@@ -271,7 +319,7 @@ void IRC::QUIT(const int32 IN socket,
     static_cast<void>(password);
     const std::string& quitMessage = trailing;
     const User& user = UserManager::GetUser(socket);
-    // TODO : 유저가 속한 채널에 해당 유저 나감을 알림
+    // 유저가 속한 채널에 알림
     std::string messageToReply("");
     messageToReply.append(":");
     messageToReply.append(user.GetNickname());

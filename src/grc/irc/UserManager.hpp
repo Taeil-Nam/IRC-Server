@@ -20,6 +20,7 @@ namespace grc
 class UserManager
 {
 public:
+    static bool IsUserExist(int32 IN socket);
     static bool IsUserExist(const std::string& IN nickname);
 
     static User& GetUser(const int32 IN socket);
