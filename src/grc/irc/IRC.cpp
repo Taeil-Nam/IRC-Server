@@ -733,6 +733,12 @@ void IRC::MODE(const int32 IN socket,
         network.PushToSendBuffer(socket, messageToReply);
         return;
     }
+    const std::string& modeString = parameters[1];
+    // 지원하지 않는 옵션(밴 리스트 출력)인 경우 생략
+    if (modeString[0] == 'b')
+    {
+        return;
+    }
     // modestring이 있는데 채널의 오퍼레이터가 아닌 경우, ERR_CHANOPRIVSNEEDED 응답
     // ERR_CHANOPRIVSNEEDED
     if (ChannelManager::GetChannel(channelName).IsOperator(user.GetNickname()) == false)
@@ -749,7 +755,6 @@ void IRC::MODE(const int32 IN socket,
         return;
     }
     // MODE 설정 또는 해제
-    const std::string& modeString = parameters[1];
     std::vector<std::string> modeArgument;
     if (parameters.size() >= 3)
     {
