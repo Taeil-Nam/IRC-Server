@@ -16,6 +16,7 @@
 // standard (표준 헤더)
 #include <iostream>
 #include <string>
+#include <map>
 
 // BSD-GDF 라이브러리
 #include <BSD-GDF/Assert.hpp>

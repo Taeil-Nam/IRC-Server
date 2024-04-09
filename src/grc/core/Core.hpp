@@ -14,9 +14,12 @@
 #include <fstream>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
+#include "BSD-GDF/Event/KernelEvent.hpp"
 #include "common.hpp"
-#include "../irc/User.hpp"
+#include "../irc/IRC.hpp"
+#include "../irc/UserManager.hpp"
 
 using namespace gdf;
 
@@ -35,14 +38,15 @@ public:
 private:
     enum eEventType
     {
-        READ = EVFILT_READ,
-        WRITE = EVFILT_WRITE
+        kRead = EVFILT_READ,
+        kWrite = EVFILT_WRITE
     };
     enum eFD
     {
         STDIN = STDIN_FILENO,
         STDOUT = STDOUT_FILENO
     };
+    
 private:
     Core(); // = delete
     Core(const Core& core); // = delete
@@ -59,13 +63,10 @@ private:
     /* about network connection */
     void setupNewClient();
 
-    /* about IRC */
-    void processIRCMessage(const int32 IN socket);
-
 private:
-    const int mPort;
+    const int32 mPort;
     const std::string mPassword;
-    bool bRunning;
+    bool mbRunning;
     KernelQueue mKernelQueue;
     Network mNetwork;
     int32 mLogFileFD;
@@ -75,7 +76,6 @@ private:
     DisplayConsole mLogMonitor;
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
-    std::map<int, User> mUsers;
 };
 
 }

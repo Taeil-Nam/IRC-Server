@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "common.hpp"
+#include "../../common.hpp"
 
 using namespace gdf;
 
@@ -22,23 +22,39 @@ class User
 {
 public:
     User();
-    const User& operator=(const User& User);
+    const User& operator=(const User& IN User);
     virtual ~User();
 
-    bool IsRegisterd() const;
-    bool IsChannelOperator() const;
+    bool IsAuthenticated() const;
+    bool IsRegistered() const;
+
+    int32 GetSocket() const;
+    const std::string& GetNickname() const;
+    const std::string& GetUsername() const;
+    const std::string& GetHostname() const;
+    const std::string& GetServername() const;
+    const std::string& GetRealname() const;
+
+    void SetSocket(const int32 IN socket);
+    void SetAuthenticated();
+    void SetRegistered();
+    void SetNickname(const std::string& IN nickname);
+    void SetUsername(const std::string& IN username);
+    void SetHostname(const std::string& IN hostname);
+    void SetServername(const std::string& IN servername);
+    void SetRealname(const std::string& IN realname);
 private:
-    User(const User& User); // = delete
+    User(const User& IN User); // = delete
 
 private:
-    bool mbIsRegisterd;
-    bool mbIsChannelOperator;
+    int32 mSocket;
+    bool mbIsAuthenticated;
+    bool mbIsRegistered;
     std::string mNickname;
     std::string mUsername;
     std::string mHostname;
     std::string mServername;
     std::string mRealname;
-    std::string mCurrentChannel;
 };
 
 }

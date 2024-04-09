@@ -1,14 +1,18 @@
 #include "Core.hpp"
+#include "BSD-GDF/Assert.hpp"
+#include "BSD-GDF/Logger/GlobalLogger.hpp"
 #include "common.hpp"
+#include <string>
 #include <sys/event.h>
 
 namespace grc
 {
 
+
 Core::Core(const int IN port, const std::string& IN password)
 : mPort(port)
 , mPassword(password)
-, bRunning(false)
+, mbRunning(false)
 , mLogBufferIndex(0)
 {
 
@@ -19,51 +23,6 @@ Core::~Core()
     close(mLogFileFD);
     LOG_SET_TARGET(STDOUT_FILENO);
     LOG_SET_LEVEL(LogLevel::Informational);
-}
-
-void Core::Run()
-{
-    while (bRunning)
-    {
-        KernelEvent event;
-        while (mKernelQueue.Poll(event))
-        {
-            if (event.IdentifyFD(STDIN) && event.IsReadType())
-            {
-                handleMonitorInput();
-                handleMonitorCommand();
-            }
-            else if (event.IdentifyFD(STDOUT) && event.IsWriteType())
-            {
-                mActivatedWindow->Refresh();
-            }
-            else if (event.IdentifyFD(mLogFileFD) && event.IsWriteType())
-            {
-                handleLogBuffer();
-            }
-            else if (event.IdentifySocket(mNetwork.GetServerSocket()) && event.IsReadType())
-            {
-                setupNewClient();
-            }
-            else if (event.IsReadType())
-            {
-                if (mNetwork.RecvFromClient(event.GetIdentifier()) == FAILURE)
-                {
-                    mUsers.erase(event.GetIdentifier());
-                    continue;
-                }
-                processIRCMessage(event.GetIdentifier());
-            }
-            else if (event.IsWriteType())
-            {
-                if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
-                {
-                    mUsers.erase(event.GetIdentifier());
-                    continue;
-                }
-            }
-        }
-    }
 }
 
 bool Core::Init()
@@ -105,9 +64,56 @@ bool Core::Init()
         LOG(LogLevel::Error) << "Failed to add server socket READ event";
         return FAILURE;
     }
-    bRunning = true;
+    mbRunning = true;
     LOG(LogLevel::Notice) << "IRC Server is ready (Port = " << mPort << ")";
     return SUCCESS;
+}
+
+void Core::Run()
+{
+    while (mbRunning)
+    {
+        KernelEvent event;
+        while (mKernelQueue.Poll(event))
+        {
+            if (event.IdentifyFD(STDIN) && event.IsReadType())
+            {
+                handleMonitorInput();
+                handleMonitorCommand();
+            }
+            else if (event.IdentifyFD(STDOUT) && event.IsWriteType())
+            {
+                mActivatedWindow->Refresh();
+            }
+            else if (event.IdentifyFD(mLogFileFD) && event.IsWriteType())
+            {
+                handleLogBuffer();
+            }
+            else if (event.IdentifySocket(mNetwork.GetServerSocket()) && event.IsReadType())
+            {
+                setupNewClient();
+            }
+            else if (event.IsReadType())
+            {
+                if (mNetwork.RecvFromClient(event.GetIdentifier()) == FAILURE)
+                {
+                    ChannelManager::DeleteUserFromAllChannels(UserManager::GetUser(event.GetIdentifier()));
+                    UserManager::DeleteUser(event.GetIdentifier());
+                    continue;
+                }
+                IRC::HandleMessage(event.GetIdentifier(), mNetwork, mPassword);
+            }
+            else if (event.IsWriteType())
+            {
+                if (mNetwork.SendToClient(event.GetIdentifier()) == FAILURE)
+                {
+                    ChannelManager::DeleteUserFromAllChannels(UserManager::GetUser(event.GetIdentifier()));
+                    UserManager::DeleteUser(event.GetIdentifier());
+                    continue;
+                }
+            }
+        }
+    }
 }
 
 bool Core::initLog()
@@ -140,8 +146,8 @@ bool Core::initLog()
 void Core::initConsoleWindow()
 {
     mLogMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Log monitor");
-    mLogMonitor.SetHeaderColor(DisplayBuffer::WhiteCharBlueBG);
-    mLogMonitor.SetFooterColor(DisplayBuffer::WhiteCharBlueBG);
+    mLogMonitor.SetHeaderColor(DisplayBuffer::WriteCharGrayBG);
+    mLogMonitor.SetFooterColor(DisplayBuffer::WriteCharGrayBG);
     mLogMonitor.SetTimestamp(true);
     mServerMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Server monitor");
     mServerMonitor.SetHeaderColor(DisplayBuffer::WhiteCharRedBG);
@@ -186,7 +192,7 @@ void Core::handleMonitorCommand()
     {
         if (prompt == "/exit" || prompt == "/quit")
         {
-            bRunning = false;
+            mbRunning = false;
         }
         else if (mActivatedWindow == &mLogMonitor)
         {
@@ -194,7 +200,8 @@ void Core::handleMonitorCommand()
             {
                 mLogMonitor.PushContent("Server is running",
                                         DisplayBuffer::Green);
-                mLogMonitor.PushContent("IP:        127.0.0.1");
+                mLogMonitor.PushContent("IP:        "
+                    + mNetwork.GetIPString(mNetwork.GetServerSocket()));
                 std::stringstream sPort; sPort << mPort;
                 mLogMonitor.PushContent("port:      " + sPort.str());
                 std::stringstream sPassword; sPassword << mPassword;
@@ -273,25 +280,23 @@ void Core::handleLogBuffer()
 
 void Core::setupNewClient()
 {
-    const int32 newClient = mNetwork.ConnectNewClient();
-    if (newClient != ERROR)
+    const int32 newClientSocket = mNetwork.ConnectNewClient();
+    if (newClientSocket != ERROR)
     {
-        if (mKernelQueue.AddReadEvent(newClient))
+        if (mKernelQueue.AddReadEvent(newClientSocket) == FAILURE
+            || mKernelQueue.AddWriteEvent(newClientSocket) == FAILURE)
         {
-            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClient) << ") connected";
+            mNetwork.DisconnectClient(newClientSocket);
+            return;
+        }
+        else
+        {
+            LOG(LogLevel::Notice) << "Client(" << mNetwork.GetIPString(newClientSocket) << ") connected";
         }
     }
-    User newUser;
-    mUsers[newClient] = newUser;
+    UserManager::AddUser(newClientSocket);
 }
 
-void Core::processIRCMessage(const int32 IN socket)
-{
-    std::string message;
-    while (mNetwork.PullFromRecvBuffer(socket, message, "\r\n") == true)
-    {
-        // TODO(all): message 유효성 검사 및 message에 알맞는 로직 수행.
-    }
-}
+
 
 }
