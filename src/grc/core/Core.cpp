@@ -198,14 +198,25 @@ void Core::handleMonitorCommand()
         {
             if (prompt == "/status")
             {
-                mLogMonitor.PushContent("Server is running",
-                                        DisplayBuffer::Green);
-                mLogMonitor.PushContent("IP:        "
-                    + mNetwork.GetIPString(mNetwork.GetServerSocket()));
-                std::stringstream sPort; sPort << mPort;
-                mLogMonitor.PushContent("port:      " + sPort.str());
-                std::stringstream sPassword; sPassword << mPassword;
-                mLogMonitor.PushContent("password:  " + sPassword.str());
+                std::string content;
+                
+                content = "Server is running";
+                mLogMonitor.PushContent(content,DisplayBuffer::Green);
+                
+                content = "IP:              " + mNetwork.GetIPString(mNetwork.GetServerSocket());
+                mLogMonitor.PushContent(content);
+
+                content = "Port:            " + std::to_string(mPort);
+                mLogMonitor.PushContent(content);
+
+                content = "Password:        " + mPassword;
+                mLogMonitor.PushContent(content);
+
+                content = "Total Users:     " + std::to_string(UserManager::GetUsers().size());
+                mLogMonitor.PushContent(content);
+
+                content = "Total Channels:  " + std::to_string(ChannelManager::GetChannels().size());
+                mLogMonitor.PushContent(content);
             }
             else if (prompt == "/test")
             {
