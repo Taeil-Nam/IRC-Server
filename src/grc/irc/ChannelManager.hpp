@@ -29,8 +29,10 @@ public:
     static void DeleteChannel(const std::string& IN channelName);
     static void DeleteUserFromChannel(const User& IN user, const std::string& channelName);
     static void DeleteUserFromAllChannels(const User& IN user);
+    static void CheckIsEmptyChannelAndDelete(const Channel& IN channel);
 private:
     ChannelManager(); // = delete
+
 
 private:
     static std::map<std::string, Channel> sStaticChannels;

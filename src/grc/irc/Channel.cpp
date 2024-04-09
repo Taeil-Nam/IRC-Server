@@ -235,6 +235,8 @@ void Channel::AddUser(const std::string& IN nickname, const User& IN user)
     if (IsUserExist(nickname) == false)
     {
         mUsers[nickname] = user;
+        LOG(LogLevel::Informational) << "User " << "[" << nickname << "]"
+            << " join to channel " << "[" << mName << "]";
     }
 }
 
@@ -243,6 +245,8 @@ void Channel::AddOperator(const std::string& IN nickname, const User& IN user)
     if (IsUserExist(nickname) && IsOperator(nickname) == false)
     {
         mOperators[nickname] = user;
+        LOG(LogLevel::Informational) << "User " << "[" << nickname << "]"
+            << " is now operator of channel " << "[" << mName << "]";
     }
 }
 void Channel::DeleteTopic()
@@ -256,6 +260,8 @@ void Channel::DeleteUser(const std::string& IN nickname)
     if (IsUserExist(nickname))
     {
         mUsers.erase(nickname);
+        LOG(LogLevel::Informational) << "User " << "[" << nickname << "]"
+            << " exit from channel " << "[" << mName << "]";
     }
 }
 
@@ -264,6 +270,8 @@ void Channel::DeleteOperator(const std::string& IN nickname)
     if (IsOperator(nickname))
     {
         mOperators.erase(nickname);
+        LOG(LogLevel::Informational) << "User " << "[" << nickname << "]"
+            << " has lost operator privilege of channel " << "[" << mName << "]";
     }
 }
 

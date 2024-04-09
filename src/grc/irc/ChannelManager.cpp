@@ -36,6 +36,7 @@ void ChannelManager::AddChannel(const std::string& IN channelName)
     {
         sStaticChannels[channelName];
         sStaticChannels[channelName].SetName(channelName);
+        LOG(LogLevel::Informational) << "Create new channel " << "[" << channelName << "]";
     }
 }
 
@@ -44,6 +45,7 @@ void ChannelManager::DeleteChannel(const std::string& IN channelName)
     if (sStaticChannels.count(channelName) > 0)
     {
         sStaticChannels.erase(channelName);
+        LOG(LogLevel::Informational) << "Delete channel " << "[" << channelName << "]";
     }
 }
 
@@ -63,6 +65,14 @@ void ChannelManager::DeleteUserFromAllChannels(const User& IN user)
         Channel& channel = it->second;
         channel.DeleteUser(user.GetNickname());
         it++;
+    }
+}
+
+void ChannelManager::CheckIsEmptyChannelAndDelete(const Channel& IN channel)
+{
+    if (channel.IsChannelEmpty())
+    {
+        DeleteChannel(channel.GetName());
     }
 }
 

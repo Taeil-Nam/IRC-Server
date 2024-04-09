@@ -204,8 +204,15 @@ void IRC::NICK(const int32 IN socket,
         network.PushToSendBuffer(socket, messageToReply);
         return;
     }
+    // 새로운 유저인 경우
+    if (UserManager::GetUser(socket).GetNickname().empty())
+    {
+        UserManager::GetUser(socket).SetNickname(nickname);
+        LOG(LogLevel::Informational) << "New user " << "[" << nickname << "]"
+            << " Created" << "(" << command << ")";
+    }
     // 유저가 존재하는 경우 닉네임 변경 및 채널에 알림
-    if (UserManager::IsUserExist(socket))
+    else
     {
         const std::string oldNickname = UserManager::GetUser(socket).GetNickname();
         UserManager::GetUser(socket).SetNickname(nickname);
@@ -220,18 +227,17 @@ void IRC::NICK(const int32 IN socket,
         messageToReply.append(" ");
         messageToReply.append(nickname);
         messageToReply.append(CRLF);
-        std::map<std::string, Channel>& channels = ChannelManager::GetChannels();
-        std::map<std::string, Channel>::iterator channel = channels.begin();
-        while (channel != channels.end())
+        std::map<std::string, Channel>::iterator channelIt = ChannelManager::GetChannels().begin();
+        while (channelIt != ChannelManager::GetChannels().end())
         {
-            if (channel->second.IsUserExist(oldNickname) == false)
+            Channel& channel = channelIt->second;
+            if (channel.IsUserExist(oldNickname) == false)
             {
-                channel++;
+                channelIt++;
                 continue;
             }
-            const std::map<std::string, User>& usersInChannel = channel->second.GetUsers();
-            std::map<std::string, User>::const_iterator userInChannel = usersInChannel.begin();
-            while (userInChannel != usersInChannel.end())
+            std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
+            while (userInChannel != channel.GetUsers().end())
             {
                 if (oldNickname == userInChannel->second.GetNickname())
                 {
@@ -241,17 +247,17 @@ void IRC::NICK(const int32 IN socket,
                 network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
                 userInChannel++;
             }
-            channel->second.AddUser(nickname, UserManager::GetUser(socket));
-            channel->second.DeleteUser(oldNickname);
-            channel++;
+            channel.AddUser(nickname, UserManager::GetUser(socket));
+            if (channel.IsOperator(oldNickname))
+            {
+                channel.AddOperator(nickname, UserManager::GetUser(socket));
+            }
+            channel.DeleteUser(oldNickname);
+            channelIt++;
         }
         network.PushToSendBuffer(socket, messageToReply);
         LOG(LogLevel::Informational) << "User " << "[" << oldNickname << "]"
             << " change nickname to " << "[" << UserManager::GetUser(socket).GetNickname() << "]" << "(" << command << ")";
-    }
-    else
-    {
-        UserManager::GetUser(socket).SetNickname(nickname);
     }
 }
 
@@ -336,28 +342,33 @@ void IRC::QUIT(const int32 IN socket,
     messageToReply.append(" ");
     messageToReply.append(quitMessage);
     messageToReply.append(CRLF);
-    const std::map<std::string, Channel>& channels = ChannelManager::GetChannels();
-    std::map<std::string, Channel>::const_iterator channel = channels.begin();
-    while (channel != channels.end())
+    std::map<std::string, Channel>::iterator channelIt = ChannelManager::GetChannels().begin();
+    while (channelIt != ChannelManager::GetChannels().end())
     {
-        if (channel->second.IsUserExist(user.GetNickname()) == false)
+        Channel& channel = channelIt->second;
+        if (channel.IsUserExist(user.GetNickname()) == false)
         {
-            channel++;
+            channelIt++;
             continue;
         }
-        const std::map<std::string, User>& users = channel->second.GetUsers();
-        std::map<std::string, User>::const_iterator user = users.begin();
-        while (user != users.end())
+        std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
+        while (userInChannel != channel.GetUsers().end())
         {
-            network.PushToSendBuffer(user->second.GetSocket(), messageToReply);
-            user++;
+            network.PushToSendBuffer(userInChannel->second.GetSocket(), messageToReply);
+            userInChannel++;
         }
-        channel++;
+        // TODO (bonus) : 채널에 유저가 없는 경우, bot 삭제
+        channelIt++;
+        channel.DeleteUser(user.GetNickname());
+        if (channel.IsOperator(user.GetNickname()))
+        {
+            channel.DeleteOperator(user.GetNickname());
+        }
+        ChannelManager::CheckIsEmptyChannelAndDelete(channel);
     }
     LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
         << " Quited : " << quitMessage << "(" << command << ")";
     UserManager::DeleteUser(socket);
-    ChannelManager::DeleteUserFromAllChannels(user);
     network.ClearRecvBuffer(socket);
     network.DisconnectClient(socket);
 }
@@ -428,12 +439,6 @@ void IRC::JOIN(const int32 IN socket,
             Channel& channel = ChannelManager::GetChannel(channelName);
             channel.AddUser(user.GetNickname(), user);
             channel.AddOperator(user.GetNickname(), user);
-            // TODO : hello bot(client)를 해당 채널에 추가(bonus)
-            LOG(LogLevel::Informational) << "Create new channel " << "[" << channelName << "]";
-            LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
-                << " join to channel " << "[" << channelName << "]";
-            LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
-                << " is now operator of channel " << "[" << channelName << "]";
         }
         // 기존 채널에 입장하는 경우
         else
@@ -652,13 +657,13 @@ void IRC::PART(const int32 IN socket,
             userInChannel++;
         }
         messageToReply.clear();
-        // TODO (bonus) : 채널에 유저가 없는 경우, 채널 삭제 (bonus : hello bot도 같이 없어져야함)
+        // TODO (bonus) : 채널에 유저가 없는 경우, bot 삭제
         channel.DeleteUser(user.GetNickname());
-        if (channel.IsChannelEmpty())
+        if (channel.IsOperator(user.GetNickname()))
         {
-            ChannelManager::DeleteChannel(channelName);
-            LOG(LogLevel::Informational) << "Delete channel " << "[" << channelName << "]";
+            channel.DeleteOperator(user.GetNickname());
         }
+        ChannelManager::CheckIsEmptyChannelAndDelete(channel);
     }
 }
 
@@ -1140,11 +1145,11 @@ void IRC::KICK(const int32 IN socket,
         userInChannel++;
     }
     channel.DeleteUser(targetUser);
-    if (channel.IsChannelEmpty())
+    if (channel.IsOperator(targetUser))
     {
-        ChannelManager::DeleteChannel(channelName);
-        LOG(LogLevel::Informational) << "Delete channel " << "[" << channelName << "]";
+        channel.DeleteOperator(targetUser);
     }
+    ChannelManager::CheckIsEmptyChannelAndDelete(channel);
 }
 
 void IRC::PRIVMSG(const int32 IN socket,
@@ -1226,8 +1231,7 @@ void IRC::PRIVMSG(const int32 IN socket,
     if (IsChannel)
     {
         const Channel& channel = ChannelManager::GetChannel(target);
-        const std::map<std::string, User>& usersInChannel = channel.GetUsers();
-        std::map<std::string, User>::const_iterator userInChannel = usersInChannel.begin();
+        std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
         messageToReply.append(":");
         messageToReply.append(user.GetNickname());
         messageToReply.append(" ");
@@ -1237,7 +1241,7 @@ void IRC::PRIVMSG(const int32 IN socket,
         messageToReply.append(" :");
         messageToReply.append(trailing);
         messageToReply.append(CRLF);
-        while (userInChannel != usersInChannel.end())
+        while (userInChannel != channel.GetUsers().end())
         {
             if (userInChannel->second.GetNickname() == user.GetNickname())
             {

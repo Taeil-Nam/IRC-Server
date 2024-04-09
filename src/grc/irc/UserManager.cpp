@@ -72,6 +72,7 @@ void UserManager::DeleteUser(const int32 socket)
 {
     if (sStaticUsers.count(socket) > 0)
     {
+        LOG(LogLevel::Informational) << "Delete user " << "[" << sStaticUsers[socket].GetNickname() << "]";
         sStaticUsers.erase(socket);
     }
 }
