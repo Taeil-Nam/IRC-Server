@@ -360,10 +360,7 @@ void IRC::QUIT(const int32 IN socket,
         // TODO (bonus) : 채널에 유저가 없는 경우, bot 삭제
         channelIt++;
         channel.DeleteUser(user.GetNickname());
-        if (channel.IsOperator(user.GetNickname()))
-        {
-            channel.DeleteOperator(user.GetNickname());
-        }
+        channel.DeleteOperator(user.GetNickname());
         ChannelManager::CheckIsEmptyChannelAndDelete(channel);
     }
     LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
@@ -659,10 +656,7 @@ void IRC::PART(const int32 IN socket,
         messageToReply.clear();
         // TODO (bonus) : 채널에 유저가 없는 경우, bot 삭제
         channel.DeleteUser(user.GetNickname());
-        if (channel.IsOperator(user.GetNickname()))
-        {
-            channel.DeleteOperator(user.GetNickname());
-        }
+        channel.DeleteOperator(user.GetNickname());
         ChannelManager::CheckIsEmptyChannelAndDelete(channel);
     }
 }
@@ -1145,10 +1139,7 @@ void IRC::KICK(const int32 IN socket,
         userInChannel++;
     }
     channel.DeleteUser(targetUser);
-    if (channel.IsOperator(targetUser))
-    {
-        channel.DeleteOperator(targetUser);
-    }
+    channel.DeleteOperator(targetUser);
     ChannelManager::CheckIsEmptyChannelAndDelete(channel);
 }
 
@@ -1230,8 +1221,6 @@ void IRC::PRIVMSG(const int32 IN socket,
     // target이 채널인 경우
     if (IsChannel)
     {
-        const Channel& channel = ChannelManager::GetChannel(target);
-        std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
         messageToReply.append(":");
         messageToReply.append(user.GetNickname());
         messageToReply.append(" ");
@@ -1241,6 +1230,8 @@ void IRC::PRIVMSG(const int32 IN socket,
         messageToReply.append(" :");
         messageToReply.append(trailing);
         messageToReply.append(CRLF);
+        const Channel& channel = ChannelManager::GetChannel(target);
+        std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
         while (userInChannel != channel.GetUsers().end())
         {
             if (userInChannel->second.GetNickname() == user.GetNickname())
