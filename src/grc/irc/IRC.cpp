@@ -54,7 +54,7 @@ void IRC::initializeCommandFunctionMap()
     sStaticCommandFunctionMap["PART"] = &PART;
     sStaticCommandFunctionMap["MODE"] = &MODE;
     sStaticCommandFunctionMap["TOPIC"] = &TOPIC;
-    // sStaticCommandFunctionMap["INVITE"] = &INVITE;
+    sStaticCommandFunctionMap["INVITE"] = &INVITE;
     sStaticCommandFunctionMap["KICK"] = &KICK;
     sStaticCommandFunctionMap["PRIVMSG"] = &PRIVMSG;
     sStaticCommandFunctionMap["PING"] = &PING;
@@ -361,6 +361,7 @@ void IRC::QUIT(const int32 IN socket,
         channelIt++;
         channel.DeleteUser(user.GetNickname());
         channel.DeleteOperator(user.GetNickname());
+        channel.DeleteInvitedUser(user.GetNickname());
         ChannelManager::CheckIsEmptyChannelAndDelete(channel);
     }
     LOG(LogLevel::Informational) << "User " << "[" << user.GetNickname() << "]"
@@ -442,7 +443,7 @@ void IRC::JOIN(const int32 IN socket,
         {
             Channel& channel = ChannelManager::GetChannel(channelName);
             // ERR_INVITEONLYCHAN
-            if (channel.IsInviteOnly())
+            if (channel.IsInviteOnly() && channel.IsInvited(user.GetNickname()) == false)
             {
                 messageToReply.append(ERR_INVITEONLYCHAN);
                 messageToReply.append(" ");
@@ -657,6 +658,7 @@ void IRC::PART(const int32 IN socket,
         // TODO (bonus) : 채널에 유저가 없는 경우, bot 삭제
         channel.DeleteUser(user.GetNickname());
         channel.DeleteOperator(user.GetNickname());
+        channel.DeleteInvitedUser(user.GetNickname());
         ChannelManager::CheckIsEmptyChannelAndDelete(channel);
     }
 }
@@ -879,6 +881,11 @@ void IRC::MODE(const int32 IN socket,
     }
     messageToReply.pop_back(); // 맨 끝의 공백 문자 제거
     messageToReply.append(CRLF);
+    // 보낼 메시지가 없는 경우 생략
+    if (messageToReply == "CRLF")
+    {
+        return;
+    }
     std::map<std::string, User>::const_iterator userInChannel = channel.GetUsers().begin();
     while (userInChannel != channel.GetUsers().end())
     {
@@ -888,11 +895,11 @@ void IRC::MODE(const int32 IN socket,
 }
 
 void IRC::TOPIC(const int32 IN socket,
-                  const std::string& IN command,
-                  const std::vector<std::string>& IN parameters,
-                  const std::string& IN trailing,
-                  const std::string& IN password,
-                  Network& IN OUT network)
+                const std::string& IN command,
+                const std::vector<std::string>& IN parameters,
+                const std::string& IN trailing,
+                const std::string& IN password,
+                Network& IN OUT network)
 {
     if (UserManager::GetUser(socket).IsRegistered() == false)
     {
@@ -1026,12 +1033,129 @@ void IRC::TOPIC(const int32 IN socket,
     }
 }
 
+void IRC::INVITE(const int32 IN socket,
+                 const std::string& IN command,
+                 const std::vector<std::string>& IN parameters,
+                 const std::string& IN trailing,
+                 const std::string& IN password,
+                 Network& IN OUT network)
+{
+    if (UserManager::GetUser(socket).IsRegistered() == false)
+    {
+        return;
+    }
+    static_cast<void>(trailing);
+    static_cast<void>(password);
+    std::string messageToReply("");
+    // ERR_NEEDMOREPARAMS
+    if (parameters.size() < 2)
+    {
+        messageToReply.append(ERR_NEEDMOREPARAMS);
+        messageToReply.append(" ");
+        messageToReply.append(command);
+        messageToReply.append(" ");
+        messageToReply.append(":Not enough parameters");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    const std::string& targetUser = parameters[0];
+    const std::string& channelName = parameters[1];
+    // ERR_NOSUCHCHANNEL
+    if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
+        || channelName.find(',') != std::string::npos || channelName.find(7) != std::string::npos
+        || ChannelManager::IsChannelExist(channelName) == false)
+    {
+        messageToReply.append(ERR_NOSUCHCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":No such channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_NOTONCHANNEL
+    const User& user = UserManager::GetUser(socket);
+    const Channel& channel = ChannelManager::GetChannel(channelName);
+    if (channel.IsUserExist(user.GetNickname()) == false)
+    {
+        messageToReply.append(ERR_NOTONCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(":You're not on that channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_CHANOPRIVSNEEDED
+    if (ChannelManager::GetChannel(channelName).IsOperator(user.GetNickname()) == false)
+    {
+        messageToReply.append(ERR_CHANOPRIVSNEEDED);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":You're not channel operator");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // ERR_USERONCHANNEL
+    if (ChannelManager::GetChannel(channelName).IsUserExist(targetUser))
+    {
+        messageToReply.append(ERR_USERONCHANNEL);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(targetUser);
+        messageToReply.append(" ");
+        messageToReply.append(channelName);
+        messageToReply.append(" ");
+        messageToReply.append(":is already on channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
+    // 채널의 초대 리스트에 추가
+    ChannelManager::GetChannel(channelName).AddInvitedUser(targetUser, UserManager::GetUser(targetUser));
+    // 초대한 사람에게 RPL_INVITING 응답
+    messageToReply.append(RPL_INVITING);
+    messageToReply.append(" ");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append(" ");
+    messageToReply.append(targetUser);
+    messageToReply.append(" ");
+    messageToReply.append(channelName);
+    messageToReply.append(CRLF);
+    network.PushToSendBuffer(socket, messageToReply);
+    messageToReply.clear();
+    // 초대 받은 사람에게 INVITE 메시지 전송
+    messageToReply.append(":");
+    messageToReply.append(user.GetNickname());
+    messageToReply.append("!");
+    messageToReply.append(user.GetUsername());
+    messageToReply.append("@");
+    messageToReply.append(user.GetHostname());
+    messageToReply.append(" ");
+    messageToReply.append(command);
+    messageToReply.append(" ");
+    messageToReply.append(targetUser);
+    messageToReply.append(" ");
+    messageToReply.append(channelName);
+    messageToReply.append(CRLF);
+    network.PushToSendBuffer(UserManager::GetUser(targetUser).GetSocket(), messageToReply);
+}
+
 void IRC::KICK(const int32 IN socket,
-                  const std::string& IN command,
-                  const std::vector<std::string>& IN parameters,
-                  const std::string& IN trailing,
-                  const std::string& IN password,
-                  Network& IN OUT network)
+               const std::string& IN command,
+               const std::vector<std::string>& IN parameters,
+               const std::string& IN trailing,
+               const std::string& IN password,
+               Network& IN OUT network)
 {
     if (UserManager::GetUser(socket).IsRegistered() == false)
     {
@@ -1140,6 +1264,7 @@ void IRC::KICK(const int32 IN socket,
     }
     channel.DeleteUser(targetUser);
     channel.DeleteOperator(targetUser);
+    channel.DeleteInvitedUser(user.GetNickname());
     ChannelManager::CheckIsEmptyChannelAndDelete(channel);
 }
 

@@ -86,6 +86,10 @@ using namespace gdf;
 // "<client> <channel> :You're not on that channel"
 #define ERR_NOTONCHANNEL  "442"
 
+// Returned when a client tries to invite <nick> to a channel they’re already joined to.
+// "<client> <nick> <channel> :is already on channel"
+#define ERR_USERONCHANNEL "443"
+
 // Returned by the server by numerous commands to
 // indicate to the client that it didn't supply enough
 // parameters.
@@ -176,6 +180,12 @@ using namespace gdf;
 // "<client> <channel> :<topic>"
 #define RPL_TOPIC "332"
 
+// Sent as a reply to the INVITE command to indicate that
+// the attempt was successful and the client with
+// the nickname <nick> has been invited to <channel>.
+// "<client> <nick> <channel>"
+#define RPL_INVITING "341"
+
 // "<client> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
 #define RPL_NAMREPLY "353"
 
@@ -259,12 +269,12 @@ private:
                      const std::string& IN trailing,
                      const std::string& IN password,
                      Network& IN OUT network);
-    // static void INVITE(const int32 IN socket,
-    //                  const std::string& IN command,
-    //                  const std::vector<std::string>& IN parameters,
-    //                  const std::string& IN trailing,
-    //                  const std::string& IN password,
-    //                  Network& IN OUT network);
+    static void INVITE(const int32 IN socket,
+                     const std::string& IN command,
+                     const std::vector<std::string>& IN parameters,
+                     const std::string& IN trailing,
+                     const std::string& IN password,
+                     Network& IN OUT network);
     static void KICK(const int32 IN socket,
                      const std::string& IN command,
                      const std::vector<std::string>& IN parameters,

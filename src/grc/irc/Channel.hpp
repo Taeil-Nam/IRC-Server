@@ -29,6 +29,7 @@ public:
 
     bool IsUserExist(const std::string& IN nickname) const;
     bool IsOperator(const std::string& IN nickname) const;
+    bool IsInvited(const std::string& IN nickname) const;
     bool IsProtectedTopic() const;
     bool IsInviteOnly() const;
     bool IsKeyRequired() const;
@@ -62,9 +63,11 @@ public:
 
     void AddUser(const std::string& IN nickname, const User& IN user);
     void AddOperator(const std::string& IN nickname, const User& IN user);
+    void AddInvitedUser(const std::string& IN nickname, const User& IN user);
     void DeleteTopic();
     void DeleteUser(const std::string& IN nickname);
     void DeleteOperator(const std::string& IN nickname);
+    void DeleteInvitedUser(const std::string& IN nickname);
 private:
     Channel(const Channel& IN channel); // = delete
     const Channel& operator=(const Channel& IN channel); // = delete
@@ -76,6 +79,7 @@ private:
     std::string mKey;
     std::map<std::string, User> mUsers;
     std::map<std::string, User> mOperators;
+    std::map<std::string, User> mInvitedUsers;
     bool mbIsProtectedTopic;
     bool mbIsInviteOnly;
     bool mbIsLimitedMaxUserCount;

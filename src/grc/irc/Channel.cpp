@@ -41,6 +41,18 @@ bool Channel::IsOperator(const std::string& IN nickname) const
     }
 }
 
+bool Channel::IsInvited(const std::string& IN nickname) const
+{
+    if (mInvitedUsers.count(nickname) > 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool Channel::IsProtectedTopic() const
 {
     return mbIsProtectedTopic;
@@ -249,6 +261,17 @@ void Channel::AddOperator(const std::string& IN nickname, const User& IN user)
             << " is now operator of channel " << "[" << mName << "]";
     }
 }
+
+void Channel::AddInvitedUser(const std::string& IN nickname, const User& IN user)
+{
+    if (IsInvited(nickname) == false)
+    {
+        mInvitedUsers[nickname] = user;
+        LOG(LogLevel::Informational) << "User " << "[" << nickname << "]"
+            << " has invited of channel " << "[" << mName << "]";
+    }
+}
+
 void Channel::DeleteTopic()
 {
     mTopic.clear();
@@ -275,6 +298,13 @@ void Channel::DeleteOperator(const std::string& IN nickname)
     }
 }
 
+void Channel::DeleteInvitedUser(const std::string& IN nickname)
+{
+    if (IsInvited(nickname))
+    {
+        mInvitedUsers.erase(nickname);
+    }
+}
 
 Channel::~Channel()
 {
