@@ -1267,7 +1267,7 @@ void IRC::KICK(const int32 IN socket,
     }
     channel.DeleteUser(targetUser);
     channel.DeleteOperator(targetUser);
-    channel.DeleteInvitedUser(user.GetNickname());
+    channel.DeleteInvitedUser(targetUser);
     ChannelManager::CheckIsEmptyChannelAndDelete(channel);
 }
 
