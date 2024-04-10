@@ -6,9 +6,10 @@ CXXFLAGS	=	-I./src	-I./extlibs/libbsd-gdf/include -MMD -Wall -Wextra -Werror -st
 LDFLAGS		=	-L./extlibs/libbsd-gdf/lib -Wl,-rpath,./extlibs/libbsd-gdf/lib
 LDLIBS		=	-lbsd-gdf-assert -lbsd-gdf-logger -lbsd-gdf-display -lbsd-gdf-network -lbsd-gdf-event
 
-SRCS		=	src/main.cpp						\
-				$(wildcard src/grc/core/*.cpp)		\
-				$(wildcard src/grc/irc/*.cpp)		\
+SRCS		=	src/main.cpp							\
+				$(wildcard src/grc/core/*.cpp)			\
+				$(wildcard src/grc/irc/*.cpp)			\
+				$(wildcard src/grc/animation/*.cpp)		\
 				$(wildcard src/utils/*.cpp)
 				
 OBJS		=	$(SRCS:.cpp=.o)

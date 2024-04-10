@@ -16,11 +16,12 @@
 #include <sys/stat.h>
 #include <ctype.h>
 
+#include "BSD-GDF/Display/DisplayConsole.hpp"
 #include "BSD-GDF/Event/KernelEvent.hpp"
 #include "common.hpp"
 #include "../irc/IRC.hpp"
 #include "../irc/UserManager.hpp"
-
+#include "../animation/Earth.hpp"
 using namespace gdf;
 
 namespace grc
@@ -58,6 +59,7 @@ private:
     /* about event */
     void handleMonitorInput();
     void handleMonitorCommand();
+    void printStatus(DisplayConsole& monitor);
     void handleLogBuffer();
 
     /* about network connection */
@@ -76,6 +78,7 @@ private:
     DisplayConsole mLogMonitor;
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
+    Earth mEarthAnimation;
 };
 
 }

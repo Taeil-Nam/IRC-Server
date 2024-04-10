@@ -13,6 +13,8 @@
 
 #define GAMERC_VERSION ("GameRC v1.0.0")
 
+#define interface struct
+
 // standard (표준 헤더)
 #include <iostream>
 #include <string>
