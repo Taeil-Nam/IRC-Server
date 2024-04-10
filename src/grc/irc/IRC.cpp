@@ -118,13 +118,25 @@ void IRC::PASS(const int32 IN socket,
         messageToReply.append(":Not enough parameters");
         messageToReply.append(CRLF);
         network.PushToSendBuffer(socket, messageToReply);
-        // 즉시 메시지 전송 후, client 연결 해제
-        network.SendToClient(socket);
-        network.DisconnectClient(socket);
+        network.ReserveDisconnectClient(socket);
+        network.ClearRecvBuffer(socket);
         UserManager::DeleteUser(socket);
         return;
     }
     const std::string& passwordInMessage = parameters[0];
+    // ERR_PASSWDMISMATCH
+    if (passwordInMessage != password)
+    {
+        messageToReply.append(ERR_PASSWDMISMATCH);
+        messageToReply.append(" ");
+        messageToReply.append(":Password incorrect");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        network.ReserveDisconnectClient(socket);
+        network.ClearRecvBuffer(socket);
+        UserManager::DeleteUser(socket);
+        return;
+    }
     User& user = UserManager::GetUser(socket);
     // ERR_ALREADYREGISTERED
     if (user.IsAuthenticated())
@@ -134,20 +146,6 @@ void IRC::PASS(const int32 IN socket,
         messageToReply.append(":You may not reregister");
         messageToReply.append(CRLF);
         network.PushToSendBuffer(socket, messageToReply);
-        return;
-    }
-    // ERR_PASSWDMISMATCH
-    if (passwordInMessage != password)
-    {
-        messageToReply.append(ERR_PASSWDMISMATCH);
-        messageToReply.append(" ");
-        messageToReply.append(":Password incorrect");
-        messageToReply.append(CRLF);
-        network.PushToSendBuffer(socket, messageToReply);
-        // 즉시 메시지 전송 후, client 연결 해제
-        network.SendToClient(socket);
-        network.DisconnectClient(socket);
-        UserManager::DeleteUser(socket);
         return;
     }
     user.SetAuthenticated();
