@@ -56,6 +56,8 @@ private:
     bool initLog();
     void initConsoleWindow();
 
+    bool isTimePassed(uint64 IN ms, struct timeval& IN OUT last);
+
     /* about event */
     void handleMonitorInput();
     void handleMonitorCommand();
@@ -79,6 +81,7 @@ private:
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
     Earth mEarthAnimation;
+    struct timeval mEarthAnimationLastUpdate;
 };
 
 }

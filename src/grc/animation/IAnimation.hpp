@@ -9,7 +9,7 @@ namespace grc
 interface IAnimation
 {
     virtual ~IAnimation() {}
-    virtual void Print(gdf::DisplayConsole& monitor) = 0;
+    virtual void PrintNextFrame(gdf::DisplayConsole& monitor) = 0;
 };
 
 }

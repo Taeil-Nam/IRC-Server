@@ -15,7 +15,6 @@ Earth::Earth()
 : mFramesIndex(0)
 , mFrames()
 {
-    gettimeofday(&mLastUpdateTime, NULL);
     std::string frame;
     frame = std::string(" \n") +
     "               _-o#&&*''''?d:>b\\_\n" +
@@ -770,7 +769,6 @@ Earth::Earth()
 Earth::Earth(const Earth& copy)
 : mFramesIndex(copy.mFramesIndex)
 , mFrames(copy.mFrames)
-, mLastUpdateTime(copy.mLastUpdateTime)
 {
 }
 
@@ -780,7 +778,6 @@ Earth& Earth::operator=(const Earth& copy)
     {
         mFramesIndex = copy.mFramesIndex;
         mFrames = copy.mFrames;
-        mLastUpdateTime = copy.mLastUpdateTime;
     }
     return *this;
 }
@@ -789,23 +786,15 @@ Earth::~Earth()
 {
 }
 
-void Earth::Print(gdf::DisplayConsole& monitor)
+void Earth::PrintNextFrame(gdf::DisplayConsole& monitor)
 {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    long seconds = now.tv_sec - mLastUpdateTime.tv_sec;
-    long micros = ((seconds * 1000000) + now.tv_usec) - (mLastUpdateTime.tv_usec);
-    if (micros > 50000)
+    const std::string& frame = mFrames[mFramesIndex];
+    std::vector<std::string> frameVector = split(frame, "\n");
+    for (uint64 i = 0; i < frameVector.size(); ++i)
     {
-        mFramesIndex = (mFramesIndex + 1) % 30;
-        mLastUpdateTime = now;
+        monitor.PushContent(frameVector[i], gdf::DisplayBuffer::Green);
     }
-
-    std::vector<std::string> earthSplited = split(mFrames[mFramesIndex], "\n");
-    for (uint64 i = 0; i < earthSplited.size(); ++i)
-    {
-        monitor.PushContent(earthSplited[i], gdf::DisplayBuffer::Green);
-    }
-};
+    mFramesIndex = (mFramesIndex + 1) % FRAMES_SIZE;
+}
 
 }

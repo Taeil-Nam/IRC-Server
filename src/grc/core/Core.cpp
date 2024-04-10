@@ -83,20 +83,12 @@ void Core::Run()
             }
             else if (event.IdentifyFD(STDOUT) && event.IsWriteType())
             {
-                if (mActivatedWindow == & mServerMonitor)
+                if (mActivatedWindow == &mServerMonitor &&
+                    isTimePassed(60, mEarthAnimationLastUpdate) == true)
                 {
-                    static int  i = 0;
-                    
-                    if (i == 1000)
-                    {
-                        mServerMonitor.ClearContent();
-                        printStatus(mServerMonitor);
-                        mEarthAnimation.Print(mServerMonitor);
-                        
-                        i = 0;
-                    }
-                    ++i;
-                    
+                    mServerMonitor.ClearContent();
+                    printStatus(mServerMonitor);
+                    mEarthAnimation.PrintNextFrame(mServerMonitor);            
                 }
                 mActivatedWindow->Refresh();
             }
@@ -127,9 +119,9 @@ void Core::Run()
                     continue;
                 }
             }
-            
         }
     }
+    
 }
 
 bool Core::initLog()
@@ -181,7 +173,25 @@ void Core::initConsoleWindow()
     mLogMonitor.PushContent(std::string("      ░       ░  ░       ░      ░  ░   ░     ░ ░      "), DisplayBuffer::Red);
     mLogMonitor.PushContent(std::string("                                             ░        "), DisplayBuffer::Red);
     mLogMonitor.PushContent(std::string("GameRC v1.0.0                   IRC server application"), DisplayBuffer::Red);
+    gettimeofday(&mEarthAnimationLastUpdate, NULL);
     mActivatedWindow = &mLogMonitor;
+}
+
+bool Core::isTimePassed(uint64 IN ms, struct timeval& IN OUT last)
+{
+    struct timeval now, diff;
+    gettimeofday(&now, NULL);
+    timersub(&now, &last, &diff);
+    uint64 elapsed = static_cast<uint64>(diff.tv_sec) * 1000 + diff.tv_usec / 1000;
+    if (elapsed >= ms)
+    {
+        last = now;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void Core::handleMonitorInput()
@@ -262,6 +272,11 @@ void Core::printStatus(DisplayConsole& monitor)
     monitor.PushContent(content);
 
     content = "Total Channels:  " + std::to_string(ChannelManager::GetChannels().size());
+    monitor.PushContent(content);
+
+    content = "[irssi connect]: \"/connect -nocap "
+              + mNetwork.GetIPString(mNetwork.GetServerSocket())
+              + " " + std::to_string(mPort) + " " + mPassword + "\"";
     monitor.PushContent(content);
 }
 
