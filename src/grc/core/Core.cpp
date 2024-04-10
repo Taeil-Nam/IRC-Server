@@ -1,9 +1,4 @@
 #include "Core.hpp"
-#include "BSD-GDF/Assert.hpp"
-#include "BSD-GDF/Logger/GlobalLogger.hpp"
-#include "common.hpp"
-#include <string>
-#include <sys/event.h>
 
 namespace grc
 {

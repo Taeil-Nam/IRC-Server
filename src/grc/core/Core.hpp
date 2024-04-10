@@ -11,17 +11,14 @@
 
 #pragma once
 
-#include <fstream>
+
+#include "common.hpp"
+#include "grc/irc/IRC.hpp"
+#include "grc/animation/Earth.hpp"
+
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <ctype.h>
 
-#include "BSD-GDF/Display/DisplayConsole.hpp"
-#include "BSD-GDF/Event/KernelEvent.hpp"
-#include "common.hpp"
-#include "../irc/IRC.hpp"
-#include "../irc/UserManager.hpp"
-#include "../animation/Earth.hpp"
 using namespace gdf;
 
 namespace grc
