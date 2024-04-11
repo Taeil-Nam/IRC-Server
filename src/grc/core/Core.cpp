@@ -150,8 +150,8 @@ void Core::initConsoleWindow()
 {
     mLogMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Log monitor");
     mLogMonitor.SetFooter(std::string("(Tab) [LOG] []"));
-    mLogMonitor.SetHeaderColor(DisplayBuffer::WriteCharGrayBG);
-    mLogMonitor.SetFooterColor(DisplayBuffer::WriteCharGrayBG);
+    mLogMonitor.SetHeaderColor(DisplayBuffer::WhiteCharGrayBG);
+    mLogMonitor.SetFooterColor(DisplayBuffer::WhiteCharGrayBG);
     mLogMonitor.SetTimestamp(true);
     mServerMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Server monitor");
     mServerMonitor.SetFooter(std::string("(Tab) [] [Server]"));
