@@ -1063,6 +1063,10 @@ void IRC::INVITE(const int32 IN socket,
         return;
     }
     const std::string& targetUser = parameters[0];
+    if (UserManager::IsUserExist(targetUser) == false)
+    {
+        return;
+    }
     const std::string& channelName = parameters[1];
     // ERR_NOSUCHCHANNEL
     if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
