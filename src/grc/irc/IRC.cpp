@@ -756,9 +756,13 @@ void IRC::MODE(const int32 IN socket,
     std::vector<std::string> modeArgument;
     if (parameters.size() >= 3)
     {
-        modeArgument = split(parameters[2], " ");
+        for (std::size_t i = 2; i < parameters.size(); i++)
+        {
+            modeArgument.push_back(parameters[i]);
+        }
     }
     std::string resultModeString("");
+    std::string resultArgumentString("");
     std::size_t modeStringIndex = 0;
     std::size_t modeArgumentIndex = 0;
     bool isAddType = false;
@@ -782,6 +786,11 @@ void IRC::MODE(const int32 IN socket,
                 {
                     break;
                 }
+                if (channel.IsUserExist(modeArgument[modeArgumentIndex]) == false)
+                {
+                    modeArgumentIndex++;
+                    break;
+                }
                 channel.AddOperator(modeArgument[modeArgumentIndex],
                                UserManager::GetUser(modeArgument[modeArgumentIndex]));
             }
@@ -791,10 +800,17 @@ void IRC::MODE(const int32 IN socket,
                 {
                     break;
                 }
+                if (channel.IsUserExist(modeArgument[modeArgumentIndex]) == false)
+                {
+                    modeArgumentIndex++;
+                    break;
+                }
                 channel.DeleteOperator(modeArgument[modeArgumentIndex]);
             }
-            modeArgumentIndex++;
             resultModeString.append("o");
+            resultArgumentString.append(modeArgument[modeArgumentIndex]);
+            resultArgumentString.append(" ");
+            modeArgumentIndex++;
             break;
         // 토픽을 오퍼레이터만 변경할 수 있도록 함.
         case 't':
@@ -830,6 +846,8 @@ void IRC::MODE(const int32 IN socket,
                 }
                 channel.SetLimitedMaxUserCount();
                 channel.SetMaxUserCount(std::atoi(modeArgument[modeArgumentIndex].c_str()));
+                resultArgumentString.append(modeArgument[modeArgumentIndex]);
+                resultArgumentString.append(" ");
                 modeArgumentIndex++;
             }
             else
@@ -849,6 +867,8 @@ void IRC::MODE(const int32 IN socket,
                 }
                 channel.SetKeyRequired();
                 channel.SetKey(modeArgument[modeArgumentIndex]);
+                resultArgumentString.append(modeArgument[modeArgumentIndex]);
+                resultArgumentString.append(" ");
                 modeArgumentIndex++;
             }
             else
@@ -877,11 +897,7 @@ void IRC::MODE(const int32 IN socket,
     messageToReply.append(" ");
     messageToReply.append(resultModeString);
     messageToReply.append(" ");
-    for (std::size_t i = 0; i < modeArgument.size(); i++)
-    {
-        messageToReply.append(modeArgument[i]);
-        messageToReply.append(" ");
-    }
+    messageToReply.append(resultArgumentString);
     messageToReply.pop_back(); // 맨 끝의 공백 문자 제거
     messageToReply.append(CRLF);
     // 보낼 메시지가 없는 경우 생략
