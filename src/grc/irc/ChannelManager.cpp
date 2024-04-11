@@ -59,12 +59,18 @@ void ChannelManager::DeleteUserFromChannel(const User& IN user, const std::strin
 
 void ChannelManager::DeleteUserFromAllChannels(const User& IN user)
 {
+    std::vector<std::string> deleteChannelList;
     std::map<std::string, Channel>::iterator it = sStaticChannels.begin();
     while (it != sStaticChannels.end())
     {
         Channel& channel = it->second;
         channel.DeleteUser(user.GetNickname());
+        deleteChannelList.push_back(channel.GetName());
         it++;
+    }
+    for (std::size_t i = 0; i < deleteChannelList.size(); i++)
+    {
+        CheckIsEmptyChannelAndDelete(ChannelManager::GetChannel(deleteChannelList[i]));
     }
 }
 
