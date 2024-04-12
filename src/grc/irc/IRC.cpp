@@ -1,6 +1,7 @@
 #include "IRC.hpp"
 #include "BSD-GDF/Assert.hpp"
 #include "BSD-GDF/Logger/GlobalLogger.hpp"
+#include <cctype>
 
 namespace grc
 {
@@ -845,8 +846,14 @@ void IRC::MODE(const int32 IN socket,
                     break;
                 }
                 channel.SetLimitedMaxUserCount();
-                channel.SetMaxUserCount(std::atoi(modeArgument[modeArgumentIndex].c_str()));
-                resultArgumentString.append(modeArgument[modeArgumentIndex]);
+                int maxUserCount = std::atoi(modeArgument[modeArgumentIndex].c_str());
+                if (maxUserCount == Channel::UNLIMIT)
+                {
+                    modeArgumentIndex++;
+                    break;
+                }
+                channel.SetMaxUserCount(maxUserCount);
+                resultArgumentString.append(std::to_string(maxUserCount));
                 resultArgumentString.append(" ");
                 modeArgumentIndex++;
             }
@@ -1338,6 +1345,21 @@ void IRC::PRIVMSG(const int32 IN socket,
     {
         IsChannel = true;
     }
+    // ERR_NOSUCHNICK
+    if ((IsChannel && ChannelManager::IsChannelExist(target) == false)
+        || (IsChannel == false && UserManager::IsUserExist(target) == false))
+    {
+        messageToReply.append(ERR_NOSUCHNICK);
+        messageToReply.append(" ");
+        messageToReply.append(user.GetNickname());
+        messageToReply.append(" ");
+        messageToReply.append(target);
+        messageToReply.append(" ");
+        messageToReply.append(":No such nick/channel");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        return;
+    }
     if (IsChannel
         && ChannelManager::GetChannel(target).IsUserExist(user.GetNickname()) == false)
     {
@@ -1348,20 +1370,6 @@ void IRC::PRIVMSG(const int32 IN socket,
         messageToReply.append(ChannelManager::GetChannel(target).GetName());
         messageToReply.append(" ");
         messageToReply.append(":Cannot send to channel");
-        messageToReply.append(CRLF);
-        network.PushToSendBuffer(socket, messageToReply);
-        return;
-    }
-    // ERR_NOSUCHNICK
-    if (IsChannel == false && UserManager::IsUserExist(target) == false)
-    {
-        messageToReply.append(ERR_NOSUCHNICK);
-        messageToReply.append(" ");
-        messageToReply.append(user.GetNickname());
-        messageToReply.append(" ");
-        messageToReply.append(target);
-        messageToReply.append(" ");
-        messageToReply.append(":No such nick/channel");
         messageToReply.append(CRLF);
         network.PushToSendBuffer(socket, messageToReply);
         return;
