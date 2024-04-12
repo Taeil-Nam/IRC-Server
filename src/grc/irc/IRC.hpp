@@ -1,7 +1,7 @@
 /**
  * @file IRC.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief IRC 로직을 처리하는 정적 클래스
+ * @brief IRC 로직을 처리하는 정적 클래스이다.
  * @version 0.1
  * @date 2024-03-31
  * 
@@ -17,111 +17,153 @@
 
 using namespace gdf;
 
+/**
+ * @brief 
+ * IRC 서버의 버전을 나타내는 매크로이다.
+ */
 #define IRC_VERSION "v0.1"
+
+/**
+ * @brief Carriage Return Line Feed(CRLF)를 나타내는 매크로이다.
+ */
 #define CRLF "\r\n"
 
 ////////////////////////////////////////////////////////////
 // Error Replies
 ////////////////////////////////////////////////////////////
 
-// Indicates that no client can be found for the supplied nickname.
-// The text used in the last param of this message may vary.
-// "<client> <nickname> :No such nick/channel"
+/**
+ * @brief 해당 nick을 가진 유저가 없는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<client> <nick> :No such nick/channel"
+ */
 #define ERR_NOSUCHNICK "401"
 
-// Used to indicate the given channel name is invalid.
-// "<channel name> :No such channel"
+/**
+ * @brief 해당 channel name을 가진 채널이 없는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<channel name> :No such channel"
+ */
 #define ERR_NOSUCHCHANNEL "403"
 
-// Returned by the PRIVMSG command to indicate the message
-// wasn’t delivered because there was no recipient given.
-// "<client> :No recipient given (<command>)"
+/**
+ * @brief PRIVMSG에 받는 사람이 없는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<client> :No recipient given (<command>)"
+ */
 #define ERR_NORECIPIENT "411"
 
-// Returned by the PRIVMSG command to indicate the message
-// wasn’t delivered because there was no text to send.
-// "<client> :No text to send"
+/**
+ * @brief PRIVMSG에 전달할 메시지 내용이 없는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<client> :No text to send"
+ */
 #define ERR_NOTEXTTOSEND "412"
 
-// Indicates that the PRIVMSG / NOTICE could not be delivered to <channel>.
-// The text used in the last param of this message may vary.
-// This is generally sent in response to channel modes,
-// such as a channel being moderated and the client
-// not having permission to speak on the channel,
-// or not being joined to a channel with the no external messages mode set.
-// "<client> <channel> :Cannot send to channel"
+/**
+ * @brief PRIVMSG / NOTICE 메시지가 주어진 채널에 전달될 수 없을 때 응답하는 에러 코드이다.
+ * 유저가 채널에 메시지를 보낼 수 있는 권한이 없거나, 채널에 입장되어 있는 상태가 아닌 경우에 해당된다.
+ *
+ * 메시지 형식: "<client> <channel> :Cannot send to channel"
+ */
 #define ERR_CANNOTSENDTOCHAN "404"
 
-// Indicates that the Message of the Day file does not exist
-// or could not be found.
-// The text used in the last param of this message may vary.
-// "<client> :MOTD File is missing"
+/**
+ * @brief 서버의 Message of the Day(MOTD) 파일이 존재하지 않는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<client> :MOTD File is missing"
+ */
 #define ERR_NOMOTD "422"
 
-// Returned when a nickname parameter expected for a
-// command and isn't found.
-// ":No nickname given"
+/**
+ * @brief nick이 꼭 필요한 메시지에 nick이 없는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: ":No nick given"
+ */
 #define ERR_NONICKNAMEGIVEN "431"
 
-// Returned after receiving a NICK message which contains
-// characters which do not fall in the defined set.  See
-// section x.x.x for details on valid nicknames.
-// "<nick> :Erroneus nickname"
+/**
+ * @brief NICK 메시지의 nick에 사용할 수 없는 문자가 들어있는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<nick> :Erroneus nick"
+ */
 #define ERR_ERRONEUSNICKNAME "432"
 
-// Returned when a NICK message is processed that results
-// in an attempt to change to a currently existing
-// nickname.
-// "<nick> :Nickname is already in use"
+/**
+ * @brief NICK 메시지의 nick을 이미 다른 유저가 사용하고 있는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<nick> :nick is already in use"
+ */
 #define ERR_NICKNAMEINUSE "433"
 
-// Returned when a client tries to perform a channel+nick affecting command,
-// when the nick isn’t joined to the channel (for example, MODE #channel +o nick).
-// "<client> <nick> <channel> :They aren't on that channel"
+/**
+ * @brief channel + nick의 조합을 사용하는 메시지에서, 해당 nick이 채널에 없는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<client> <nick> <channel> :They aren't on that channel"
+ */
 #define ERR_USERNOTINCHANNEL "441"
 
-// Returned by the server whenever a client tries to
-// perform a channel effecting command for which the
-// client isn't a member.
-// "<client> <channel> :You're not on that channel"
+/**
+ * @brief user가 속하지 않은 채널에 특정 메시지를 전달하려고 하는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<client> <channel> :You're not on that channel"
+ */
 #define ERR_NOTONCHANNEL  "442"
 
-// Returned when a client tries to invite <nick> to a channel they’re already joined to.
-// "<client> <nick> <channel> :is already on channel"
+/**
+ * @brief 채널에 이미 있는 nick을 초대했을 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<client> <nick> <channel> :is already on channel"
+ */
 #define ERR_USERONCHANNEL "443"
 
-// Returned by the server by numerous commands to
-// indicate to the client that it didn't supply enough
-// parameters.
-// "<command> :Not enough parameters"
+/**
+ * @brief 메시지에 필요한 매개변수가 부족한 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<command> :Not enough parameters"
+ */
 #define ERR_NEEDMOREPARAMS "461"
 
-// Returned by the server to any link which tries to
-// change part of the registered details (such as
-// password or user details from second USER message).
-// ":You may not reregister"
+/**
+ * @brief 연결 등록이 되지 않은 user로부터 메시지를 받은 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: ":You may not reregister"
+ */
 #define ERR_ALREADYREGISTERED "462"
 
-// Returned to indicate a failed attempt at registering
-// a connection for which a password was required and
-// was either not given or incorrect.
-// ":Password incorrect"
+/**
+ * @brief 연결 등록을 위한 password가 다른 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: ":Password incorrect"
+ */
 #define ERR_PASSWDMISMATCH "464"
 
-// "<channel> :Cannot join channel (+l)"
+/**
+ * @brief 유저가 가득찬 채널에 입장하려고 하는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<channel> :Cannot join channel (+l)"
+ */
 #define ERR_CHANNELISFULL "471"
 
-// "<channel> :Cannot join channel (+i)"
+/**
+ * @brief 유저가 초대를 받지 않고 초대 전용 채널에 입장하는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<channel> :Cannot join channel (+i)"
+ */
 #define ERR_INVITEONLYCHAN "473"
 
-// "<channel> :Cannot join channel (+k)"
+/**
+ * @brief 채널 입장에 필요한 key(password)가 없거나 다른 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<channel> :Cannot join channel (+k)"
+ */
 #define ERR_BADCHANNELKEY "475"
 
-// Indicates that a command failed because the client does not have
-// the appropriate channel privileges. This numeric can apply for 
-// different prefixes such as halfop, operator, etc. 
-// The text used in the last param of this message may vary.
-// "<client> <channel> :You're not channel operator"
+/**
+ * @brief operator 권한이 없는 user가 operator 권한이 필요한 메시지를 사용하는 경우 응답하는 에러 코드이다.
+ *
+ * 메시지 형식: "<client> <channel> :You're not channel operator"
+ */
 #define ERR_CHANOPRIVSNEEDED "482"
 
 
@@ -129,76 +171,82 @@ using namespace gdf;
 // Command responses.
 ////////////////////////////////////////////////////////////
 
-// The first message sent after client registration,
-// this message introduces the client to the network.
-// The text used in the last param of this message varies wildly.
-// "<nick> :Welcome to the <networkname> Network, <nick>[!<user>@<host>]"
+/**
+ * @brief user가 등록되면 첫 번째로 응답하는 메시지이며, 해당 user의 정보를 알려준다.
+ *
+ * 메시지 형식: "<nick> :Welcome to the <networkname> Network, <nick>[!<user>@<host>]"
+ */
 #define RPL_WELCOME "001"
 
-// Part of the post-registration greeting, this numeric returns
-// the name and software/version of the server
-// the client is currently connected to.
-// The text used in the last param of this message varies wildly.
-// "<client> :Your host is <servername>, running version <version>"
+/**
+ * @brief user가 등록되면 두 번째로 응답하는 메시지이며, 해당 user가 연결된 서버의 정보를 알려준다.
+ *
+ * 메시지 형식: "<nick> :Your host is <servername>, running version <version>"
+ */
 #define RPL_YOURHOST "002"
 
-// Part of the post-registration greeting, this numeric returns
-// a human-readable date/time that the server was started or created.
-// The text used in the last param of this message varies wildly.
-// "<client> :This server was created <datetime>"
+/**
+ * @brief user가 등록되면 세 번째로 응답하는 메시지이며, 해당 user가 연결된 서버가 생성된 날짜를 알려준다.
+ *
+ * 메시지 형식: "<nick> :This server was created <datetime>"
+ */
 #define RPL_CREATED "003"
 
-// Part of the post-registration greeting.
-// Clients SHOULD discover available features using RPL_ISUPPORT tokens
-// rather than the mode letters listed in this reply.
-// <client> <servername> <version> <available user modes> 
-// <available channel modes> [<channel modes with a parameter>]
+/**
+ * @brief user가 등록되면 네 번째로 응답하는 메시지이며, 서버 이름 및 version을 알려준다. 
+ *
+ * 메시지 형식: "<nick> <servername> <version> <available user modes> ""
+ */
 #define RPL_MYINFO "004"
 
-// <client> <1-13 tokens> :are supported by this server
+/**
+ * @brief user가 등록되면 다섯 번째로 응답하는 메시지이며, 서버에서 지원 가능한 목록들을 알려준다.
+ *
+ * 메시지 형식: "<nick> <1-13 tokens> :are supported by this server"
+ */
 #define RPL_ISUPPORT "005"
 
-// Sent to a client to inform them of the currently-set modes of a channel.
-// <channel> is the name of the channel.
-// <modestring> and <mode arguments> are a mode string
-// and the mode arguments (delimited as separate parameters)
-// as defined in the MODE message description.
-// "<client> <channel> <modestring> <mode arguments>..."
+/**
+ * @brief 현재 채널에 어떤 mode가 적용되어 있는지 알려준다.
+ *
+ * 메시지 형식: "<nick> <channel> <modestring> <mode arguments>..."
+ */
 #define RPL_CHANNELMODEIS "324"
 
-// Sent to a client when joining a channel to inform them that
-// the channel with the name <channel> does not have any topic set.
-// "<client> <channel> :No topic is set"
+/**
+ * @brief 유저가 채널에 입장했을 때, 채널에 topic이 없는 경우 topic이 설정되어 있지 않다고 알려준다.
+ *
+ * 메시지 형식: "<nick> <channel> :No topic is set"
+ */
 #define RPL_NOTOPIC "331"
 
-// Sent to a client when joining the <channel> to
-// inform them of the current topic of the channel.
-// When sending a TOPIC message to determine the
-// channel topic, one of two replies is sent. If
-// the topic is set, RPL_TOPIC is sent back else
-// RPL_NOTOPIC.
-// "<client> <channel> :<topic>"
+/**
+ * @brief 유저가 채널에 입장했을 때, 채널에 topic이 있는 경우 topic을 알려준다.
+ *
+ * 메시지 형식: "<nick> <channel> :<topic>"
+ */
 #define RPL_TOPIC "332"
 
-// Sent as a reply to the INVITE command to indicate that
-// the attempt was successful and the client with
-// the nickname <nick> has been invited to <channel>.
-// "<client> <nick> <channel>"
+/**
+ * @brief 유저가 특정 유저를 채널에 초대했을 때, 정상적으로 초대했음을 알려준다.
+ *
+ * 메시지 형식: "<client> <target nick> <channel>"
+ */
 #define RPL_INVITING "341"
 
-// "<client> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+/**
+ * @brief 채널의 모든 유저 목록을 알려준다.
+ *
+ * 메시지 형식: "<client> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+ */
 #define RPL_NAMREPLY "353"
 
-// To reply to a NAMES message, a reply pair consisting
-// of RPL_NAMREPLY and RPL_ENDOFNAMES is sent by the
-// server back to the client.  If there is no channel
-// found as in the query, then only RPL_ENDOFNAMES is
-// returned.  The exception to this is when a NAMES
-// message is sent with no parameters and all visible
-// channels and contents are sent back in a series of
-// RPL_NAMEREPLY messages with a RPL_ENDOFNAMES to mark
-// the end.
-// "<client> <channel> :End of /NAMES list"
+/**
+ * @brief 채널의 모든 유저 목록의 끝을 알려준다.
+ * RPL_NAMREPLY 메시지의 뒤에 붙는다
+ *
+ * 메시지 형식: "<client> <channel> :End of /NAMES list"
+ */
 #define RPL_ENDOFNAMES "366"
 
 namespace grc
