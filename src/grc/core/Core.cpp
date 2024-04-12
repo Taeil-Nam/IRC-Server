@@ -1,9 +1,4 @@
 #include "Core.hpp"
-#include "BSD-GDF/Assert.hpp"
-#include "BSD-GDF/Logger/GlobalLogger.hpp"
-#include "common.hpp"
-#include <string>
-#include <sys/event.h>
 
 namespace grc
 {
@@ -72,7 +67,7 @@ bool Core::Init()
 void Core::Run()
 {
     while (mbRunning)
-    {
+    {   
         KernelEvent event;
         while (mKernelQueue.Poll(event))
         {
@@ -83,6 +78,13 @@ void Core::Run()
             }
             else if (event.IdentifyFD(STDOUT) && event.IsWriteType())
             {
+                if (mActivatedWindow == &mServerMonitor &&
+                    isTimePassed(60, mEarthAnimationLastUpdate) == true)
+                {
+                    mServerMonitor.ClearContent();
+                    printStatus(mServerMonitor);
+                    mEarthAnimation.PrintNextFrame(mServerMonitor);            
+                }
                 mActivatedWindow->Refresh();
             }
             else if (event.IdentifyFD(mLogFileFD) && event.IsWriteType())
@@ -114,6 +116,7 @@ void Core::Run()
             }
         }
     }
+    
 }
 
 bool Core::initLog()
@@ -146,10 +149,12 @@ bool Core::initLog()
 void Core::initConsoleWindow()
 {
     mLogMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Log monitor");
-    mLogMonitor.SetHeaderColor(DisplayBuffer::WriteCharGrayBG);
-    mLogMonitor.SetFooterColor(DisplayBuffer::WriteCharGrayBG);
+    mLogMonitor.SetFooter(std::string("(Tab) [LOG] []"));
+    mLogMonitor.SetHeaderColor(DisplayBuffer::WhiteCharGrayBG);
+    mLogMonitor.SetFooterColor(DisplayBuffer::WhiteCharGrayBG);
     mLogMonitor.SetTimestamp(true);
     mServerMonitor.SetHeader(std::string(GAMERC_VERSION) + " - Server monitor");
+    mServerMonitor.SetFooter(std::string("(Tab) [] [Server]"));
     mServerMonitor.SetHeaderColor(DisplayBuffer::WhiteCharRedBG);
     mServerMonitor.SetFooterColor(DisplayBuffer::WhiteCharRedBG);
     mServerMonitor.SetTimestamp(false);
@@ -165,7 +170,25 @@ void Core::initConsoleWindow()
     mLogMonitor.PushContent(std::string("      ░       ░  ░       ░      ░  ░   ░     ░ ░      "), DisplayBuffer::Red);
     mLogMonitor.PushContent(std::string("                                             ░        "), DisplayBuffer::Red);
     mLogMonitor.PushContent(std::string("GameRC v1.0.0                   IRC server application"), DisplayBuffer::Red);
+    gettimeofday(&mEarthAnimationLastUpdate, NULL);
     mActivatedWindow = &mLogMonitor;
+}
+
+bool Core::isTimePassed(uint64 IN ms, struct timeval& IN OUT last)
+{
+    struct timeval now, diff;
+    gettimeofday(&now, NULL);
+    timersub(&now, &last, &diff);
+    uint64 elapsed = static_cast<uint64>(diff.tv_sec) * 1000 + diff.tv_usec / 1000;
+    if (elapsed >= ms)
+    {
+        last = now;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void Core::handleMonitorInput()
@@ -198,14 +221,7 @@ void Core::handleMonitorCommand()
         {
             if (prompt == "/status")
             {
-                mLogMonitor.PushContent("Server is running",
-                                        DisplayBuffer::Green);
-                mLogMonitor.PushContent("IP:        "
-                    + mNetwork.GetIPString(mNetwork.GetServerSocket()));
-                std::stringstream sPort; sPort << mPort;
-                mLogMonitor.PushContent("port:      " + sPort.str());
-                std::stringstream sPassword; sPassword << mPassword;
-                mLogMonitor.PushContent("password:  " + sPassword.str());
+                printStatus(mLogMonitor);
             }
             else if (prompt == "/test")
             {
@@ -231,6 +247,34 @@ void Core::handleMonitorCommand()
             // 빨간 서버 모니터 콘솔창 
         }
     }
+}
+
+void Core::printStatus(DisplayConsole& monitor)
+{
+    std::string content;
+                
+    content = "Server is running";
+    monitor.PushContent(content,DisplayBuffer::Green);
+    
+    content = "IP:              " + mNetwork.GetIPString(mNetwork.GetServerSocket());
+    monitor.PushContent(content);
+
+    content = "Port:            " + std::to_string(mPort);
+    monitor.PushContent(content);
+
+    content = "Password:        " + mPassword;
+    monitor.PushContent(content);
+
+    content = "Total Users:     " + std::to_string(UserManager::GetUsers().size());
+    monitor.PushContent(content);
+
+    content = "Total Channels:  " + std::to_string(ChannelManager::GetChannels().size());
+    monitor.PushContent(content);
+
+    content = "[irssi connect]: \"/connect -nocap "
+              + mNetwork.GetIPString(mNetwork.GetServerSocket())
+              + " " + std::to_string(mPort) + " " + mPassword + "\"";
+    monitor.PushContent(content);
 }
 
 void Core::handleLogBuffer()

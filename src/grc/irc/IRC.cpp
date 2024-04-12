@@ -118,13 +118,25 @@ void IRC::PASS(const int32 IN socket,
         messageToReply.append(":Not enough parameters");
         messageToReply.append(CRLF);
         network.PushToSendBuffer(socket, messageToReply);
-        // 즉시 메시지 전송 후, client 연결 해제
-        network.SendToClient(socket);
-        network.DisconnectClient(socket);
+        network.ReserveDisconnectClient(socket);
+        network.ClearRecvBuffer(socket);
         UserManager::DeleteUser(socket);
         return;
     }
     const std::string& passwordInMessage = parameters[0];
+    // ERR_PASSWDMISMATCH
+    if (passwordInMessage != password)
+    {
+        messageToReply.append(ERR_PASSWDMISMATCH);
+        messageToReply.append(" ");
+        messageToReply.append(":Password incorrect");
+        messageToReply.append(CRLF);
+        network.PushToSendBuffer(socket, messageToReply);
+        network.ReserveDisconnectClient(socket);
+        network.ClearRecvBuffer(socket);
+        UserManager::DeleteUser(socket);
+        return;
+    }
     User& user = UserManager::GetUser(socket);
     // ERR_ALREADYREGISTERED
     if (user.IsAuthenticated())
@@ -134,20 +146,6 @@ void IRC::PASS(const int32 IN socket,
         messageToReply.append(":You may not reregister");
         messageToReply.append(CRLF);
         network.PushToSendBuffer(socket, messageToReply);
-        return;
-    }
-    // ERR_PASSWDMISMATCH
-    if (passwordInMessage != password)
-    {
-        messageToReply.append(ERR_PASSWDMISMATCH);
-        messageToReply.append(" ");
-        messageToReply.append(":Password incorrect");
-        messageToReply.append(CRLF);
-        network.PushToSendBuffer(socket, messageToReply);
-        // 즉시 메시지 전송 후, client 연결 해제
-        network.SendToClient(socket);
-        network.DisconnectClient(socket);
-        UserManager::DeleteUser(socket);
         return;
     }
     user.SetAuthenticated();
@@ -733,6 +731,12 @@ void IRC::MODE(const int32 IN socket,
         network.PushToSendBuffer(socket, messageToReply);
         return;
     }
+    const std::string& modeString = parameters[1];
+    // 지원하지 않는 옵션(밴 리스트 출력)인 경우 생략
+    if (modeString[0] == 'b')
+    {
+        return;
+    }
     // modestring이 있는데 채널의 오퍼레이터가 아닌 경우, ERR_CHANOPRIVSNEEDED 응답
     // ERR_CHANOPRIVSNEEDED
     if (ChannelManager::GetChannel(channelName).IsOperator(user.GetNickname()) == false)
@@ -749,13 +753,16 @@ void IRC::MODE(const int32 IN socket,
         return;
     }
     // MODE 설정 또는 해제
-    const std::string& modeString = parameters[1];
     std::vector<std::string> modeArgument;
     if (parameters.size() >= 3)
     {
-        modeArgument = split(parameters[2], " ");
+        for (std::size_t i = 2; i < parameters.size(); i++)
+        {
+            modeArgument.push_back(parameters[i]);
+        }
     }
     std::string resultModeString("");
+    std::string resultArgumentString("");
     std::size_t modeStringIndex = 0;
     std::size_t modeArgumentIndex = 0;
     bool isAddType = false;
@@ -779,6 +786,11 @@ void IRC::MODE(const int32 IN socket,
                 {
                     break;
                 }
+                if (channel.IsUserExist(modeArgument[modeArgumentIndex]) == false)
+                {
+                    modeArgumentIndex++;
+                    break;
+                }
                 channel.AddOperator(modeArgument[modeArgumentIndex],
                                UserManager::GetUser(modeArgument[modeArgumentIndex]));
             }
@@ -788,10 +800,17 @@ void IRC::MODE(const int32 IN socket,
                 {
                     break;
                 }
+                if (channel.IsUserExist(modeArgument[modeArgumentIndex]) == false)
+                {
+                    modeArgumentIndex++;
+                    break;
+                }
                 channel.DeleteOperator(modeArgument[modeArgumentIndex]);
             }
-            modeArgumentIndex++;
             resultModeString.append("o");
+            resultArgumentString.append(modeArgument[modeArgumentIndex]);
+            resultArgumentString.append(" ");
+            modeArgumentIndex++;
             break;
         // 토픽을 오퍼레이터만 변경할 수 있도록 함.
         case 't':
@@ -827,6 +846,8 @@ void IRC::MODE(const int32 IN socket,
                 }
                 channel.SetLimitedMaxUserCount();
                 channel.SetMaxUserCount(std::atoi(modeArgument[modeArgumentIndex].c_str()));
+                resultArgumentString.append(modeArgument[modeArgumentIndex]);
+                resultArgumentString.append(" ");
                 modeArgumentIndex++;
             }
             else
@@ -846,6 +867,8 @@ void IRC::MODE(const int32 IN socket,
                 }
                 channel.SetKeyRequired();
                 channel.SetKey(modeArgument[modeArgumentIndex]);
+                resultArgumentString.append(modeArgument[modeArgumentIndex]);
+                resultArgumentString.append(" ");
                 modeArgumentIndex++;
             }
             else
@@ -874,11 +897,7 @@ void IRC::MODE(const int32 IN socket,
     messageToReply.append(" ");
     messageToReply.append(resultModeString);
     messageToReply.append(" ");
-    for (std::size_t i = 0; i < modeArgument.size(); i++)
-    {
-        messageToReply.append(modeArgument[i]);
-        messageToReply.append(" ");
-    }
+    messageToReply.append(resultArgumentString);
     messageToReply.pop_back(); // 맨 끝의 공백 문자 제거
     messageToReply.append(CRLF);
     // 보낼 메시지가 없는 경우 생략
@@ -1060,6 +1079,10 @@ void IRC::INVITE(const int32 IN socket,
         return;
     }
     const std::string& targetUser = parameters[0];
+    if (UserManager::IsUserExist(targetUser) == false)
+    {
+        return;
+    }
     const std::string& channelName = parameters[1];
     // ERR_NOSUCHCHANNEL
     if ((channelName[0] != '#' && channelName[0] != '&') || channelName.find(' ') != std::string::npos
@@ -1264,7 +1287,7 @@ void IRC::KICK(const int32 IN socket,
     }
     channel.DeleteUser(targetUser);
     channel.DeleteOperator(targetUser);
-    channel.DeleteInvitedUser(user.GetNickname());
+    channel.DeleteInvitedUser(targetUser);
     ChannelManager::CheckIsEmptyChannelAndDelete(channel);
 }
 

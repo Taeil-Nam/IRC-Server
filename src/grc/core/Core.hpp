@@ -11,15 +11,14 @@
 
 #pragma once
 
-#include <fstream>
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <ctype.h>
 
 #include "BSD-GDF/Event/KernelEvent.hpp"
 #include "common.hpp"
-#include "../irc/IRC.hpp"
-#include "../irc/UserManager.hpp"
+#include "grc/irc/IRC.hpp"
+#include "grc/animation/Earth.hpp"
+
+#include <sys/time.h>
+#include <sys/stat.h>
 
 using namespace gdf;
 
@@ -55,9 +54,12 @@ private:
     bool initLog();
     void initConsoleWindow();
 
+    bool isTimePassed(uint64 IN ms, struct timeval& IN OUT last);
+
     /* about event */
     void handleMonitorInput();
     void handleMonitorCommand();
+    void printStatus(DisplayConsole& monitor);
     void handleLogBuffer();
 
     /* about network connection */
@@ -76,6 +78,8 @@ private:
     DisplayConsole mLogMonitor;
     DisplayConsole mServerMonitor;
     DisplayConsole* mActivatedWindow;
+    Earth mEarthAnimation;
+    struct timeval mEarthAnimationLastUpdate;
 };
 
 }
