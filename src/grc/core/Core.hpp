@@ -12,6 +12,7 @@
 #pragma once
 
 
+#include "BSD-GDF/Event/KernelEvent.hpp"
 #include "common.hpp"
 #include "grc/irc/IRC.hpp"
 #include "grc/animation/Earth.hpp"
