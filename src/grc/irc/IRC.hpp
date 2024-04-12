@@ -1,7 +1,7 @@
 /**
  * @file IRC.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief IRC 로직을 처리하는 정적 클래스이다.
+ * @brief IRC 로직에 필요한 매크로 및 IRC 클래스를 정의한다.
  * @version 0.1
  * @date 2024-03-31
  * 
@@ -19,12 +19,12 @@ using namespace gdf;
 
 /**
  * @brief 
- * IRC 서버의 버전을 나타내는 매크로이다.
+ * IRC 서버의 버전을 나타내는 매크로.
  */
 #define IRC_VERSION "v0.1"
 
 /**
- * @brief Carriage Return Line Feed(CRLF)를 나타내는 매크로이다.
+ * @brief Carriage Return Line Feed(CRLF)를 나타내는 매크로.
  */
 #define CRLF "\r\n"
 
@@ -33,35 +33,35 @@ using namespace gdf;
 ////////////////////////////////////////////////////////////
 
 /**
- * @brief 해당 nick을 가진 유저가 없는 경우 응답하는 에러 코드이다.
+ * @brief 해당 nick을 가진 유저가 없는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<client> <nick> :No such nick/channel"
  */
 #define ERR_NOSUCHNICK "401"
 
 /**
- * @brief 해당 channel name을 가진 채널이 없는 경우 응답하는 에러 코드이다.
+ * @brief 해당 channel name을 가진 채널이 없는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<channel name> :No such channel"
  */
 #define ERR_NOSUCHCHANNEL "403"
 
 /**
- * @brief PRIVMSG에 받는 사람이 없는 경우 응답하는 에러 코드이다.
+ * @brief PRIVMSG에 받는 사람이 없는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<client> :No recipient given (<command>)"
  */
 #define ERR_NORECIPIENT "411"
 
 /**
- * @brief PRIVMSG에 전달할 메시지 내용이 없는 경우 응답하는 에러 코드이다.
+ * @brief PRIVMSG에 전달할 메시지 내용이 없는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<client> :No text to send"
  */
 #define ERR_NOTEXTTOSEND "412"
 
 /**
- * @brief PRIVMSG / NOTICE 메시지가 주어진 채널에 전달될 수 없을 때 응답하는 에러 코드이다.
+ * @brief PRIVMSG / NOTICE 메시지가 주어진 채널에 전달될 수 없을 때 응답하는 에러 코드.
  * 유저가 채널에 메시지를 보낼 수 있는 권한이 없거나, 채널에 입장되어 있는 상태가 아닌 경우에 해당된다.
  *
  * 메시지 형식: "<client> <channel> :Cannot send to channel"
@@ -69,98 +69,98 @@ using namespace gdf;
 #define ERR_CANNOTSENDTOCHAN "404"
 
 /**
- * @brief 서버의 Message of the Day(MOTD) 파일이 존재하지 않는 경우 응답하는 에러 코드이다.
+ * @brief 서버의 Message of the Day(MOTD) 파일이 존재하지 않는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<client> :MOTD File is missing"
  */
 #define ERR_NOMOTD "422"
 
 /**
- * @brief nick이 꼭 필요한 메시지에 nick이 없는 경우 응답하는 에러 코드이다.
+ * @brief nick이 꼭 필요한 메시지에 nick이 없는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: ":No nick given"
  */
 #define ERR_NONICKNAMEGIVEN "431"
 
 /**
- * @brief NICK 메시지의 nick에 사용할 수 없는 문자가 들어있는 경우 응답하는 에러 코드이다.
+ * @brief NICK 메시지의 nick에 사용할 수 없는 문자가 들어있는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<nick> :Erroneus nick"
  */
 #define ERR_ERRONEUSNICKNAME "432"
 
 /**
- * @brief NICK 메시지의 nick을 이미 다른 유저가 사용하고 있는 경우 응답하는 에러 코드이다.
+ * @brief NICK 메시지의 nick을 이미 다른 유저가 사용하고 있는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<nick> :nick is already in use"
  */
 #define ERR_NICKNAMEINUSE "433"
 
 /**
- * @brief channel + nick의 조합을 사용하는 메시지에서, 해당 nick이 채널에 없는 경우 응답하는 에러 코드이다.
+ * @brief channel + nick의 조합을 사용하는 메시지에서, 해당 nick이 채널에 없는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<client> <nick> <channel> :They aren't on that channel"
  */
 #define ERR_USERNOTINCHANNEL "441"
 
 /**
- * @brief user가 속하지 않은 채널에 특정 메시지를 전달하려고 하는 경우 응답하는 에러 코드이다.
+ * @brief user가 속하지 않은 채널에 특정 메시지를 전달하려고 하는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<client> <channel> :You're not on that channel"
  */
 #define ERR_NOTONCHANNEL  "442"
 
 /**
- * @brief 채널에 이미 있는 nick을 초대했을 경우 응답하는 에러 코드이다.
+ * @brief 채널에 이미 있는 nick을 초대했을 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<client> <nick> <channel> :is already on channel"
  */
 #define ERR_USERONCHANNEL "443"
 
 /**
- * @brief 메시지에 필요한 매개변수가 부족한 경우 응답하는 에러 코드이다.
+ * @brief 메시지에 필요한 매개변수가 부족한 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<command> :Not enough parameters"
  */
 #define ERR_NEEDMOREPARAMS "461"
 
 /**
- * @brief 연결 등록이 되지 않은 user로부터 메시지를 받은 경우 응답하는 에러 코드이다.
+ * @brief 연결 등록이 되지 않은 user로부터 메시지를 받은 경우 응답하는 에러 코드.
  *
  * 메시지 형식: ":You may not reregister"
  */
 #define ERR_ALREADYREGISTERED "462"
 
 /**
- * @brief 연결 등록을 위한 password가 다른 경우 응답하는 에러 코드이다.
+ * @brief 연결 등록을 위한 password가 다른 경우 응답하는 에러 코드.
  *
  * 메시지 형식: ":Password incorrect"
  */
 #define ERR_PASSWDMISMATCH "464"
 
 /**
- * @brief 유저가 가득찬 채널에 입장하려고 하는 경우 응답하는 에러 코드이다.
+ * @brief 유저가 가득찬 채널에 입장하려고 하는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<channel> :Cannot join channel (+l)"
  */
 #define ERR_CHANNELISFULL "471"
 
 /**
- * @brief 유저가 초대를 받지 않고 초대 전용 채널에 입장하는 경우 응답하는 에러 코드이다.
+ * @brief 유저가 초대를 받지 않고 초대 전용 채널에 입장하는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<channel> :Cannot join channel (+i)"
  */
 #define ERR_INVITEONLYCHAN "473"
 
 /**
- * @brief 채널 입장에 필요한 key(password)가 없거나 다른 경우 응답하는 에러 코드이다.
+ * @brief 채널 입장에 필요한 key(password)가 없거나 다른 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<channel> :Cannot join channel (+k)"
  */
 #define ERR_BADCHANNELKEY "475"
 
 /**
- * @brief operator 권한이 없는 user가 operator 권한이 필요한 메시지를 사용하는 경우 응답하는 에러 코드이다.
+ * @brief operator 권한이 없는 user가 operator 권한이 필요한 메시지를 사용하는 경우 응답하는 에러 코드.
  *
  * 메시지 형식: "<client> <channel> :You're not channel operator"
  */
@@ -243,7 +243,7 @@ using namespace gdf;
 
 /**
  * @brief 채널의 모든 유저 목록의 끝을 알려준다.
- * RPL_NAMREPLY 메시지의 뒤에 붙는다
+ * RPL_NAMREPLY 메시지의 뒤에 따라온다.
  *
  * 메시지 형식: "<client> <channel> :End of /NAMES list"
  */
@@ -252,6 +252,14 @@ using namespace gdf;
 namespace grc
 {
 
+/**
+ * @class IRC
+ * @brief IRC 로직을 수행하는 정적 클래스.
+ * 
+ * 클라이언트로부터 전달된 데이터 중, CRLF로 끝나는 메시지를 하나씩 가져온다.
+ * 메시지를 command, parameters, trailing 으로 파싱한다.
+ * command에 따라 알맞은 함수를 호출하여 IRC 로직을 수행한다.
+ */
 class IRC
 {
 public:
@@ -351,6 +359,10 @@ private:
     static void sendWelcomeMessage(const int32 IN socket, Network& IN OUT network);
     static bool isNicknameInUse(const std::string& IN nickname);
 private:
+    /**
+     * @brief 특정 IRC command가 호출해야 하는 함수를 가지고 있는 정적 멤버 변수이다.
+     * Key = IRC command, Value = command의 함수.
+     */
     static std::map<std::string, TcommandFunctionPTR> sStaticCommandFunctionMap;
 };
 
