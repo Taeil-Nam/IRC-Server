@@ -1,7 +1,7 @@
 /**
  * @file User.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief User 클래스를 정의한다.
+ * @brief 이 파일은 User 클래스를 정의한다.
  * @version 0.1
  * @date 2024-03-27
  * 

@@ -1,7 +1,7 @@
 /**
  * @file IRC.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief IRC 로직에 필요한 매크로 및 IRC 클래스를 정의한다.
+ * @brief 이 파일은 IRC 로직에 필요한 매크로 및 IRC 클래스를 정의한다.
  * @version 0.1
  * @date 2024-03-31
  *

@@ -1,7 +1,7 @@
 /**
  * @file UserManager.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief UserManager 클래스를 정의한다.
+ * @brief 이 파일은 UserManager 클래스를 정의한다.
  * @version 0.1
  * @date 2024-04-01
  * 
@@ -29,21 +29,23 @@ public:
      * @brief 유저가 존재하는지 확인하는 함수.
      * 
      * @param socket 찾을 유저의 소켓.
-     * @return true 유저가 존재 하는 경우 true 반환.
-     * @return false 유저가 존재 하지 않는 경우 false 반환.
+     * @return true 유저가 존재하는 경우 true 반환.
+     * @return false 유저가 존재하지 않는 경우 false 반환.
      */
     static bool IsUserExist(int32 IN socket);
     /**
      * @brief 유저가 존재하는지 확인하는 함수.
      * 
      * @param nickname 찾을 유저의 nickname.
-     * @return true 유저가 존재 하는 경우 true 반환.
-     * @return false 유저가 존재 하지 않는 경우 false 반환.
+     * @return true 유저가 존재하는 경우 true 반환.
+     * @return false 유저가 존재하지 않는 경우 false 반환.
      */
     static bool IsUserExist(const std::string& IN nickname);
 
     /**
      * @brief 특정 User 객체를 반환하는 함수.
+     * 
+     * 없는 유저에 대해서 함수를 호출하는 경우, Assertion 발생.
      * 
      * @param socket 찾을 유저 객체의 소켓.
      * @return User& 유저의 객체를 반환.
@@ -60,8 +62,6 @@ public:
     static User& GetUser(const std::string& IN nickname);
     /**
      * @brief 현재 모든 유저 목록을 반환하는 함수.
-     * 
-     * 없는 유저에 대해서 함수를 호출하는 경우, Assertion 발생.
      * 
      * @return const std::map<int32, User>& 멤버 변수 sStaticUsers 반환.
      */
