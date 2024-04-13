@@ -273,9 +273,13 @@ namespace grc
         static void HandleMessage(const int32 IN socket, Network &IN network, const std::string &IN password);
 
     private:
+        /**
+         * @brief IRC 객체의 기본 생성자. (사용되지 않음)
+         * 
+         */
         IRC(); // = delete
         /**
-         * @brief command 처리 함수 포인터를 정의.
+         * @brief command 함수 포인터를 정의.
          *
          */
         typedef void (*TcommandFunctionPTR)(const int32,
@@ -645,7 +649,8 @@ namespace grc
 
     private:
         /**
-         * @brief 특정 IRC command가 호출해야 하는 함수를 가지고 있는 정적 멤버 변수.
+         * @brief IRC command에 따라 호출해야 하는 함수를 가지고 있는 정적 멤버 변수.
+         * 
          * Key = IRC command, Value = command의 함수.
          */
         static std::map<std::string, TcommandFunctionPTR> sStaticCommandFunctionMap;
