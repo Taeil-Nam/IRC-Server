@@ -52,12 +52,16 @@ public:
         /**
      * @brief 특정 User 객체를 반환하는 함수.
      * 
+     * 없는 유저에 대해서 함수를 호출하는 경우, Assertion 발생.
+     * 
      * @param nickname 찾을 유저 객체의 nickname.
      * @return User& 유저의 객체를 반환.
      */
     static User& GetUser(const std::string& IN nickname);
     /**
      * @brief 현재 모든 유저 목록을 반환하는 함수.
+     * 
+     * 없는 유저에 대해서 함수를 호출하는 경우, Assertion 발생.
      * 
      * @return const std::map<int32, User>& 멤버 변수 sStaticUsers 반환.
      */
