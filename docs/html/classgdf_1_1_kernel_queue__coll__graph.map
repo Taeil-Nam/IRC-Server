@@ -1,0 +1,9 @@
+<map id="gdf::KernelQueue" name="gdf::KernelQueue">
+<area shape="rect" id="Node000001" title="커널 이벤트 큐를 관리하는 클래스이다." alt="" coords="78,124,200,150"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,44,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="30,46,37,73,52,98,68,111,88,121,86,126,66,116,48,102,32,75,24,47"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="86,5,192,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,47,142,123,137,123,137,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="217,5,328,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="262,46,243,75,217,102,176,126,173,121,214,98,238,71,257,43"/>
+</map>

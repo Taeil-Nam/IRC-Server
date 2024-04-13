@@ -1,0 +1,9 @@
+<map id="grc::User" name="grc::User">
+<area shape="rect" id="Node000001" title="IRC에서 생성되는 User 객체를 정의하는 클래스." alt="" coords="74,154,149,180"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,44,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="27,46,34,88,41,109,52,128,65,141,81,151,78,156,62,145,48,132,36,111,29,89,22,47"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="89,5,134,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="114,46,114,153,109,153,109,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="229,5,282,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="258,47,250,90,242,112,228,132,210,146,190,155,150,166,148,160,189,150,208,141,224,128,237,110,245,89,252,46"/>
+</map>

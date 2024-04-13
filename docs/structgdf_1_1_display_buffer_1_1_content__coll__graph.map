@@ -1,0 +1,7 @@
+<map id="gdf::DisplayBuffer::Content" name="gdf::DisplayBuffer::Content">
+<area shape="rect" id="Node000001" title="텍스트 컨텐츠를 색상, 시간 정보와 함께 저장하는 구조체" alt="" coords="5,109,186,135"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="21,5,74,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="45,46,46,66,51,84,60,96,73,106,70,111,57,100,46,86,40,66,40,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="115,5,175,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="136,46,118,86,105,110,100,108,113,84,132,44"/>
+</map>

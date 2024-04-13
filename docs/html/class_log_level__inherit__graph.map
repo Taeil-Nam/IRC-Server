@@ -1,0 +1,5 @@
+<map id="LogLevel" name="LogLevel">
+<area shape="rect" id="Node000001" title="GlobalLogger 클래스에 대한 별칭을 제공하는 클래스" alt="" coords="17,79,91,105"/>
+<area shape="rect" id="Node000002" href="$class_global_logger.html" title="전역으로 사용할 수 있는 로깅시스템 클래스이다." alt="" coords="5,5,103,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="57,46,57,79,51,79,51,46"/>
+</map>
