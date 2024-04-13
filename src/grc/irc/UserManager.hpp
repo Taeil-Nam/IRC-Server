@@ -26,19 +26,19 @@ class UserManager
 {
 public:
     /**
-     * @brief 유저가 존재하는지 확인하는 함수.
+     * @brief User 객체가 존재하는지 확인하는 함수.
      * 
-     * @param socket 찾을 유저의 소켓.
-     * @return true 유저가 존재하는 경우 true 반환.
-     * @return false 유저가 존재하지 않는 경우 false 반환.
+     * @param socket 찾을 User 객체의 소켓.
+     * @return true
+     * @return false
      */
     static bool IsUserExist(int32 IN socket);
     /**
-     * @brief 유저가 존재하는지 확인하는 함수.
+     * @brief User 객체가 존재하는지 확인하는 함수.
      * 
-     * @param nickname 찾을 유저의 nickname.
-     * @return true 유저가 존재하는 경우 true 반환.
-     * @return false 유저가 존재하지 않는 경우 false 반환.
+     * @param nickname 찾을 User 객체의 nickname.
+     * @return true
+     * @return false
      */
     static bool IsUserExist(const std::string& IN nickname);
 
@@ -47,8 +47,8 @@ public:
      * 
      * 없는 유저에 대해서 함수를 호출하는 경우, Assertion 발생.
      * 
-     * @param socket 찾을 유저 객체의 소켓.
-     * @return User& 유저의 객체를 반환.
+     * @param socket 찾을 User 객체의 소켓.
+     * @return User& : User의 객체를 반환.
      */
     static User& GetUser(const int32 IN socket);
         /**
@@ -56,27 +56,27 @@ public:
      * 
      * 없는 유저에 대해서 함수를 호출하는 경우, Assertion 발생.
      * 
-     * @param nickname 찾을 유저 객체의 nickname.
-     * @return User& 유저의 객체를 반환.
+     * @param nickname 찾을 User 객체의 nickname.
+     * @return User& : User의 객체를 반환.
      */
     static User& GetUser(const std::string& IN nickname);
     /**
-     * @brief 현재 모든 유저 목록을 반환하는 함수.
+     * @brief 현재 모든 User 객체의 목록을 반환하는 함수.
      * 
-     * @return const std::map<int32, User>& 멤버 변수 sStaticUsers 반환.
+     * @return const std::map<int32, User>& : 멤버 변수 sStaticUsers 반환.
      */
     static const std::map<int32, User>& GetUsers();
 
     /**
-     * @brief 유저를 추가하는 함수.
+     * @brief User 객체를 추가하는 함수.
      * 
-     * @param socket 추가할 유저의 소켓.
+     * @param socket 추가할 User 객체의 소켓.
      */
     static void AddUser(const int32 IN socket);
     /**
-     * @brief 유저를 삭제하는 함수.
+     * @brief User 객체를 삭제하는 함수.
      * 
-     * @param socket 삭제할 유저의 소켓.
+     * @param socket 삭제할 User 객체의 소켓.
      */
     static void DeleteUser(const int32 IN socket);
 private:
@@ -88,7 +88,7 @@ private:
 
 private:
     /**
-     * @brief 현재 IRC에 연결된 모든 유저 목록.
+     * @brief 현재 IRC에 연결된 모든 User 객체의 목록.
      * 
      */
     static std::map<int32, User> sStaticUsers;

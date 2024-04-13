@@ -20,7 +20,7 @@ namespace grc
 
 /**
  * @class User 
- * @brief IRC에 연결되는 유저 객체를 정의하는 클래스.
+ * @brief IRC에서 생성되는 User 객체를 정의하는 클래스.
  */
 class User
 {
@@ -48,52 +48,52 @@ public:
     /**
      * @brief User가 인증 되었는지 확인하는 함수.
      * 
-     * @return true 인증되어 있는 경우 true 반환.
-     * @return false 인증되어 있지 않은 경우 false 반환.
+     * @return true
+     * @return false
      */
     bool IsAuthenticated() const;
     /**
      * @brief User가 등록 되었는지 확인하는 함수.
      * 
-     * @return true 등록되어 있는 경우 true 반환.
-     * @return false 등록되어 있지 않은 경우 false 반환.
+     * @return true
+     * @return false
      */
     bool IsRegistered() const;
 
     /**
      * @brief User 객체의 소켓을 반환하는 함수.
      * 
-     * @return int32 User 객체의 소켓.
+     * @return int32 : User 객체의 소켓.
      */
     int32 GetSocket() const;
     /**
      * @brief User 객체의 nickname을 반환하는 함수.
      * 
-     * @return const std::string& User 객체의 nickname.
+     * @return const std::string& : User 객체의 nickname.
      */
     const std::string& GetNickname() const;
     /**
      * @brief User 객체의 username을 반환하는 함수.
      * 
-     * @return const std::string& User 객체의 username.
+     * @return const std::string& : User 객체의 username.
      */
     const std::string& GetUsername() const;
     /**
      * @brief User 객체의 hostname을 반환하는 함수.
      * 
-     * @return const std::string& User 객체의 hostname.
+     * @return const std::string& : User 객체의 hostname.
      */
     const std::string& GetHostname() const;
     /**
      * @brief User 객체의 servername을 반환하는 함수.
      * 
-     * @return const std::string& User 객체의 servername.
+     * @return const std::string& : User 객체의 servername.
      */
     const std::string& GetServername() const;
     /**
      * @brief User 객체의 realname을 반환하는 함수.
      * 
-     * @return const std::string& User 객체의 realname.
+     * @return const std::string& : User 객체의 realname.
      */
     const std::string& GetRealname() const;
 

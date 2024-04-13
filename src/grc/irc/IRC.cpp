@@ -1338,7 +1338,6 @@ void IRC::PRIVMSG(const int32 IN socket,
         network.PushToSendBuffer(socket, messageToReply);
         return;
     }
-    // ERR_CANNOTSENDTOCHAN
     const std::string& target = parameters[0];
     bool IsChannel = false;
     if (target[0] == '&' || target[0] == '#')
@@ -1360,6 +1359,7 @@ void IRC::PRIVMSG(const int32 IN socket,
         network.PushToSendBuffer(socket, messageToReply);
         return;
     }
+    // ERR_CANNOTSENDTOCHAN
     if (IsChannel
         && ChannelManager::GetChannel(target).IsUserExist(user.GetNickname()) == false)
     {
