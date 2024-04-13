@@ -1,12 +1,12 @@
 /**
  * @file IRC.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief IRC 로직을 처리하는 정적 클래스
+ * @brief 이 파일은 IRC 로직에 필요한 매크로 및 IRC 클래스를 정의한다.
  * @version 0.1
  * @date 2024-03-31
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 
 #pragma once
@@ -17,293 +17,643 @@
 
 using namespace gdf;
 
+/**
+ * @brief
+ * IRC 서버의 버전을 나타내는 매크로.
+ */
 #define IRC_VERSION "v0.1"
+
+/**
+ * @brief Carriage Return Line Feed(CRLF)를 나타내는 매크로.
+ */
 #define CRLF "\r\n"
 
 ////////////////////////////////////////////////////////////
 // Error Replies
 ////////////////////////////////////////////////////////////
 
-// Indicates that no client can be found for the supplied nickname.
-// The text used in the last param of this message may vary.
-// "<client> <nickname> :No such nick/channel"
+/**
+ * @brief 해당 nick을 가진 유저가 없는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<client> <nick> :No such nick/channel"
+ */
 #define ERR_NOSUCHNICK "401"
 
-// Used to indicate the given channel name is invalid.
-// "<channel name> :No such channel"
+/**
+ * @brief 해당 channel name을 가진 채널이 없는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<channel name> :No such channel"
+ */
 #define ERR_NOSUCHCHANNEL "403"
 
-// Returned by the PRIVMSG command to indicate the message
-// wasn’t delivered because there was no recipient given.
-// "<client> :No recipient given (<command>)"
+/**
+ * @brief PRIVMSG에 받는 사람이 없는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<client> :No recipient given (<command>)"
+ */
 #define ERR_NORECIPIENT "411"
 
-// Returned by the PRIVMSG command to indicate the message
-// wasn’t delivered because there was no text to send.
-// "<client> :No text to send"
+/**
+ * @brief PRIVMSG에 전달할 메시지 내용이 없는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<client> :No text to send"
+ */
 #define ERR_NOTEXTTOSEND "412"
 
-// Indicates that the PRIVMSG / NOTICE could not be delivered to <channel>.
-// The text used in the last param of this message may vary.
-// This is generally sent in response to channel modes,
-// such as a channel being moderated and the client
-// not having permission to speak on the channel,
-// or not being joined to a channel with the no external messages mode set.
-// "<client> <channel> :Cannot send to channel"
+/**
+ * @brief PRIVMSG / NOTICE 메시지가 주어진 채널에 전달될 수 없을 때 응답하는 에러 코드.
+ * 유저가 채널에 메시지를 보낼 수 있는 권한이 없거나, 채널에 입장되어 있는 상태가 아닌 경우에 해당된다.
+ *
+ * 메시지 형식: "<client> <channel> :Cannot send to channel"
+ */
 #define ERR_CANNOTSENDTOCHAN "404"
 
-// Indicates that the Message of the Day file does not exist
-// or could not be found.
-// The text used in the last param of this message may vary.
-// "<client> :MOTD File is missing"
+/**
+ * @brief 서버의 Message of the Day(MOTD) 파일이 존재하지 않는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<client> :MOTD File is missing"
+ */
 #define ERR_NOMOTD "422"
 
-// Returned when a nickname parameter expected for a
-// command and isn't found.
-// ":No nickname given"
+/**
+ * @brief nick이 꼭 필요한 메시지에 nick이 없는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: ":No nick given"
+ */
 #define ERR_NONICKNAMEGIVEN "431"
 
-// Returned after receiving a NICK message which contains
-// characters which do not fall in the defined set.  See
-// section x.x.x for details on valid nicknames.
-// "<nick> :Erroneus nickname"
+/**
+ * @brief NICK 메시지의 nick에 사용할 수 없는 문자가 들어있는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<nick> :Erroneus nick"
+ */
 #define ERR_ERRONEUSNICKNAME "432"
 
-// Returned when a NICK message is processed that results
-// in an attempt to change to a currently existing
-// nickname.
-// "<nick> :Nickname is already in use"
+/**
+ * @brief NICK 메시지의 nick을 이미 다른 유저가 사용하고 있는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<nick> :nick is already in use"
+ */
 #define ERR_NICKNAMEINUSE "433"
 
-// Returned when a client tries to perform a channel+nick affecting command,
-// when the nick isn’t joined to the channel (for example, MODE #channel +o nick).
-// "<client> <nick> <channel> :They aren't on that channel"
+/**
+ * @brief channel + nick의 조합을 사용하는 메시지에서, 해당 nick이 채널에 없는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<client> <nick> <channel> :They aren't on that channel"
+ */
 #define ERR_USERNOTINCHANNEL "441"
 
-// Returned by the server whenever a client tries to
-// perform a channel effecting command for which the
-// client isn't a member.
-// "<client> <channel> :You're not on that channel"
-#define ERR_NOTONCHANNEL  "442"
+/**
+ * @brief user가 속하지 않은 채널에 특정 메시지를 전달하려고 하는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<client> <channel> :You're not on that channel"
+ */
+#define ERR_NOTONCHANNEL "442"
 
-// Returned when a client tries to invite <nick> to a channel they’re already joined to.
-// "<client> <nick> <channel> :is already on channel"
+/**
+ * @brief 채널에 이미 있는 nick을 초대했을 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<client> <nick> <channel> :is already on channel"
+ */
 #define ERR_USERONCHANNEL "443"
 
-// Returned by the server by numerous commands to
-// indicate to the client that it didn't supply enough
-// parameters.
-// "<command> :Not enough parameters"
+/**
+ * @brief 메시지에 필요한 매개변수가 부족한 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<command> :Not enough parameters"
+ */
 #define ERR_NEEDMOREPARAMS "461"
 
-// Returned by the server to any link which tries to
-// change part of the registered details (such as
-// password or user details from second USER message).
-// ":You may not reregister"
+/**
+ * @brief 연결 등록이 되지 않은 user로부터 메시지를 받은 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: ":You may not reregister"
+ */
 #define ERR_ALREADYREGISTERED "462"
 
-// Returned to indicate a failed attempt at registering
-// a connection for which a password was required and
-// was either not given or incorrect.
-// ":Password incorrect"
+/**
+ * @brief 연결 등록을 위한 password가 다른 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: ":Password incorrect"
+ */
 #define ERR_PASSWDMISMATCH "464"
 
-// "<channel> :Cannot join channel (+l)"
+/**
+ * @brief 유저가 가득찬 채널에 입장하려고 하는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<channel> :Cannot join channel (+l)"
+ */
 #define ERR_CHANNELISFULL "471"
 
-// "<channel> :Cannot join channel (+i)"
+/**
+ * @brief 유저가 초대를 받지 않고 초대 전용 채널에 입장하는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<channel> :Cannot join channel (+i)"
+ */
 #define ERR_INVITEONLYCHAN "473"
 
-// "<channel> :Cannot join channel (+k)"
+/**
+ * @brief 채널 입장에 필요한 key(password)가 없거나 다른 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<channel> :Cannot join channel (+k)"
+ */
 #define ERR_BADCHANNELKEY "475"
 
-// Indicates that a command failed because the client does not have
-// the appropriate channel privileges. This numeric can apply for 
-// different prefixes such as halfop, operator, etc. 
-// The text used in the last param of this message may vary.
-// "<client> <channel> :You're not channel operator"
+/**
+ * @brief operator 권한이 없는 user가 operator 권한이 필요한 메시지를 사용하는 경우 응답하는 에러 코드.
+ *
+ * 메시지 형식: "<client> <channel> :You're not channel operator"
+ */
 #define ERR_CHANOPRIVSNEEDED "482"
-
 
 ////////////////////////////////////////////////////////////
 // Command responses.
 ////////////////////////////////////////////////////////////
 
-// The first message sent after client registration,
-// this message introduces the client to the network.
-// The text used in the last param of this message varies wildly.
-// "<nick> :Welcome to the <networkname> Network, <nick>[!<user>@<host>]"
+/**
+ * @brief user가 등록되면 첫 번째로 응답하는 메시지이며, 해당 user의 정보를 알려준다.
+ *
+ * 메시지 형식: "<nick> :Welcome to the <networkname> Network, <nick>[!<user>@<host>]"
+ */
 #define RPL_WELCOME "001"
 
-// Part of the post-registration greeting, this numeric returns
-// the name and software/version of the server
-// the client is currently connected to.
-// The text used in the last param of this message varies wildly.
-// "<client> :Your host is <servername>, running version <version>"
+/**
+ * @brief user가 등록되면 두 번째로 응답하는 메시지이며, 해당 user가 연결된 서버의 정보를 알려준다.
+ *
+ * 메시지 형식: "<nick> :Your host is <servername>, running version <version>"
+ */
 #define RPL_YOURHOST "002"
 
-// Part of the post-registration greeting, this numeric returns
-// a human-readable date/time that the server was started or created.
-// The text used in the last param of this message varies wildly.
-// "<client> :This server was created <datetime>"
+/**
+ * @brief user가 등록되면 세 번째로 응답하는 메시지이며, 해당 user가 연결된 서버가 생성된 날짜를 알려준다.
+ *
+ * 메시지 형식: "<nick> :This server was created <datetime>"
+ */
 #define RPL_CREATED "003"
 
-// Part of the post-registration greeting.
-// Clients SHOULD discover available features using RPL_ISUPPORT tokens
-// rather than the mode letters listed in this reply.
-// <client> <servername> <version> <available user modes> 
-// <available channel modes> [<channel modes with a parameter>]
+/**
+ * @brief user가 등록되면 네 번째로 응답하는 메시지이며, 서버 이름 및 version을 알려준다.
+ *
+ * 메시지 형식: "<nick> <servername> <version> <available user modes> ""
+ */
 #define RPL_MYINFO "004"
 
-// <client> <1-13 tokens> :are supported by this server
+/**
+ * @brief user가 등록되면 다섯 번째로 응답하는 메시지이며, 서버에서 지원 가능한 목록들을 알려준다.
+ *
+ * 메시지 형식: "<nick> <1-13 tokens> :are supported by this server"
+ */
 #define RPL_ISUPPORT "005"
 
-// Sent to a client to inform them of the currently-set modes of a channel.
-// <channel> is the name of the channel.
-// <modestring> and <mode arguments> are a mode string
-// and the mode arguments (delimited as separate parameters)
-// as defined in the MODE message description.
-// "<client> <channel> <modestring> <mode arguments>..."
+/**
+ * @brief 현재 채널에 어떤 mode가 적용되어 있는지 알려준다.
+ *
+ * 메시지 형식: "<nick> <channel> <modestring> <mode arguments>..."
+ */
 #define RPL_CHANNELMODEIS "324"
 
-// Sent to a client when joining a channel to inform them that
-// the channel with the name <channel> does not have any topic set.
-// "<client> <channel> :No topic is set"
+/**
+ * @brief 유저가 채널에 입장했을 때, 채널에 topic이 없는 경우 topic이 설정되어 있지 않다고 알려준다.
+ *
+ * 메시지 형식: "<nick> <channel> :No topic is set"
+ */
 #define RPL_NOTOPIC "331"
 
-// Sent to a client when joining the <channel> to
-// inform them of the current topic of the channel.
-// When sending a TOPIC message to determine the
-// channel topic, one of two replies is sent. If
-// the topic is set, RPL_TOPIC is sent back else
-// RPL_NOTOPIC.
-// "<client> <channel> :<topic>"
+/**
+ * @brief 유저가 채널에 입장했을 때, 채널에 topic이 있는 경우 topic을 알려준다.
+ *
+ * 메시지 형식: "<nick> <channel> :<topic>"
+ */
 #define RPL_TOPIC "332"
 
-// Sent as a reply to the INVITE command to indicate that
-// the attempt was successful and the client with
-// the nickname <nick> has been invited to <channel>.
-// "<client> <nick> <channel>"
+/**
+ * @brief 유저가 특정 유저를 채널에 초대했을 때, 정상적으로 초대했음을 알려준다.
+ *
+ * 메시지 형식: "<client> <target nick> <channel>"
+ */
 #define RPL_INVITING "341"
 
-// "<client> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+/**
+ * @brief 채널의 모든 유저 목록을 알려준다.
+ *
+ * 메시지 형식: "<client> <symbol> <channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+ */
 #define RPL_NAMREPLY "353"
 
-// To reply to a NAMES message, a reply pair consisting
-// of RPL_NAMREPLY and RPL_ENDOFNAMES is sent by the
-// server back to the client.  If there is no channel
-// found as in the query, then only RPL_ENDOFNAMES is
-// returned.  The exception to this is when a NAMES
-// message is sent with no parameters and all visible
-// channels and contents are sent back in a series of
-// RPL_NAMEREPLY messages with a RPL_ENDOFNAMES to mark
-// the end.
-// "<client> <channel> :End of /NAMES list"
+/**
+ * @brief 채널의 모든 유저 목록의 끝을 알려준다.
+ * RPL_NAMREPLY 메시지의 뒤에 따라온다.
+ *
+ * 메시지 형식: "<client> <channel> :End of /NAMES list"
+ */
 #define RPL_ENDOFNAMES "366"
 
 namespace grc
 {
 
-class IRC
-{
-public:
-    static void HandleMessage(const int32 IN socket, Network& IN network, const std::string& IN password);
-private:
-    IRC(); // = delete
-    typedef void (*TcommandFunctionPTR)(const int32,
-                                        const std::string&,
-                                        const std::vector<std::string>&,
-                                        const std::string&,
-                                        const std::string&,
-                                        Network&);
-    static void initializeCommandFunctionMap();
-    static void parseMessage(const std::string& IN message,
-                             std::string& OUT command,
-                             std::vector<std::string>& OUT parameters,
-                             std::string& OUT trailing);
-    static void PASS(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void NICK(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void USER(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void QUIT(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void JOIN(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void PART(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void MODE(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void TOPIC(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void INVITE(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void KICK(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void PRIVMSG(const int32 IN socket,
-                        const std::string& IN command,
-                        const std::vector<std::string>& IN parameters,
-                        const std::string& IN trailing,
-                        const std::string& IN password,
-                     Network& IN OUT network);
-    static void PING(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
-    static void PONG(const int32 IN socket,
-                     const std::string& IN command,
-                     const std::vector<std::string>& IN parameters,
-                     const std::string& IN trailing,
-                     const std::string& IN password,
-                     Network& IN OUT network);
+    /**
+     * @class IRC
+     * @brief IRC 로직을 수행하는 정적 클래스.
+     *
+     */
+    class IRC
+    {
+    public:
+        /**
+         * @brief 유저로부터 들어온 메시지를 처리하는 함수.
+         *
+         * 네트워크를 통해 수신된 메시지가 있는 경우, Core::Run()에서 호출된다.\n
+         * CRLF로 끝나는 메시지를 하나씩 가져와서 command, parameters, trailing 으로 파싱한다.\n
+         * command에 알맞는 함수를 호출한다.\n
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         * @param password 유저 연결 등록에 필요한 비밀번호.
+         */
+        static void HandleMessage(const int32 IN socket, Network &IN network, const std::string &IN password);
 
-    static void sendWelcomeMessage(const int32 IN socket, Network& IN OUT network);
-    static bool isNicknameInUse(const std::string& IN nickname);
-private:
-    static std::map<std::string, TcommandFunctionPTR> sStaticCommandFunctionMap;
-};
+    private:
+        /**
+         * @brief IRC 객체의 기본 생성자. (사용되지 않음)
+         * 
+         */
+        IRC(); // = delete
+        /**
+         * @brief command 함수 포인터를 정의.
+         *
+         */
+        typedef void (*TcommandFunctionPTR)(const int32,
+                                            const std::string &,
+                                            const std::vector<std::string> &,
+                                            const std::string &,
+                                            const std::string &,
+                                            Network &);
+        /**
+         * @brief 정적 멤버 변수 sStaticCommandFunctionMap를 초기화하는 함수.
+         *
+         */
+        static void initializeCommandFunctionMap();
+        /**
+         * @brief CRLF로 끝나는 메시지를 파싱하는 함수.
+         *
+         * 메시지 파싱 후 매개 변수로 받은 command, parameters, trailing에 올바른 값들을 넣어준다.
+         *
+         * [Input message format]\n
+         * <command> <parameters> <trailing>\n
+         * <trailing> = ':'로 시작하는 맨 마지막 문자열.
+         *
+         * @param message 원본 메시지.
+         * @param command command가 저장되는 std::string.
+         * @param parameters parameter들이 저장되는 std::vector<std::string>.
+         * @param trailing trailing이 저장되는 std::string.
+         */
+        static void parseMessage(const std::string &IN message,
+                                 std::string &OUT command,
+                                 std::vector<std::string> &OUT parameters,
+                                 std::string &OUT trailing);
+        /**
+         * @brief PASS 메시지를 처리하는 함수.
+         *
+         * 유저를 인증한다.
+         *
+         * [Error Replies]\n
+         * - ERR_NEEDMOREPARAMS : parameter가 부족한 경우.\n
+         * - ERR_PASSWDMISMATCH : password가 다른 경우.\n
+         * - ERR_ALREADYREGISTERED : 유저가 이미 등록되어 있는 경우.\n
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 유저 연결 등록에 필요한 비밀번호.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void PASS(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief NICK 메시지를 처리하는 함수.
+         *
+         * 유저의 nickname을 설정한다.
+         *
+         * nickname이 올바르게 설정된 경우, 해당 유저가 속한 모든 채널에 알린다.
+         *
+         * [Error Replies]\n
+         * - ERR_NONICKNAMEGIVEN : 메시지에 nickname이 없는 경우.\n
+         * - ERR_ERRONEUSNICKNAME : 사용할 수 없는 문자가 nickname에 포함되어 있는 경우.\n
+         * - ERR_NICKNAMEINUSE : 이미 해당 nickname을 사용하는 유저가 있는 경우.\n
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void NICK(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief USER 메시지를 처리하는 함수.
+         *
+         * 유저의 username, hostname, servername, realname을 설정한다.
+         *
+         * 유저 설정을 마친 후, 유저가 연결되었는지 확인을 위해 PING 메시지를 전송한다.\n
+         * 유저가 PING 메시지에 대한 PONG 메시지를 응답한 경우, 해당 유저의 연결을 등록한다.
+         *
+         * [Error Replies]\n
+         * - ERR_NEEDMOREPARAMS : parameter가 부족한 경우.\n
+         * - ERR_ALREADYREGISTERED : 이미 유저가 등록된 경우.\n
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void USER(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief QUIT 메시지를 처리하는 함수.
+         *
+         * 유저를 종료시킨다.
+         *
+         * 유저가 특정 채널에 존재하는 경우, 해당 채널에 유저가 종료되었음을 알린다.
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void QUIT(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief JOIN 메시지를 처리하는 함수.
+         *
+         * 유저를 특정 채널에 입장시킨다.
+         *
+         * 유저가 새로운 채널에 입장하는 경우, 채널의 operator로 설정된다.\n
+         * 유저가 기존 채널에 입장하는 경우, 채널의 일반 유저로 설정된다.\n
+         * 채널의 모든 유저에게 새로운 유저의 입장을 알린다.
+         *
+         * [Error Replies]\n
+         * - ERR_NEEDMOREPARAMS : parameter가 부족한 경우.\n
+         * - ERR_INVITEONLYCHAN : 채널이 초대 전용으로 설정되어 있으나, 초대 받지 않은 상태인 경우.\n
+         * - ERR_BADCHANNELKEY : 채널에 key가 설정되어 있으나, 올바르지 않은 key로 입장한 경우.\n
+         * - ERR_CHANNELISULL : 채널이 꽉 찬 경우.
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void JOIN(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief PART 메시지를 처리하는 함수.
+         *
+         * 유저를 채널에서 퇴장시킨다.
+         *
+         * 채널의 모든 유저에게 유저의 퇴장을 알린다.
+         *
+         * [Error Replies]\n
+         * - ERR_NEEDMOREPARAMS : parameter가 부족한 경우.\n
+         * - ERR_NOSUCHCHANNEL : 없는 채널인 경우.\n
+         * - ERR_NOTONCHANNEL : 유저가 채널에 없는 경우.\n
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void PART(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief MODE 메시지를 처리하는 함수.
+         *
+         * 채널에 대한 옵션을 설정한다.
+         * 
+         * 옵션 설정 후, 채널의 모든 유저에게 알린다.
+         *
+         * [Options]\n
+         * - o : 특정 유저에게 채널의 operator 권한을 부여하거나 해제한다.\n
+         * - t : 채널의 topic 변경을 operator만 가능하도록 설정하거나 해제한다.\n
+         * - i : 채널을 초대 전용으로 설정하거나 해제한다.\n
+         * - l : 채널의 최대 유저 수를 설정하거나 해제한다.\n
+         * - k : 채널 입장에 필요한 key(password)를 설정하거나 해제한다.
+         *
+         * [Error Replies]\n
+         * - ERR_NEEDMOREPARAMS : parameter가 부족한 경우.\n
+         * - ERR_NOSUCHCHANNEL : 없는 채널인 경우.\n
+         * - ERR_CHANOPRIVSNEEDED : 메시지를 보낸 유저가 operator가 아닌 경우.\n
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void MODE(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief TOPIC 메시지를 처리하는 함수.
+         *
+         * 채널의 topic을 설정하거나 삭제한다.\n
+         * trailing이 없는 경우, 채널의 topic을 알려준다.
+         * 
+         * topic 설정 및 삭제 후, 채널의 모든 유저에게 알린다.
+         *
+         * [Error Replies]\n
+         * - ERR_NEEDMOREPARAMS : parameter가 부족한 경우.\n
+         * - ERR_NOSUCHCHANNEL : 없는 채널인 경우.\n
+         * - ERR_NOTONCHANNEL : 유저가 채널에 없는 경우.\n
+         * - ERR_CHANOPRIVSNEEDED : 메시지를 보낸 유저가 operator가 아닌 경우.
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void TOPIC(const int32 IN socket,
+                          const std::string &IN command,
+                          const std::vector<std::string> &IN parameters,
+                          const std::string &IN trailing,
+                          const std::string &IN password,
+                          Network &IN OUT network);
+        /**
+         * @brief INVITE 메시지를 처리하는 함수.
+         *
+         * 특정 유저를 채널에 초대한다.\n
+         *
+         * [Error Replies]\n
+         * - ERR_NEEDMOREPARAMS : parameter가 부족한 경우.\n
+         * - ERR_NOSUCHCHANNEL : 없는 채널인 경우.\n
+         * - ERR_NOTONCHANNEL : 유저가 채널에 없는 경우.\n
+         * - ERR_CHANOPRIVSNEEDED : 메시지를 보낸 유저가 operator가 아닌 경우.\n
+         * - ERR_USERONCHANNEL : 유저가 이미 채널에 존재하는 경우.
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void INVITE(const int32 IN socket,
+                           const std::string &IN command,
+                           const std::vector<std::string> &IN parameters,
+                           const std::string &IN trailing,
+                           const std::string &IN password,
+                           Network &IN OUT network);
+        /**
+         * @brief KICK 메시지를 처리하는 함수.
+         *
+         * 특정 유저를 채널에서 강제로 추방시킨다.
+         * 
+         * 유저 추방 후, 채널의 모든 유저에게 알린다.
+         *
+         * [Error Replies]\n
+         * - ERR_NEEDMOREPARAMS : parameter가 부족한 경우.\n
+         * - ERR_NOSUCHCHANNEL : 없는 채널인 경우.\n
+         * - ERR_NOTONCHANNEL : 유저가 채널에 없는 경우.\n
+         * - ERR_CHANOPRIVSNEEDED : 메시지를 보낸 유저가 operator가 아닌 경우.\n
+         * - ERR_USERNOTINCHANNEL : 추방시킬 유저가 채널에 존재하지 않는 경우.
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void KICK(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief PRIVMSG 메시지를 처리하는 함수.
+         *
+         * 유저 또는 채널에 메시지를 전송한다.
+         *
+         * [Error Replies]\n
+         * - ERR_NORECIPIENT : 메시지를 전달할 목적지가 포함되어 있지 않은 경우.\n
+         * - ERR_NOTEXTTOSEND : 전달할 메시지가 포함되어 있지 않은 경우.\n
+         * - ERR_CANNOTSENDTOCHAN : 메시지를 보내는 유저가 해당 채널에 없는 경우.\n
+         * - ERR_NOSUCHNICK : 메시지를 전송할 유저나 채널 이름이 존재하지 않는 경우.\n
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void PRIVMSG(const int32 IN socket,
+                            const std::string &IN command,
+                            const std::vector<std::string> &IN parameters,
+                            const std::string &IN trailing,
+                            const std::string &IN password,
+                            Network &IN OUT network);
+        /**
+         * @brief PING 메시지를 처리하는 함수.
+         *
+         * PING 메시지를 보낸 유저에게 PONG 메시지를 전송한다.
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void PING(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+        /**
+         * @brief PONG 메시지를 처리하는 함수.
+         *
+         * 유저가 PONG 메시지를 보낸 경우, 해당 유저를 등록시킨다.
+         *
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param command command.
+         * @param parameters parameters.
+         * @param trailing trailing.
+         * @param password 사용되지 않음.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void PONG(const int32 IN socket,
+                         const std::string &IN command,
+                         const std::vector<std::string> &IN parameters,
+                         const std::string &IN trailing,
+                         const std::string &IN password,
+                         Network &IN OUT network);
+
+        /**
+         * @brief 웰컴 메시지를 전송하는 함수.
+         * 
+         * 유저가 등록되면, 웰컴 메시지를 전송한다.
+         * 
+         * @param socket 메시지를 보낸 유저의 소켓.
+         * @param network 메시지 처리에 사용될 네트워크 객체.
+         */
+        static void sendWelcomeMessage(const int32 IN socket, Network &IN OUT network);
+        /**
+         * @brief nickname 중복을 확인하는 함수.
+         * 
+         * @param nickname 찾을 nickname.
+         * @return true nickname이 이미 사용 중인 경우, true 반환.
+         * @return false nickname이 사용 중이지 않은 경우, false 반환.
+         */
+        static bool isNicknameInUse(const std::string &IN nickname);
+
+    private:
+        /**
+         * @brief IRC command에 따라 호출해야 하는 함수를 가지고 있는 정적 멤버 변수.
+         * 
+         * Key = IRC command, Value = command의 함수.
+         */
+        static std::map<std::string, TcommandFunctionPTR> sStaticCommandFunctionMap;
+    };
 
 }
