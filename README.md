@@ -1,10 +1,5 @@
-# 💬 ft_irc
+# 💬 GameRC 프로젝트
 이 프로젝트는 C++98을 사용하여 `IRC` (Internet Relay Chat) 서버를 만드는 프로젝트이다.
-
----
-
-## 구조
-`docs/ARCHITECTURE.md` 파일 참고.
 
 ---
 
@@ -98,5 +93,5 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## 팀 멤버
 - [Taeil Nam (Tayden)](https://github.com/Taeil-Nam) - nam0314@gmail.com
-- [JEEKUN PARK](https://github.com/jeekpark)
+- [JEEKUN PARK](https://github.com/jeekpark) - jeekunp@naver.com
 - [Ejay](https://github.com/Eonjoo-Oh)

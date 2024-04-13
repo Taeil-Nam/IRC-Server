@@ -1,0 +1,13 @@
+<map id="gdf::Network::Session" name="gdf::Network::Session">
+<area shape="rect" id="Node000001" title=" " alt="" coords="138,109,289,135"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,97,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,41,91,63,115,83,141,96,167,106,165,111,138,101,113,87,87,67,67,45"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="121,5,160,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="149,46,156,65,166,83,193,106,189,110,162,87,151,67,144,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="186,5,239,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="215,47,216,108,211,109,210,47"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="264,5,393,31"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="317,46,302,67,283,87,245,111,243,106,280,83,298,64,312,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="426,5,471,31"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="442,47,430,68,413,87,391,97,361,105,290,116,289,111,360,100,390,92,409,83,426,65,437,44"/>
+</map>

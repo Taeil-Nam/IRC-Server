@@ -1,0 +1,641 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="IRC_server documentation" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="IRC_server documentation by hyunjunk" />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="IRC_server documentation" />
+<meta name="twitter:description" content="IRC_server documentation by hyunjunk" />
+<!-- END twitter metadata -->
+<title>GameRC (IRC server): gdf::KernelQueue 클래스 참조</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/Ria9993/IRC_server" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">GameRC (IRC server)
+   &#160;<span id="projectnumber">1.0.0</span>
+   </div>
+   <div id="projectbrief">C++98 기반 IRC 서버 프로젝트</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 다음에 의해 생성됨 :  Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','검색');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classgdf_1_1_kernel_queue.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">로딩중...</div>
+<div class="SRStatus" id="Searching">검색중...</div>
+<div class="SRStatus" id="NoMatches">일치하는것 없음</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 멤버 함수</a> &#124;
+<a href="#pri-types">Private 타입</a> &#124;
+<a href="#pri-methods">Private 멤버 함수</a> &#124;
+<a href="#pri-attribs">Private 속성</a> &#124;
+<a href="classgdf_1_1_kernel_queue-members.html">모든 멤버 목록</a>  </div>
+  <div class="headertitle"><div class="title">gdf::KernelQueue 클래스 참조</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>커널 이벤트 큐를 관리하는 클래스이다.  
+ <a href="classgdf_1_1_kernel_queue.html#details">더 자세히 ...</a></p>
+
+<p><code>#include &lt;<a class="el" href="_kernel_queue_8hpp_source.html">KernelQueue.hpp</a>&gt;</code></p>
+<div class="dynheader">
+gdf::KernelQueue에 대한 협력 다이어그램:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classgdf_1_1_kernel_queue__coll__graph.svg" width="334" height="155"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">범례</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 멤버 함수</h2></td></tr>
+<tr class="memitem:a13ea55a9c046e0ba98393875ecffd42f" id="r_a13ea55a9c046e0ba98393875ecffd42f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a13ea55a9c046e0ba98393875ecffd42f">KernelQueue</a> ()</td></tr>
+<tr class="memdesc:a13ea55a9c046e0ba98393875ecffd42f"><td class="mdescLeft">&#160;</td><td class="mdescRight">KernelQueue의 기본 생성자  <br /></td></tr>
+<tr class="separator:a13ea55a9c046e0ba98393875ecffd42f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57b271aa05fcd1a5d21ca6a598248f25" id="r_a57b271aa05fcd1a5d21ca6a598248f25"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a57b271aa05fcd1a5d21ca6a598248f25">~KernelQueue</a> ()</td></tr>
+<tr class="memdesc:a57b271aa05fcd1a5d21ca6a598248f25"><td class="mdescLeft">&#160;</td><td class="mdescRight">KernelQueue의 가상소멸자  <br /></td></tr>
+<tr class="separator:a57b271aa05fcd1a5d21ca6a598248f25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1e79d0d8eeaf7a13844161eb8d29026" id="r_aa1e79d0d8eeaf7a13844161eb8d29026"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#aa1e79d0d8eeaf7a13844161eb8d29026">Init</a> ()</td></tr>
+<tr class="memdesc:aa1e79d0d8eeaf7a13844161eb8d29026"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트 큐를 초기화한다.  <br /></td></tr>
+<tr class="separator:aa1e79d0d8eeaf7a13844161eb8d29026"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0abc4895987c6775f074b08333ef3cb3" id="r_a0abc4895987c6775f074b08333ef3cb3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a0abc4895987c6775f074b08333ef3cb3">AddReadEvent</a> (const <a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> fd)</td></tr>
+<tr class="memdesc:a0abc4895987c6775f074b08333ef3cb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">읽기 이벤트를 추가하여 해당 fd를 감시한다.  <br /></td></tr>
+<tr class="separator:a0abc4895987c6775f074b08333ef3cb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4e0115bf7ae56e9afd2cb837cd9b2df" id="r_ae4e0115bf7ae56e9afd2cb837cd9b2df"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#ae4e0115bf7ae56e9afd2cb837cd9b2df">AddWriteEvent</a> (const <a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> fd)</td></tr>
+<tr class="memdesc:ae4e0115bf7ae56e9afd2cb837cd9b2df"><td class="mdescLeft">&#160;</td><td class="mdescRight">쓰기 이벤트를 추가하여 해당 fd를 감시한다.  <br /></td></tr>
+<tr class="separator:ae4e0115bf7ae56e9afd2cb837cd9b2df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69ecc4bc146d51dca51b2c85f9c61b13" id="r_a69ecc4bc146d51dca51b2c85f9c61b13"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a69ecc4bc146d51dca51b2c85f9c61b13">Poll</a> (<a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a> &amp;event)</td></tr>
+<tr class="memdesc:a69ecc4bc146d51dca51b2c85f9c61b13"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트 큐를 폴링하고 다음 이벤트를 반환한다.  <br /></td></tr>
+<tr class="separator:a69ecc4bc146d51dca51b2c85f9c61b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab350b25fae4a8bbb914083acba5fc4f3" id="r_ab350b25fae4a8bbb914083acba5fc4f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#ab350b25fae4a8bbb914083acba5fc4f3">SetTimeout</a> (const <a class="el" href="types_8hpp.html#aecfc3c54bd29ad5964e1c1c3ccbf89df">int64</a> ms)</td></tr>
+<tr class="memdesc:ab350b25fae4a8bbb914083acba5fc4f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트가 발생할 때까지 함수가 얼마나 대기할지 지정한다.  <br /></td></tr>
+<tr class="separator:ab350b25fae4a8bbb914083acba5fc4f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private 타입</h2></td></tr>
+<tr class="memitem:ae7a2e0a118e2e3a9a9e5317350091d9a" id="r_ae7a2e0a118e2e3a9a9e5317350091d9a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <a class="el" href="classgdf_1_1_kernel_queue.html#ae7a2e0a118e2e3a9a9e5317350091d9aa319f99be7972d743073e07c67f7b8970">MAX_KEVENT_SIZE</a> = 128
+ }</td></tr>
+<tr class="separator:ae7a2e0a118e2e3a9a9e5317350091d9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private 멤버 함수</h2></td></tr>
+<tr class="memitem:a59c3f06e91342d23aa8cfc2c0e3a8963" id="r_a59c3f06e91342d23aa8cfc2c0e3a8963"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a59c3f06e91342d23aa8cfc2c0e3a8963">KernelQueue</a> (const <a class="el" href="classgdf_1_1_kernel_queue.html">KernelQueue</a> &amp;event)</td></tr>
+<tr class="separator:a59c3f06e91342d23aa8cfc2c0e3a8963"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78ab2ee2d30247317d810164ba766f41" id="r_a78ab2ee2d30247317d810164ba766f41"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classgdf_1_1_kernel_queue.html">KernelQueue</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a78ab2ee2d30247317d810164ba766f41">operator=</a> (const <a class="el" href="classgdf_1_1_kernel_queue.html">KernelQueue</a> &amp;event)</td></tr>
+<tr class="separator:a78ab2ee2d30247317d810164ba766f41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08421a01d99db5a67aaba7453300e124" id="r_a08421a01d99db5a67aaba7453300e124"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a08421a01d99db5a67aaba7453300e124">createKqueue</a> ()</td></tr>
+<tr class="separator:a08421a01d99db5a67aaba7453300e124"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7f66da0263af7863f780b9169fe014e" id="r_ac7f66da0263af7863f780b9169fe014e"><td class="memItemLeft" align="right" valign="top">const struct kevent *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#ac7f66da0263af7863f780b9169fe014e">getEventList</a> ()</td></tr>
+<tr class="separator:ac7f66da0263af7863f780b9169fe014e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 속성</h2></td></tr>
+<tr class="memitem:ad776fa7a31473690f551f04dd3e23ac4" id="r_ad776fa7a31473690f551f04dd3e23ac4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#ad776fa7a31473690f551f04dd3e23ac4">mKqueue</a></td></tr>
+<tr class="separator:ad776fa7a31473690f551f04dd3e23ac4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5dbc4524bde1de17df21a8476f56def3" id="r_a5dbc4524bde1de17df21a8476f56def3"><td class="memItemLeft" align="right" valign="top">struct kevent *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a5dbc4524bde1de17df21a8476f56def3">mEventList</a></td></tr>
+<tr class="separator:a5dbc4524bde1de17df21a8476f56def3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1cd7464ca08178ed3b0f4eefd9a1968" id="r_ab1cd7464ca08178ed3b0f4eefd9a1968"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#ab1cd7464ca08178ed3b0f4eefd9a1968">mEventCount</a></td></tr>
+<tr class="separator:ab1cd7464ca08178ed3b0f4eefd9a1968"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a4e5cfd039c764f20b766dd3e835c92" id="r_a8a4e5cfd039c764f20b766dd3e835c92"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#a8a4e5cfd039c764f20b766dd3e835c92">mEventIndex</a></td></tr>
+<tr class="separator:a8a4e5cfd039c764f20b766dd3e835c92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae92f80a17e6e41f03c9da82f17b44753" id="r_ae92f80a17e6e41f03c9da82f17b44753"><td class="memItemLeft" align="right" valign="top">struct timespec&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_queue.html#ae92f80a17e6e41f03c9da82f17b44753">mTimeout</a></td></tr>
+<tr class="separator:ae92f80a17e6e41f03c9da82f17b44753"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">상세한 설명</h2>
+<div class="textblock"><p>커널 이벤트 큐를 관리하는 클래스이다. </p>
+<p>이 클래스는 시스템 커널 레벨의 이벤트 핸들링을 위해 kqueue를 사용한다. </p>
+</div><h2 class="groupheader">멤버 열거형 문서화</h2>
+<a id="ae7a2e0a118e2e3a9a9e5317350091d9a" name="ae7a2e0a118e2e3a9a9e5317350091d9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7a2e0a118e2e3a9a9e5317350091d9a">&#9670;&#160;</a></span>anonymous enum</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">anonymous enum</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">열거형 멤버</th></tr><tr><td class="fieldname"><a id="ae7a2e0a118e2e3a9a9e5317350091d9aa319f99be7972d743073e07c67f7b8970" name="ae7a2e0a118e2e3a9a9e5317350091d9aa319f99be7972d743073e07c67f7b8970"></a>MAX_KEVENT_SIZE&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">생성자 &amp; 소멸자 문서화</h2>
+<a id="a13ea55a9c046e0ba98393875ecffd42f" name="a13ea55a9c046e0ba98393875ecffd42f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13ea55a9c046e0ba98393875ecffd42f">&#9670;&#160;</a></span>KernelQueue() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gdf::KernelQueue::KernelQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>KernelQueue의 기본 생성자 </p>
+
+</div>
+</div>
+<a id="a57b271aa05fcd1a5d21ca6a598248f25" name="a57b271aa05fcd1a5d21ca6a598248f25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57b271aa05fcd1a5d21ca6a598248f25">&#9670;&#160;</a></span>~KernelQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">gdf::KernelQueue::~KernelQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>KernelQueue의 가상소멸자 </p>
+
+</div>
+</div>
+<a id="a59c3f06e91342d23aa8cfc2c0e3a8963" name="a59c3f06e91342d23aa8cfc2c0e3a8963"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59c3f06e91342d23aa8cfc2c0e3a8963">&#9670;&#160;</a></span>KernelQueue() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">gdf::KernelQueue::KernelQueue </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgdf_1_1_kernel_queue.html">KernelQueue</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">멤버 함수 문서화</h2>
+<a id="aa1e79d0d8eeaf7a13844161eb8d29026" name="aa1e79d0d8eeaf7a13844161eb8d29026"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1e79d0d8eeaf7a13844161eb8d29026">&#9670;&#160;</a></span>Init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelQueue::Init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트 큐를 초기화한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>true 성공시 </dd>
+<dd>
+false 실패시 </dd></dl>
+
+</div>
+</div>
+<a id="a0abc4895987c6775f074b08333ef3cb3" name="a0abc4895987c6775f074b08333ef3cb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0abc4895987c6775f074b08333ef3cb3">&#9670;&#160;</a></span>AddReadEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelQueue::AddReadEvent </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a>&#160;</td>
+          <td class="paramname"><em>fd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>읽기 이벤트를 추가하여 해당 fd를 감시한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>감시할 파일 디스크립터 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>반환값</dt><dd>true 성공시 </dd>
+<dd>
+false 실패시 </dd></dl>
+
+</div>
+</div>
+<a id="ae4e0115bf7ae56e9afd2cb837cd9b2df" name="ae4e0115bf7ae56e9afd2cb837cd9b2df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4e0115bf7ae56e9afd2cb837cd9b2df">&#9670;&#160;</a></span>AddWriteEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelQueue::AddWriteEvent </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a>&#160;</td>
+          <td class="paramname"><em>fd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>쓰기 이벤트를 추가하여 해당 fd를 감시한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>감시할 파일 디스크립터 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>반환값</dt><dd>true 성공시 </dd>
+<dd>
+false 실패시 </dd></dl>
+
+</div>
+</div>
+<a id="a69ecc4bc146d51dca51b2c85f9c61b13" name="a69ecc4bc146d51dca51b2c85f9c61b13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69ecc4bc146d51dca51b2c85f9c61b13">&#9670;&#160;</a></span>Poll()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelQueue::Poll </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트 큐를 폴링하고 다음 이벤트를 반환한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">event</td><td>반환할 <a class="el" href="classgdf_1_1_kernel_event.html" title="BSD계열 유닉스 커널의 이벤트를 추상화한 클래스 시스템 내부의 다양한 이벤트(FD,Socket)을 식별하고 이벤트 유형을 파악하는 관리 기능을 제공한다.">KernelEvent</a> 객체의 참조 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>반환값</dt><dd>true 이벤트가 존재할 경우 </dd>
+<dd>
+false 이벤트가 존재하지 않을 경우 </dd></dl>
+
+</div>
+</div>
+<a id="ab350b25fae4a8bbb914083acba5fc4f3" name="ab350b25fae4a8bbb914083acba5fc4f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab350b25fae4a8bbb914083acba5fc4f3">&#9670;&#160;</a></span>SetTimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gdf::KernelQueue::SetTimeout </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#aecfc3c54bd29ad5964e1c1c3ccbf89df">int64</a>&#160;</td>
+          <td class="paramname"><em>ms</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트가 발생할 때까지 함수가 얼마나 대기할지 지정한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ms</td><td>밀리초 단위의 타임아웃 시간 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a78ab2ee2d30247317d810164ba766f41" name="a78ab2ee2d30247317d810164ba766f41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78ab2ee2d30247317d810164ba766f41">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classgdf_1_1_kernel_queue.html">KernelQueue</a> &amp; gdf::KernelQueue::operator= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgdf_1_1_kernel_queue.html">KernelQueue</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a08421a01d99db5a67aaba7453300e124" name="a08421a01d99db5a67aaba7453300e124"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08421a01d99db5a67aaba7453300e124">&#9670;&#160;</a></span>createKqueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelQueue::createKqueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac7f66da0263af7863f780b9169fe014e" name="ac7f66da0263af7863f780b9169fe014e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7f66da0263af7863f780b9169fe014e">&#9670;&#160;</a></span>getEventList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const struct kevent * gdf::KernelQueue::getEventList </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">멤버 데이터 문서화</h2>
+<a id="ad776fa7a31473690f551f04dd3e23ac4" name="ad776fa7a31473690f551f04dd3e23ac4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad776fa7a31473690f551f04dd3e23ac4">&#9670;&#160;</a></span>mKqueue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> gdf::KernelQueue::mKqueue</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5dbc4524bde1de17df21a8476f56def3" name="a5dbc4524bde1de17df21a8476f56def3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5dbc4524bde1de17df21a8476f56def3">&#9670;&#160;</a></span>mEventList</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct kevent* gdf::KernelQueue::mEventList</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab1cd7464ca08178ed3b0f4eefd9a1968" name="ab1cd7464ca08178ed3b0f4eefd9a1968"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1cd7464ca08178ed3b0f4eefd9a1968">&#9670;&#160;</a></span>mEventCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> gdf::KernelQueue::mEventCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8a4e5cfd039c764f20b766dd3e835c92" name="a8a4e5cfd039c764f20b766dd3e835c92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a4e5cfd039c764f20b766dd3e835c92">&#9670;&#160;</a></span>mEventIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> gdf::KernelQueue::mEventIndex</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae92f80a17e6e41f03c9da82f17b44753" name="ae92f80a17e6e41f03c9da82f17b44753"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae92f80a17e6e41f03c9da82f17b44753">&#9670;&#160;</a></span>mTimeout</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct timespec gdf::KernelQueue::mTimeout</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>이 클래스에 대한 문서화 페이지는 다음의 파일들로부터 생성되었습니다.:<ul>
+<li>/Users/wasavi/ft_irc/extlibs/libbsd-gdf/include/BSD-GDF/Event/<a class="el" href="_kernel_queue_8hpp_source.html">KernelQueue.hpp</a></li>
+<li>/Users/wasavi/ft_irc/extlibs/libbsd-gdf/src/BSD-GDF/Event/<a class="el" href="_kernel_queue_8cpp.html">KernelQueue.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacegdf.html">gdf</a></li><li class="navelem"><a class="el" href="classgdf_1_1_kernel_queue.html">KernelQueue</a></li>
+    <li class="footer">다음에 의해 생성됨 :  <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

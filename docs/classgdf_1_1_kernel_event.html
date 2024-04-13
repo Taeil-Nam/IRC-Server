@@ -1,0 +1,852 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="IRC_server documentation" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="IRC_server documentation by hyunjunk" />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="IRC_server documentation" />
+<meta name="twitter:description" content="IRC_server documentation by hyunjunk" />
+<!-- END twitter metadata -->
+<title>GameRC (IRC server): gdf::KernelEvent 클래스 참조</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom-alternative.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- https://tholman.com/github-corners/ -->
+<a href="https://github.com/Ria9993/IRC_server" class="github-corner" title="View source on GitHub" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">GameRC (IRC server)
+   &#160;<span id="projectnumber">1.0.0</span>
+   </div>
+   <div id="projectbrief">C++98 기반 IRC 서버 프로젝트</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 다음에 의해 생성됨 :  Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','검색');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classgdf_1_1_kernel_event.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">로딩중...</div>
+<div class="SRStatus" id="Searching">검색중...</div>
+<div class="SRStatus" id="NoMatches">일치하는것 없음</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 멤버 함수</a> &#124;
+<a href="#pri-attribs">Private 속성</a> &#124;
+<a href="classgdf_1_1_kernel_event-members.html">모든 멤버 목록</a>  </div>
+  <div class="headertitle"><div class="title">gdf::KernelEvent 클래스 참조</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>BSD계열 유닉스 커널의 이벤트를 추상화한 클래스 시스템 내부의 다양한 이벤트(FD,Socket)을 식별하고 이벤트 유형을 파악하는 관리 기능을 제공한다.  
+ <a href="classgdf_1_1_kernel_event.html#details">더 자세히 ...</a></p>
+
+<p><code>#include &lt;<a class="el" href="_kernel_event_8hpp_source.html">KernelEvent.hpp</a>&gt;</code></p>
+<div class="dynheader">
+gdf::KernelEvent에 대한 협력 다이어그램:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classgdf_1_1_kernel_event__coll__graph.svg" width="506" height="140"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">범례</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 멤버 함수</h2></td></tr>
+<tr class="memitem:ab055dc99e6a4295a3264405e36fb5e64" id="r_ab055dc99e6a4295a3264405e36fb5e64"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#ab055dc99e6a4295a3264405e36fb5e64">KernelEvent</a> ()</td></tr>
+<tr class="memdesc:ab055dc99e6a4295a3264405e36fb5e64"><td class="mdescLeft">&#160;</td><td class="mdescRight">KernelEvent의 기본 생성자  <br /></td></tr>
+<tr class="separator:ab055dc99e6a4295a3264405e36fb5e64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12ab22224ab7d5d0959cdc307db02192" id="r_a12ab22224ab7d5d0959cdc307db02192"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a12ab22224ab7d5d0959cdc307db02192">~KernelEvent</a> ()</td></tr>
+<tr class="memdesc:a12ab22224ab7d5d0959cdc307db02192"><td class="mdescLeft">&#160;</td><td class="mdescRight">KernelEvent의 가상 소멸자  <br /></td></tr>
+<tr class="separator:a12ab22224ab7d5d0959cdc307db02192"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa19c930d1d0f923027fff73e73e57c72" id="r_aa19c930d1d0f923027fff73e73e57c72"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#aa19c930d1d0f923027fff73e73e57c72">KernelEvent</a> (const <a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a> &amp;<a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> copy)</td></tr>
+<tr class="memdesc:aa19c930d1d0f923027fff73e73e57c72"><td class="mdescLeft">&#160;</td><td class="mdescRight">KernelEvent의 복사 생성자  <br /></td></tr>
+<tr class="separator:aa19c930d1d0f923027fff73e73e57c72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c49b361582fe9bd06d4344dc4a9db24" id="r_a2c49b361582fe9bd06d4344dc4a9db24"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a2c49b361582fe9bd06d4344dc4a9db24">operator=</a> (const <a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a> &amp;<a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> copy)</td></tr>
+<tr class="memdesc:a2c49b361582fe9bd06d4344dc4a9db24"><td class="mdescLeft">&#160;</td><td class="mdescRight">KernelEvent의 복사 대입 연산자  <br /></td></tr>
+<tr class="separator:a2c49b361582fe9bd06d4344dc4a9db24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87a2c7b4332453812dd0bfeb49562810" id="r_a87a2c7b4332453812dd0bfeb49562810"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a87a2c7b4332453812dd0bfeb49562810">IdentifyFD</a> (const <a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> fd) const</td></tr>
+<tr class="memdesc:a87a2c7b4332453812dd0bfeb49562810"><td class="mdescLeft">&#160;</td><td class="mdescRight">주어진 파일 디스크립터가 이 이벤트와 연관되어 있는지 식별한다.  <br /></td></tr>
+<tr class="separator:a87a2c7b4332453812dd0bfeb49562810"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ce902944a22e53f93c8032f98b0c403" id="r_a2ce902944a22e53f93c8032f98b0c403"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a2ce902944a22e53f93c8032f98b0c403">IdentifySocket</a> (const <a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> socket) const</td></tr>
+<tr class="memdesc:a2ce902944a22e53f93c8032f98b0c403"><td class="mdescLeft">&#160;</td><td class="mdescRight">주어진 소켓이 이 이벤트와 연관되어 있는지 식별한다.  <br /></td></tr>
+<tr class="separator:a2ce902944a22e53f93c8032f98b0c403"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d25b278b272bb4cd292279d1a09f7f6" id="r_a9d25b278b272bb4cd292279d1a09f7f6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a9d25b278b272bb4cd292279d1a09f7f6">IsReadType</a> () const</td></tr>
+<tr class="memdesc:a9d25b278b272bb4cd292279d1a09f7f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">이 이벤트가 읽기 유형의 이벤트인지 식별한다.  <br /></td></tr>
+<tr class="separator:a9d25b278b272bb4cd292279d1a09f7f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64b1fcea11ddf4d2e3618809fab494c8" id="r_a64b1fcea11ddf4d2e3618809fab494c8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a64b1fcea11ddf4d2e3618809fab494c8">IsWriteType</a> () const</td></tr>
+<tr class="memdesc:a64b1fcea11ddf4d2e3618809fab494c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">이 이벤트가 쓰기 유형의 이벤트인지 식별한다.  <br /></td></tr>
+<tr class="separator:a64b1fcea11ddf4d2e3618809fab494c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a539ef09d3460c23dda6864a49196cb" id="r_a5a539ef09d3460c23dda6864a49196cb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a29940ae63ec06c9998bba873e25407ad">uint64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a5a539ef09d3460c23dda6864a49196cb">GetIdentifier</a> () const</td></tr>
+<tr class="memdesc:a5a539ef09d3460c23dda6864a49196cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트의 식별자를 반환한다.  <br /></td></tr>
+<tr class="separator:a5a539ef09d3460c23dda6864a49196cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3aea765df04f3f44e3f286adbbac47eb" id="r_a3aea765df04f3f44e3f286adbbac47eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a4355d16fcf9f644c9ac84293f0b1801f">int16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a3aea765df04f3f44e3f286adbbac47eb">GetFilter</a> () const</td></tr>
+<tr class="memdesc:a3aea765df04f3f44e3f286adbbac47eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트의 필터값을 반환한다.  <br /></td></tr>
+<tr class="separator:a3aea765df04f3f44e3f286adbbac47eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f41305ad9252f890711f822367487fb" id="r_a1f41305ad9252f890711f822367487fb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a05f6b0ae8f6a6e135b0e290c25fe0e4e">uint16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a1f41305ad9252f890711f822367487fb">GetFlags</a> () const</td></tr>
+<tr class="memdesc:a1f41305ad9252f890711f822367487fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트의 플래그값을 반환한다.  <br /></td></tr>
+<tr class="separator:a1f41305ad9252f890711f822367487fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2951b50f8c05e7b9cb4398356a24cf06" id="r_a2951b50f8c05e7b9cb4398356a24cf06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a1134b580f8da4de94ca6b1de4d37975e">uint32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a2951b50f8c05e7b9cb4398356a24cf06">GetFilterFlags</a> () const</td></tr>
+<tr class="memdesc:a2951b50f8c05e7b9cb4398356a24cf06"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트의 필터 플래그값을 반환한다.  <br /></td></tr>
+<tr class="separator:a2951b50f8c05e7b9cb4398356a24cf06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19509ad37b0a8278af4d43203e06f467" id="r_a19509ad37b0a8278af4d43203e06f467"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#aecfc3c54bd29ad5964e1c1c3ccbf89df">int64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a19509ad37b0a8278af4d43203e06f467">GetData</a> () const</td></tr>
+<tr class="memdesc:a19509ad37b0a8278af4d43203e06f467"><td class="mdescLeft">&#160;</td><td class="mdescRight">필터에 의해 반환된 데이터를 반환한다.  <br /></td></tr>
+<tr class="separator:a19509ad37b0a8278af4d43203e06f467"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b28aa542a493c76f511986a6ff7f6ae" id="r_a5b28aa542a493c76f511986a6ff7f6ae"><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a5b28aa542a493c76f511986a6ff7f6ae">GetUserData</a> () const</td></tr>
+<tr class="memdesc:a5b28aa542a493c76f511986a6ff7f6ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">사용자 정의 포인터를 반환한다.  <br /></td></tr>
+<tr class="separator:a5b28aa542a493c76f511986a6ff7f6ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bd1d574ec51818a089d765deb477ac4" id="r_a6bd1d574ec51818a089d765deb477ac4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a6bd1d574ec51818a089d765deb477ac4">SetIdent</a> (const <a class="el" href="types_8hpp.html#a29940ae63ec06c9998bba873e25407ad">uint64</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> ident)</td></tr>
+<tr class="memdesc:a6bd1d574ec51818a089d765deb477ac4"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트의 식별자를 설정한다.  <br /></td></tr>
+<tr class="separator:a6bd1d574ec51818a089d765deb477ac4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bf3d9f5f75fd071918fa149309a3450" id="r_a2bf3d9f5f75fd071918fa149309a3450"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a2bf3d9f5f75fd071918fa149309a3450">SetFilter</a> (const <a class="el" href="types_8hpp.html#a4355d16fcf9f644c9ac84293f0b1801f">int16</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> filter)</td></tr>
+<tr class="memdesc:a2bf3d9f5f75fd071918fa149309a3450"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트의 필터를 설정한다.  <br /></td></tr>
+<tr class="separator:a2bf3d9f5f75fd071918fa149309a3450"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a214b9bd321faea2db0bae9a7a1a6bcca" id="r_a214b9bd321faea2db0bae9a7a1a6bcca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a214b9bd321faea2db0bae9a7a1a6bcca">SetFlags</a> (const <a class="el" href="types_8hpp.html#a05f6b0ae8f6a6e135b0e290c25fe0e4e">uint16</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> flags)</td></tr>
+<tr class="memdesc:a214b9bd321faea2db0bae9a7a1a6bcca"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트의 플래그를 설정한다.  <br /></td></tr>
+<tr class="separator:a214b9bd321faea2db0bae9a7a1a6bcca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa72dad1b07d209ec6c13221b15539d75" id="r_aa72dad1b07d209ec6c13221b15539d75"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#aa72dad1b07d209ec6c13221b15539d75">SetFilterFlags</a> (const <a class="el" href="types_8hpp.html#a1134b580f8da4de94ca6b1de4d37975e">uint32</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> fflags)</td></tr>
+<tr class="memdesc:aa72dad1b07d209ec6c13221b15539d75"><td class="mdescLeft">&#160;</td><td class="mdescRight">이벤트의 필터 플래그를 설정한다.  <br /></td></tr>
+<tr class="separator:aa72dad1b07d209ec6c13221b15539d75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7308c6cb679bd975f5a87b52259a32a8" id="r_a7308c6cb679bd975f5a87b52259a32a8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a7308c6cb679bd975f5a87b52259a32a8">SetData</a> (const <a class="el" href="types_8hpp.html#aecfc3c54bd29ad5964e1c1c3ccbf89df">int64</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> data)</td></tr>
+<tr class="memdesc:a7308c6cb679bd975f5a87b52259a32a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">필터에 연관된 데이터를 설정한다.  <br /></td></tr>
+<tr class="separator:a7308c6cb679bd975f5a87b52259a32a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92ef9e2490faf82cf6f0099a8ab20b8b" id="r_a92ef9e2490faf82cf6f0099a8ab20b8b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a92ef9e2490faf82cf6f0099a8ab20b8b">SetUserData</a> (void *<a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a> udata)</td></tr>
+<tr class="memdesc:a92ef9e2490faf82cf6f0099a8ab20b8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">사용자 정의 포인터를 설정한다.  <br /></td></tr>
+<tr class="separator:a92ef9e2490faf82cf6f0099a8ab20b8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private 속성</h2></td></tr>
+<tr class="memitem:ad889687902addfd225992ff056d97f6c" id="r_ad889687902addfd225992ff056d97f6c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a29940ae63ec06c9998bba873e25407ad">uint64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#ad889687902addfd225992ff056d97f6c">mIdentifier</a></td></tr>
+<tr class="separator:ad889687902addfd225992ff056d97f6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7d7b857764bf6e998d4cef5bcadca00" id="r_af7d7b857764bf6e998d4cef5bcadca00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a4355d16fcf9f644c9ac84293f0b1801f">int16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#af7d7b857764bf6e998d4cef5bcadca00">mFilter</a></td></tr>
+<tr class="separator:af7d7b857764bf6e998d4cef5bcadca00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f6c154ab39064b147ded5ac0a8c41c7" id="r_a4f6c154ab39064b147ded5ac0a8c41c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a05f6b0ae8f6a6e135b0e290c25fe0e4e">uint16</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#a4f6c154ab39064b147ded5ac0a8c41c7">mFlags</a></td></tr>
+<tr class="separator:a4f6c154ab39064b147ded5ac0a8c41c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4346894c4c9799973c4e3ffa8703161" id="r_af4346894c4c9799973c4e3ffa8703161"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#a1134b580f8da4de94ca6b1de4d37975e">uint32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#af4346894c4c9799973c4e3ffa8703161">mFilterFlags</a></td></tr>
+<tr class="separator:af4346894c4c9799973c4e3ffa8703161"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4f1a4c38aaf883926e62b61da589ca3" id="r_ae4f1a4c38aaf883926e62b61da589ca3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8hpp.html#aecfc3c54bd29ad5964e1c1c3ccbf89df">int64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#ae4f1a4c38aaf883926e62b61da589ca3">mData</a></td></tr>
+<tr class="separator:ae4f1a4c38aaf883926e62b61da589ca3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03ebb9757f931b49cf592bc1f847f34" id="r_ad03ebb9757f931b49cf592bc1f847f34"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdf_1_1_kernel_event.html#ad03ebb9757f931b49cf592bc1f847f34">mUserData</a></td></tr>
+<tr class="separator:ad03ebb9757f931b49cf592bc1f847f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">상세한 설명</h2>
+<div class="textblock"><p>BSD계열 유닉스 커널의 이벤트를 추상화한 클래스 시스템 내부의 다양한 이벤트(FD,Socket)을 식별하고 이벤트 유형을 파악하는 관리 기능을 제공한다. </p>
+</div><h2 class="groupheader">생성자 &amp; 소멸자 문서화</h2>
+<a id="ab055dc99e6a4295a3264405e36fb5e64" name="ab055dc99e6a4295a3264405e36fb5e64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab055dc99e6a4295a3264405e36fb5e64">&#9670;&#160;</a></span>KernelEvent() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gdf::KernelEvent::KernelEvent </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>KernelEvent의 기본 생성자 </p>
+
+</div>
+</div>
+<a id="a12ab22224ab7d5d0959cdc307db02192" name="a12ab22224ab7d5d0959cdc307db02192"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12ab22224ab7d5d0959cdc307db02192">&#9670;&#160;</a></span>~KernelEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">gdf::KernelEvent::~KernelEvent </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>KernelEvent의 가상 소멸자 </p>
+
+</div>
+</div>
+<a id="aa19c930d1d0f923027fff73e73e57c72" name="aa19c930d1d0f923027fff73e73e57c72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa19c930d1d0f923027fff73e73e57c72">&#9670;&#160;</a></span>KernelEvent() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">gdf::KernelEvent::KernelEvent </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a> &amp;<a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>copy</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>KernelEvent의 복사 생성자 </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">copy</td><td>복사할 객체의 참조 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">멤버 함수 문서화</h2>
+<a id="a2c49b361582fe9bd06d4344dc4a9db24" name="a2c49b361582fe9bd06d4344dc4a9db24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c49b361582fe9bd06d4344dc4a9db24">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a> &amp; gdf::KernelEvent::operator= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a> &amp;<a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>copy</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>KernelEvent의 복사 대입 연산자 </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">copy</td><td>복사할 객체의 참조 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>반환값</dt><dd><a class="el" href="classgdf_1_1_kernel_event.html" title="BSD계열 유닉스 커널의 이벤트를 추상화한 클래스 시스템 내부의 다양한 이벤트(FD,Socket)을 식별하고 이벤트 유형을 파악하는 관리 기능을 제공한다.">KernelEvent</a>&amp; 업데이트된 객체의 참조를 반환 </dd></dl>
+
+</div>
+</div>
+<a id="a87a2c7b4332453812dd0bfeb49562810" name="a87a2c7b4332453812dd0bfeb49562810"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87a2c7b4332453812dd0bfeb49562810">&#9670;&#160;</a></span>IdentifyFD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelEvent::IdentifyFD </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>fd</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>주어진 파일 디스크립터가 이 이벤트와 연관되어 있는지 식별한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>검사할 파일 디스크립터 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>반환값</dt><dd>true 연관되어있을 시 </dd>
+<dd>
+false 연관되어있지 않을 시 </dd></dl>
+
+</div>
+</div>
+<a id="a2ce902944a22e53f93c8032f98b0c403" name="a2ce902944a22e53f93c8032f98b0c403"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ce902944a22e53f93c8032f98b0c403">&#9670;&#160;</a></span>IdentifySocket()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelEvent::IdentifySocket </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#a56f1a81c92849566ae864511088eb7e8">int32</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>socket</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>주어진 소켓이 이 이벤트와 연관되어 있는지 식별한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>검사할 소켓 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>반환값</dt><dd>true 연관되어있을 시 </dd>
+<dd>
+false 연관되어있지 않을 시 </dd></dl>
+
+</div>
+</div>
+<a id="a9d25b278b272bb4cd292279d1a09f7f6" name="a9d25b278b272bb4cd292279d1a09f7f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d25b278b272bb4cd292279d1a09f7f6">&#9670;&#160;</a></span>IsReadType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelEvent::IsReadType </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이 이벤트가 읽기 유형의 이벤트인지 식별한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>true 읽기 유형이라면 </dd>
+<dd>
+false 읽기 유형이 아니라면 </dd></dl>
+
+</div>
+</div>
+<a id="a64b1fcea11ddf4d2e3618809fab494c8" name="a64b1fcea11ddf4d2e3618809fab494c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64b1fcea11ddf4d2e3618809fab494c8">&#9670;&#160;</a></span>IsWriteType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gdf::KernelEvent::IsWriteType </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이 이벤트가 쓰기 유형의 이벤트인지 식별한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>true 쓰기 유형일마면 </dd>
+<dd>
+false 쓰기 유형이 아니라면 </dd></dl>
+
+</div>
+</div>
+<a id="a5a539ef09d3460c23dda6864a49196cb" name="a5a539ef09d3460c23dda6864a49196cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a539ef09d3460c23dda6864a49196cb">&#9670;&#160;</a></span>GetIdentifier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a29940ae63ec06c9998bba873e25407ad">uint64</a> gdf::KernelEvent::GetIdentifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트의 식별자를 반환한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>uint64 이벤트의 식별자 </dd></dl>
+
+</div>
+</div>
+<a id="a3aea765df04f3f44e3f286adbbac47eb" name="a3aea765df04f3f44e3f286adbbac47eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3aea765df04f3f44e3f286adbbac47eb">&#9670;&#160;</a></span>GetFilter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a4355d16fcf9f644c9ac84293f0b1801f">int16</a> gdf::KernelEvent::GetFilter </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트의 필터값을 반환한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>int16 이벤트의 필터값 </dd></dl>
+
+</div>
+</div>
+<a id="a1f41305ad9252f890711f822367487fb" name="a1f41305ad9252f890711f822367487fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f41305ad9252f890711f822367487fb">&#9670;&#160;</a></span>GetFlags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a05f6b0ae8f6a6e135b0e290c25fe0e4e">uint16</a> gdf::KernelEvent::GetFlags </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트의 플래그값을 반환한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>uint16 이벤트의 플래그값 </dd></dl>
+
+</div>
+</div>
+<a id="a2951b50f8c05e7b9cb4398356a24cf06" name="a2951b50f8c05e7b9cb4398356a24cf06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2951b50f8c05e7b9cb4398356a24cf06">&#9670;&#160;</a></span>GetFilterFlags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a1134b580f8da4de94ca6b1de4d37975e">uint32</a> gdf::KernelEvent::GetFilterFlags </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트의 필터 플래그값을 반환한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>uint32 이벤트의 필터 플래그값 </dd></dl>
+
+</div>
+</div>
+<a id="a19509ad37b0a8278af4d43203e06f467" name="a19509ad37b0a8278af4d43203e06f467"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19509ad37b0a8278af4d43203e06f467">&#9670;&#160;</a></span>GetData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#aecfc3c54bd29ad5964e1c1c3ccbf89df">int64</a> gdf::KernelEvent::GetData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>필터에 의해 반환된 데이터를 반환한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>int64 필터에 의해 반환된 데이터 </dd></dl>
+
+</div>
+</div>
+<a id="a5b28aa542a493c76f511986a6ff7f6ae" name="a5b28aa542a493c76f511986a6ff7f6ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b28aa542a493c76f511986a6ff7f6ae">&#9670;&#160;</a></span>GetUserData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const void * gdf::KernelEvent::GetUserData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>사용자 정의 포인터를 반환한다. </p>
+<dl class="section return"><dt>반환값</dt><dd>const void* 사용자 정의 포인터 </dd></dl>
+
+</div>
+</div>
+<a id="a6bd1d574ec51818a089d765deb477ac4" name="a6bd1d574ec51818a089d765deb477ac4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bd1d574ec51818a089d765deb477ac4">&#9670;&#160;</a></span>SetIdent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gdf::KernelEvent::SetIdent </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#a29940ae63ec06c9998bba873e25407ad">uint64</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>ident</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트의 식별자를 설정한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ident</td><td>새로운 식별자 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2bf3d9f5f75fd071918fa149309a3450" name="a2bf3d9f5f75fd071918fa149309a3450"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bf3d9f5f75fd071918fa149309a3450">&#9670;&#160;</a></span>SetFilter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gdf::KernelEvent::SetFilter </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#a4355d16fcf9f644c9ac84293f0b1801f">int16</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>filter</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트의 필터를 설정한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filter</td><td>새로운 필터값 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a214b9bd321faea2db0bae9a7a1a6bcca" name="a214b9bd321faea2db0bae9a7a1a6bcca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a214b9bd321faea2db0bae9a7a1a6bcca">&#9670;&#160;</a></span>SetFlags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gdf::KernelEvent::SetFlags </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#a05f6b0ae8f6a6e135b0e290c25fe0e4e">uint16</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>flags</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트의 플래그를 설정한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">flags</td><td>새로운 플래그값 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa72dad1b07d209ec6c13221b15539d75" name="aa72dad1b07d209ec6c13221b15539d75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa72dad1b07d209ec6c13221b15539d75">&#9670;&#160;</a></span>SetFilterFlags()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gdf::KernelEvent::SetFilterFlags </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#a1134b580f8da4de94ca6b1de4d37975e">uint32</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>fflags</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>이벤트의 필터 플래그를 설정한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fflags</td><td>새로운 필터 플래그값 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7308c6cb679bd975f5a87b52259a32a8" name="a7308c6cb679bd975f5a87b52259a32a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7308c6cb679bd975f5a87b52259a32a8">&#9670;&#160;</a></span>SetData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gdf::KernelEvent::SetData </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="types_8hpp.html#aecfc3c54bd29ad5964e1c1c3ccbf89df">int64</a> <a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>필터에 연관된 데이터를 설정한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>새로운 데이터 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a92ef9e2490faf82cf6f0099a8ab20b8b" name="a92ef9e2490faf82cf6f0099a8ab20b8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92ef9e2490faf82cf6f0099a8ab20b8b">&#9670;&#160;</a></span>SetUserData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gdf::KernelEvent::SetUserData </td>
+          <td>(</td>
+          <td class="paramtype">void *<a class="el" href="_config_8hpp.html#ac2bbd6d630a06a980d9a92ddb9a49928">IN</a>&#160;</td>
+          <td class="paramname"><em>udata</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>사용자 정의 포인터를 설정한다. </p>
+<dl class="params"><dt>매개변수</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">udata</td><td>사용자 정의 포인터 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">멤버 데이터 문서화</h2>
+<a id="ad889687902addfd225992ff056d97f6c" name="ad889687902addfd225992ff056d97f6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad889687902addfd225992ff056d97f6c">&#9670;&#160;</a></span>mIdentifier</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a29940ae63ec06c9998bba873e25407ad">uint64</a> gdf::KernelEvent::mIdentifier</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af7d7b857764bf6e998d4cef5bcadca00" name="af7d7b857764bf6e998d4cef5bcadca00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7d7b857764bf6e998d4cef5bcadca00">&#9670;&#160;</a></span>mFilter</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a4355d16fcf9f644c9ac84293f0b1801f">int16</a> gdf::KernelEvent::mFilter</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4f6c154ab39064b147ded5ac0a8c41c7" name="a4f6c154ab39064b147ded5ac0a8c41c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f6c154ab39064b147ded5ac0a8c41c7">&#9670;&#160;</a></span>mFlags</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a05f6b0ae8f6a6e135b0e290c25fe0e4e">uint16</a> gdf::KernelEvent::mFlags</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af4346894c4c9799973c4e3ffa8703161" name="af4346894c4c9799973c4e3ffa8703161"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4346894c4c9799973c4e3ffa8703161">&#9670;&#160;</a></span>mFilterFlags</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#a1134b580f8da4de94ca6b1de4d37975e">uint32</a> gdf::KernelEvent::mFilterFlags</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae4f1a4c38aaf883926e62b61da589ca3" name="ae4f1a4c38aaf883926e62b61da589ca3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4f1a4c38aaf883926e62b61da589ca3">&#9670;&#160;</a></span>mData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="types_8hpp.html#aecfc3c54bd29ad5964e1c1c3ccbf89df">int64</a> gdf::KernelEvent::mData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad03ebb9757f931b49cf592bc1f847f34" name="ad03ebb9757f931b49cf592bc1f847f34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad03ebb9757f931b49cf592bc1f847f34">&#9670;&#160;</a></span>mUserData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void* gdf::KernelEvent::mUserData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>이 클래스에 대한 문서화 페이지는 다음의 파일들로부터 생성되었습니다.:<ul>
+<li>/Users/wasavi/ft_irc/extlibs/libbsd-gdf/include/BSD-GDF/Event/<a class="el" href="_kernel_event_8hpp_source.html">KernelEvent.hpp</a></li>
+<li>/Users/wasavi/ft_irc/extlibs/libbsd-gdf/src/BSD-GDF/Event/<a class="el" href="_kernel_event_8cpp.html">KernelEvent.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacegdf.html">gdf</a></li><li class="navelem"><a class="el" href="classgdf_1_1_kernel_event.html">KernelEvent</a></li>
+    <li class="footer">다음에 의해 생성됨 :  <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>
