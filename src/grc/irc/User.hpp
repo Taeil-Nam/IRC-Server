@@ -1,7 +1,7 @@
 /**
  * @file User.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief 이 파일은 User 클래스를 정의한다.
+ * @brief User 클래스 정의 헤더 파일.
  * @version 0.1
  * @date 2024-03-27
  * 
@@ -37,7 +37,7 @@ public:
      * 현재 객체에 매개 변수로 받은 User의 값을 전부 복사한다.
      * 
      * @param User 복사할 User 객체.
-     * @return const User& 복사된 User 객체.
+     * @return const User& : 복사된 User 객체.
      */
     const User& operator=(const User& IN User);
     /**
@@ -145,7 +145,7 @@ private:
     /**
      * @brief User 객체의 복사 생성자. (사용되지 않음)
      * 
-     * @param User 복사할 User 객체.
+     * @param User : 복사할 User 객체.
      */
     User(const User& IN User); // = delete
 

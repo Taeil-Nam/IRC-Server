@@ -1,7 +1,7 @@
 /**
  * @file Channel.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief 이 파일은 Channel 클래스를 정의한다.
+ * @brief Channel 클래스 정의 헤더 파일.
  * @version 0.1
  * @date 2024-03-29
  * 
@@ -291,7 +291,7 @@ private:
      * @brief Channel 객체의 복사 대입 연산자. (사용되지 않음)
      * 
      * @param channel 복사할 Channel 객체.
-     * @return const Channel& 복사된 Channel 객체.
+     * @return const Channel& : 복사된 Channel 객체.
      */
     const Channel& operator=(const Channel& IN channel); // = delete
 
