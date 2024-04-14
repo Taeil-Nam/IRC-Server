@@ -3,6 +3,11 @@
 
 ---
 
+## Architecture
+[GameRC Architecture](https://taeil-nam.github.io/ft_irc/) 참고.
+
+---
+
 ## 기능
 ### TCP/IP 통신
 - 소켓을 이용한 TCP/IP 통신.
@@ -16,7 +21,7 @@
 - 채널 운영자 및 일반 사용자.
 - 채널 운영자의 명령어 구현 (KICK, INVITE, TOPIC, MODE).
 - [DCC(Direct Client-to-Client)](https://modern.ircdocs.horse/dcc.html)를 이용한 파일 전송.
-- GPT 챗봇.
+- Russian roulette 챗봇.
 
 ### 서버 모니터링
 - 여러 개의 모니터링 콘솔 화면 지원.
