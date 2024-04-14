@@ -1,9 +1,0 @@
-<map id="grc::Earth" name="grc::Earth">
-<area shape="rect" id="Node000001" title="지구의 애니메이션을 출력하는 클래스이다." alt="" coords="139,94,217,120"/>
-<area shape="rect" id="Node000002" href="$class_i_animation.html" title=" " alt="" coords="5,5,89,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,37,161,91,158,96,76,42"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="113,5,242,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,47,180,94,175,94,175,47"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="267,5,406,31"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="314,44,275,72,218,97,216,92,272,68,311,39"/>
-</map>

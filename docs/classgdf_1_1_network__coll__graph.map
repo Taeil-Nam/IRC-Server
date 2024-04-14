@@ -1,9 +1,0 @@
-<map id="gdf::Network" name="gdf::Network">
-<area shape="rect" id="Node000001" title=" " alt="" coords="102,94,198,120"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,44,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="36,44,52,68,76,83,102,93,100,98,73,88,49,72,31,47"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="123,5,177,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="153,47,153,94,147,94,147,47"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="201,5,475,31"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="310,42,256,72,194,96,192,91,254,68,307,37"/>
-</map>

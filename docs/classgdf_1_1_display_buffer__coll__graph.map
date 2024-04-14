@@ -1,9 +1,0 @@
-<map id="gdf::DisplayBuffer" name="gdf::DisplayBuffer">
-<area shape="rect" id="Node000001" title="디스플레이에 표시되어야하는 텍스트를 저장하는 클래스" alt="" coords="85,109,211,135"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,59,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="52,42,91,83,126,106,123,111,88,87,48,45"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="83,5,213,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="151,47,151,109,145,109,145,47"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="236,5,476,31"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="343,46,326,68,303,87,258,107,212,118,211,113,256,102,300,83,322,64,339,42"/>
-</map>
