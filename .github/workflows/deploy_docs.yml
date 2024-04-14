@@ -1,10 +1,8 @@
-# .github/workflows/deploy_docs.yml
 name: Deploy doxygen to Pages
 
 on:
   push:
     branches: ["main"]
-
   workflow_dispatch:
 
 permissions:
@@ -33,14 +31,13 @@ jobs:
       - name: Add .nojekyll
         run: |
           mkdir -p ./docs/html
-          sudo touch ./docs/html/.nojekyll
+          touch ./docs/html/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./docs/html
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages
