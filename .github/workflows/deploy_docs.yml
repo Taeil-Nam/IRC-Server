@@ -32,7 +32,7 @@ jobs:
 
       - name: Add .nojekyll
         run: |
-          makedir -p ./docs/html
+          mkdir -p ./docs/html
           sudo touch ./docs/html/.nojekyll
 
       - name: Upload artifact
