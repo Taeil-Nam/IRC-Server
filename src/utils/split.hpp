@@ -1,7 +1,7 @@
 /**
  * @file split.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief 이 파일은 split 함수를 정의한다.
+ * @brief split 함수 정의 헤더 파일.
  * @version 0.1
  * @date 2024-04-13
  * 
@@ -15,7 +15,7 @@
 #include <vector>
 
 /**
- * @brief 특정 구분자로 나뉜 문자열들을 std::vector로 반환한다.
+ * @brief 문자열을 특정 구분자로 나누고, 나뉜 문자열들을 std::vector<std::string>로 반환한다.
  * 
  * - Time complexity : O(n^2).
  * 

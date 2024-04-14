@@ -1,8 +1,7 @@
 /**
  * @file Channel.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief 이 파일은 프로그램에서 공통적으로 사용되는 헤더 파일과 
- * 매크로를 정의한다.
+ * @brief 프로그램 전반적으로 사용되는 공용 헤더 파일.
  * 
  * @version 0.1
  * @date 2024-04-13

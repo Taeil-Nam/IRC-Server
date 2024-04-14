@@ -1,7 +1,7 @@
 /**
  * @file ChannelManager.hpp
  * @author Taeil-Nam (nam0314@gmail.com)
- * @brief 이 파일은 ChannelManager 클래스를 정의한다.
+ * @brief ChannelManager 클래스 정의 헤더 파일.
  * @version 0.1
  * @date 2024-04-01
  * 
