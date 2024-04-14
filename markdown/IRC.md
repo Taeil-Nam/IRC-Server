@@ -45,6 +45,7 @@
   - [6. REPLIES](#6-replies)
     - [6.1 Error Replies](#61-error-replies)
     - [6.2. Command responses](#62-command-responses)
+
 ---
 
 ## 1. INTRODUCTION
