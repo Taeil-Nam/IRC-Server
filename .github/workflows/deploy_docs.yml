@@ -31,7 +31,7 @@ jobs:
       - name: Add .nojekyll
         run: |
           mkdir -p ./docs/html
-          touch ./docs/html/.nojekyll
+          sudo touch ./docs/html/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
