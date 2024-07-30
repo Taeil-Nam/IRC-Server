@@ -74,7 +74,7 @@ $> ./ircserv [port] [password]
 - port = IRC 서버에서 사용할 포트 번호.
 - password = 클라이언트 연결 등록을 위한 비밀번호.
 
-_[Demo video](https://youtu.be/hwVtcpV-cUM) 참고_
+_[Demo video](https://www.youtube.com/watch?v=0kU9ql3TWPg) 참고_
 
 ---
 
