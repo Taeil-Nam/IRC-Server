@@ -1,7 +1,7 @@
 # 🛠️ 프로젝트 개발 지침
 
 ## 프로젝트 요구사항
-[프로젝트 요구사항 명세서](https://cdn.intra.42.fr/pdf/pdf/115395/en.subject.pdf)
+- 42 인트라 문서 참고
 
 ## 코딩 컨벤션
 [C++ 코딩 표준](https://docs.popekim.com/ko/coding-standards/cpp) 컨벤션을 기본으로 사용한다.  
