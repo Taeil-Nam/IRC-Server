@@ -4,7 +4,7 @@
 ---
 
 ## Architecture
-[GameRC Architecture](https://taeil-nam.github.io/ft_irc/) 참고.
+[GameRC Architecture](https://taeil-nam.github.io/IRC-Server/md_markdown_2_d_e_v_e_l_o_p_m_e_n_t___g_u_i_d_e_l_i_n_e_s.html) 참고.
 
 ---
 
